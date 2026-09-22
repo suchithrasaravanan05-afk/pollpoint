@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PTM Live Polling - Parent Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/parent.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header-card">
+      <div class="brand-info">
+        <span class="dept-name" id="deptName">Department of CSE</span>
+        <h1 class="meeting-title" id="meetingTitle">PTM Live Polling</h1>
+      </div>
+      <div class="connection-pill" id="connectionStatus">
+        <span class="connection-dot"></span>
+        <span id="connectionText">Live</span>
+      </div>
+    </header>
+
+    <!-- Year Group Selected Bar -->
+    <div class="year-badge-bar" id="yearBadgeBar" style="display: none;">
+      <div class="year-info">
+        <span>Student Year:</span>
+        <span class="year-value" id="currentYearDisplay">1st Year</span>
+      </div>
+      <button class="change-year-btn" id="changeYearBtn" type="button">Change</button>
+    </div>
+
+    <!-- Main Dynamic Card -->
+    <main class="main-card">
+      <!-- 1. Waiting State Screen -->
+      <section class="state-container active" id="waitingState">
+        <div class="waiting-radar">
+          <div class="radar-circle"></div>
+          <div class="radar-circle"></div>
+          <div class="radar-circle"></div>
+          <div class="radar-center-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+        </div>
+
+        <h2 class="waiting-title">Welcome Parents!</h2>
+        <p class="waiting-subtitle" id="waitingSubtitle">
+          You are connected to the live session. Please wait for the HOD to launch the first question on the screen.
+        </p>
+
+        <div class="tips-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Your votes are completely anonymous and categorized by student year-group.</span>
+        </div>
+      </section>
+
+      <!-- 2. Live Question Screen -->
+      <section class="state-container" id="questionState">
+        <div class="question-header">
+          <div class="status-badge live" id="qStatusBadge">
+            <span class="badge-dot"></span>
+            <span id="qStatusText">Live Poll</span>
+          </div>
+          <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;" id="qIndexBadge">Question</div>
+        </div>
+
+        <h2 class="question-text" id="questionText">Loading question...</h2>
+
+        <div class="options-container" id="optionsContainer">
+          <!-- Dynamically populated option buttons -->
+        </div>
+
+        <div class="vote-status-banner" id="voteStatusBanner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span id="voteBannerText">Your response is recorded! Tap another option to change.</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      Tap on your choice to submit. No account needed.
+    </footer>
+  </div>
+
+  <!-- Year Group Selection Modal (First-time onboarding or editing) -->
+  <div class="modal-overlay" id="yearModal">
+    <div class="modal-box">
+      <div class="modal-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+      </div>
+      <h2 class="modal-title">Select Child's Year</h2>
+      <p class="modal-desc">
+        Please indicate which year your ward is currently studying in to participate in the meeting poll.
+      </p>
+
+      <div class="year-options-grid" id="yearOptionsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/parent.js"></script>
+</body>
+</html>

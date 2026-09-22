@@ -1,0 +1,25 @@
+{
+  "name": "ptm-live-poll",
+  "version": "1.0.0",
+  "description": "Live polling web app for college department Parent-Teacher Meetings",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "polling",
+    "ptm",
+    "education",
+    "websocket",
+    "real-time"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.3"
+  }
+}

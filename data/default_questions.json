@@ -1,0 +1,62 @@
+{
+  "departmentName": "Department of Computer Science & Engineering",
+  "meetingTitle": "Annual Parent-Teacher Meeting 2026",
+  "yearGroups": [
+    "1st Year",
+    "2nd Year",
+    "3rd Year",
+    "Final Year"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "text": "How satisfied are you with the academic progress and curriculum delivery so far?",
+      "options": [
+        "Highly Satisfied",
+        "Satisfied",
+        "Needs Improvement",
+        "Dissatisfied"
+      ]
+    },
+    {
+      "id": "q2",
+      "text": "Which area should the department prioritize for enhanced student support this semester?",
+      "options": [
+        "Industry Internships & Placement Prep",
+        "Coding & Technical Workshops",
+        "Individual Mentorship & Counseling",
+        "Research & Competitive Exams (GATE/GRE)"
+      ]
+    },
+    {
+      "id": "q3",
+      "text": "What is your preferred channel for receiving department notifications and attendance alerts?",
+      "options": [
+        "WhatsApp / SMS Updates",
+        "Parent Portal / College Mobile App",
+        "Official Email",
+        "Periodic Phone Calls"
+      ]
+    },
+    {
+      "id": "q4",
+      "text": "Would you support weekend expert bootcamps and hackathons for hands-on skill building?",
+      "options": [
+        "Strongly Support",
+        "Support (if hybrid/flexible)",
+        "Prefer weekday sessions only",
+        "Not in favor"
+      ]
+    },
+    {
+      "id": "q5",
+      "text": "Overall, how effective do you find the mentorship and faculty-student guidance system?",
+      "options": [
+        "Excellent",
+        "Good",
+        "Average",
+        "Needs Major Restructuring"
+      ]
+    }
+  ]
+}

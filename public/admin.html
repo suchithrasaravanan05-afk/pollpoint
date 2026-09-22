@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOD Meeting Setup & Live Polling Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+  <div class="admin-shell">
+    <!-- Top Shared Navigation Bar -->
+    <header class="top-nav">
+      <div class="brand-section">
+        <div class="dept-badge" id="navDeptBadge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+          <span id="navDeptText">Department of CSE</span>
+        </div>
+        <h1 class="admin-title" id="navMeetingTitle">Set Up Meeting</h1>
+      </div>
+
+      <div class="nav-stats-bar">
+        <!-- Live view only elements -->
+        <div class="stat-pill" id="liveConnectedPill" style="display: none;">
+          <span class="dot"></span>
+          <span id="navConnectedCount">0</span>
+          <span style="color: var(--text-muted);">Parents Connected</span>
+        </div>
+
+        <div class="nav-actions">
+          <!-- Setup View Top Buttons -->
+          <div id="setupNavActions" style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" id="btnPreviewToggleMobile">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <span>Toggle Preview</span>
+            </button>
+            <button class="btn btn-secondary" id="btnGoToLiveIfStarted" style="display: none;">
+              <span>Go to Live Dashboard →</span>
+            </button>
+          </div>
+
+          <!-- Live Dashboard Top Buttons -->
+          <div id="liveNavActions" style="display: none; gap: 8px;">
+            <button class="btn btn-secondary" id="btnEditQuestionsNav" title="Edit upcoming questions">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span>Edit Questions</span>
+            </button>
+
+            <button class="btn btn-secondary" id="btnOpenQrModal" title="Project QR Code on screen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Project QR</span>
+            </button>
+
+            <button class="btn btn-secondary" id="btnExportCsv">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Export CSV</span>
+            </button>
+
+            <button class="btn btn-secondary" id="btnSummaryReport">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span>Summary</span>
+            </button>
+
+            <button class="btn btn-secondary btn-icon-only" id="btnSettings" title="Session Settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================================================================
+         VIEW 1: QUESTION BUILDER ("SET UP MEETING")
+         =================================================================== -->
+    <section class="view-container active" id="setupView">
+      <div class="setup-layout">
+        <!-- Left Main Column: Setup & Question Cards -->
+        <div class="setup-main-col">
+          <!-- Setup Header Card -->
+          <div class="setup-header-card">
+            <div class="setup-title-row">
+              <div class="setup-headline">
+                <span>Meeting Questions & Setup</span>
+                <span class="setup-step-pill">Stage 1 of 2</span>
+              </div>
+              <div class="autosave-status" id="autoSaveIndicator">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Draft Auto-Saved</span>
+              </div>
+            </div>
+
+            <!-- Setup Meta Grid (Dept & Meeting Title) -->
+            <div class="setup-meta-grid">
+              <div class="form-group">
+                <label class="form-label" for="builderDeptNameInput">Department Name</label>
+                <input type="text" class="form-input" id="builderDeptNameInput" placeholder="e.g. Department of Computer Science & Engineering">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="builderMeetingTitleInput">Meeting Title</label>
+                <input type="text" class="form-input" id="builderMeetingTitleInput" placeholder="e.g. Annual Parent-Teacher Meeting 2026">
+              </div>
+            </div>
+
+            <!-- Toggle: Show Year Group to Parents -->
+            <div class="setting-toggle-card">
+              <div class="toggle-info">
+                <span class="toggle-title">Show Selected Year-Group to Parents</span>
+                <span class="toggle-desc">
+                  When enabled, parents see "Joined as: 2nd Year" on their phone. When disabled, they see "Participation: Anonymous" while votes are still categorized for the HOD.
+                </span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggleShowYearToParents" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dynamic Questions Builder List -->
+          <div class="builder-questions-list" id="builderQuestionsList">
+            <!-- Rendered Question Cards -->
+          </div>
+
+          <!-- Add Question Big Action Block -->
+          <div class="btn-add-question-block" id="btnAddQuestionCard">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Add Another Question</span>
+          </div>
+        </div>
+
+        <!-- Right Column: Live Mobile Device Preview Pane -->
+        <aside class="preview-col" id="previewColumn">
+          <div class="preview-card">
+            <div class="preview-card-header">
+              <span style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">Parent View Preview</span>
+              <span class="preview-badge">Live Preview</span>
+            </div>
+
+            <!-- Phone Frame -->
+            <div class="phone-mockup-frame">
+              <div class="phone-speaker-bar"></div>
+              <div class="phone-screen-content" id="previewPhoneContent">
+                <!-- Dynamically updated as HOD edits questions -->
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Sticky Bottom Finish Bar -->
+      <footer class="setup-bottom-bar">
+        <div class="setup-summary-text">
+          Configured <span class="setup-summary-count" id="builderValidCount">0 questions</span> ready for meeting
+        </div>
+
+        <button class="btn btn-primary btn-lg" id="btnFinishAndStartMeeting" disabled>
+          <span>Finish & Start Meeting →</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </footer>
+    </section>
+
+    <!-- ===================================================================
+         VIEW 2: LIVE POLLING DASHBOARD (PROJECTOR VIEW)
+         =================================================================== -->
+    <section class="view-container" id="liveDashboardView">
+      <main class="dashboard-grid">
+        <!-- Center Stage: Presentation & Live Polling -->
+        <div class="center-stage">
+          <!-- Question Banner Card -->
+          <div class="projector-card">
+            <div class="question-meta-row">
+              <span class="q-index-tag" id="displayQuestionIndex">Question 1 of 5</span>
+              <div class="q-status-badge idle" id="displayStatusBadge">
+                <span id="displayStatusText">Ready to Launch</span>
+              </div>
+            </div>
+
+            <div class="projector-question-text" id="displayQuestionText">
+              Select or launch a question to begin polling the audience...
+            </div>
+          </div>
+
+          <!-- Controls Bar -->
+          <div class="hod-controls-bar">
+            <div class="control-group">
+              <button class="btn btn-secondary" id="btnPrevQuestion" title="Previous Question">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span>Previous</span>
+              </button>
+              <button class="btn btn-secondary" id="btnNextQuestion" title="Next Question">
+                <span>Next</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+
+            <div class="control-group">
+              <button class="btn btn-success" id="btnLaunchPoll">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>Launch Poll to Parents</span>
+              </button>
+
+              <button class="btn btn-destructive" id="btnClosePoll" style="display: none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="6" width="12" height="12"></rect></svg>
+                <span>Close Poll & Lock Results</span>
+              </button>
+
+              <button class="btn btn-secondary" id="btnResetPoll" title="Reset responses for this question">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v6h6"></path><path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6"></path><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg>
+                <span>Reset</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Year Group Segregation Filter Pills -->
+          <div class="filter-section">
+            <span class="filter-label">Filter Results:</span>
+            <div class="filter-pills-container" id="filterPillsContainer">
+              <!-- Dynamically populated with 'All Years', '1st Year', etc. -->
+            </div>
+          </div>
+
+          <!-- Live Updating Bar Chart -->
+          <div class="chart-container">
+            <div class="chart-header">
+              <h2 class="chart-title">Live Response Breakdown</h2>
+              <div class="vote-summary-stat" id="chartVoteSummary">
+                0 Votes Cast (0% participation)
+              </div>
+            </div>
+
+            <div class="bars-list" id="chartBarsList">
+              <!-- Animated Bar Rows or Empty State -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sidebar & Venue Operations -->
+        <aside class="right-sidebar">
+          <!-- QR Code Card -->
+          <div class="side-card">
+            <div class="side-card-title">
+              <span>Scan to Join</span>
+              <span style="font-size: 0.72rem; color: #10b981; font-weight: 700;">Local WiFi</span>
+            </div>
+
+            <div class="qr-container">
+              <img id="sideQrImg" class="qr-image" src="" alt="QR Code to Join">
+              <div class="join-url-pill" id="sideJoinUrl">Loading...</div>
+            </div>
+
+            <button class="btn btn-primary" id="btnBigQr">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+              <span>Project QR Fullscreen</span>
+            </button>
+          </div>
+
+          <!-- Attendance Breakdown -->
+          <div class="side-card">
+            <div class="side-card-title">
+              <span>Attendance by Year</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);" id="audienceTotalPill">0 Total</span>
+            </div>
+            <div class="audience-list" id="audienceBreakdownList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Question Navigator -->
+          <div class="side-card" style="flex: 1;">
+            <div class="side-card-title">
+              <span>Meeting Agenda</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);" id="qCountPill">0 Questions</span>
+            </div>
+            <div class="q-nav-list" id="questionNavList">
+              <!-- List of questions for fast switching -->
+            </div>
+          </div>
+        </aside>
+      </main>
+    </section>
+  </div>
+
+  <!-- Fullscreen QR Code Projector Modal -->
+  <div class="modal-overlay hidden" id="qrModal">
+    <div class="modal-content qr-projector-modal">
+      <h2 style="font-size: 2rem; font-weight: 800; color: #ffffff; margin-bottom: 6px;">
+        Scan QR Code to Join
+      </h2>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 12px;">
+        Connect to venue Wi-Fi and point your camera to vote
+      </p>
+
+      <img id="modalQrImg" class="qr-projector-img" src="" alt="Projector QR Code">
+
+      <div class="qr-projector-url" id="modalJoinUrl">http://...</div>
+      <p style="color: var(--text-dim); font-size: 0.95rem; margin-top: 8px;">
+        Or type this URL directly into your mobile browser
+      </p>
+
+      <button class="btn btn-secondary" id="btnCloseQrModal" style="margin-top: 24px;">
+        Close QR Display
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary / Printable Report Modal -->
+  <div class="modal-overlay hidden" id="summaryModal">
+    <div class="modal-content" style="max-width: 850px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Department Meeting Polling Report</h3>
+        <button class="modal-close-btn" id="btnCloseSummary">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" id="summaryReportContent">
+        <!-- Dynamically rendered report -->
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnPrintReport">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Print / Save PDF</span>
+        </button>
+        <button class="btn btn-primary" id="btnDownloadCsvFromSummary">Download CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Meeting Settings</h3>
+        <button class="modal-close-btn" id="btnCloseSettings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="settingDeptName">Department Name</label>
+          <input type="text" class="form-input" id="settingDeptName">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="settingMeetingTitle">Meeting Title</label>
+          <input type="text" class="form-input" id="settingMeetingTitle">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="settingJoinUrl">Custom Join URL Override (Optional)</label>
+          <input type="text" class="form-input" id="settingJoinUrl" placeholder="e.g. https://ptm.college.edu">
+          <span style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
+            Leave blank to use auto-detected local Wi-Fi IP.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="settingYearGroups">Year Groups (comma-separated)</label>
+          <input type="text" class="form-input" id="settingYearGroups">
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 14px; margin-top: 6px;">
+          <button class="btn btn-secondary" id="btnSwitchToSetupFromSettings" style="width: 100%;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <span>Return to Question Builder Screen</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelSettings">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveSettings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

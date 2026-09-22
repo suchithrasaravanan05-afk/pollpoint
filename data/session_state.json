@@ -1,0 +1,31 @@
+{
+  "departmentName": "Department of Computer Science & Engineering",
+  "meetingTitle": "Annual Parent-Teacher Meeting 2026",
+  "customJoinUrl": "",
+  "meetingStatus": "active",
+  "showYearToParents": true,
+  "yearGroups": [
+    "1st Year",
+    "2nd Year",
+    "3rd Year",
+    "Final Year"
+  ],
+  "questions": [
+    {
+      "id": "custom_q3",
+      "text": "MODIFIED Q3: Should the department organize Saturday industry bootcamps?",
+      "options": [
+        "Strongly Support",
+        "Support if Virtual",
+        "Do Not Support"
+      ]
+    }
+  ],
+  "currentQuestionId": "custom_q3",
+  "questionStatus": "idle",
+  "responses": {
+    "q1": {},
+    "q2": {},
+    "custom_q1": {}
+  }
+}
