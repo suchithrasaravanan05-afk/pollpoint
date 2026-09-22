@@ -1,5 +1,5 @@
 {
-  "departmentName": "Department of Computer Science & Engineering",
+  "departmentName": "Department of Computer Science and Business Systems",
   "meetingTitle": "Annual Parent-Teacher Meeting 2026",
   "customJoinUrl": "",
   "meetingStatus": "active",
@@ -12,21 +12,104 @@
   ],
   "questions": [
     {
-      "id": "custom_q3",
-      "text": "",
+      "id": "q1",
+      "text": "How satisfied are you with the academic progress and curriculum delivery in CSBS so far?",
+      "textTa": "இதுவரை CSBS பாடத்திட்டம் மற்றும் கல்வி முன்னேற்றத்தில் நீங்கள் எவ்வளவு திருப்தி அடைகிறீர்கள்?",
+      "options": [
+        "Highly Satisfied",
+        "Satisfied",
+        "Needs Improvement",
+        "Dissatisfied"
+      ],
+      "optionsTa": [
+        "மிகவும் திருப்தி",
+        "திருப்தி",
+        "முன்னேற்றம் தேவை",
+        "திருப்தியற்றது"
+      ]
+    },
+    {
+      "id": "q2",
+      "text": "Which industry readiness initiative should the CSBS department prioritize this semester?",
+      "textTa": "இந்த செமஸ்டரில் CSBS துறை எந்த தொழில்முனைவு மற்றும் வேலைவாய்ப்பு பயிற்சிக்கு முன்னுரிமை அளிக்க வேண்டும்?",
+      "options": [
+        "Business Analytics & AI Workshops",
+        "Corporate Internships & Live Projects",
+        "Full-Stack & Cloud Certifications",
+        "Soft Skills & Management Consulting Prep"
+      ],
+      "optionsTa": [
+        "பிசினஸ் அனலிட்டிக்ஸ் & AI பட்டறைகள்",
+        "நிறுவன இன்டர்ன்ஷிப் & நேரடி திட்டங்கள்",
+        "ஃபுல்-ஸ்டாக் & கிளவுட் சான்றிதழ்கள்",
+        "திறன் மேம்பாடு & நேர்காணல் பயிற்சி"
+      ]
+    },
+    {
+      "id": "q3",
+      "text": "What is your preferred channel for receiving department notifications and student attendance alerts?",
+      "textTa": "துறை அறிவிப்புகள் மற்றும் மாணவர் வருகைப் பதிவை அறிய உங்கள் விருப்பமான வழி எது?",
+      "options": [
+        "WhatsApp / SMS Alerts",
+        "College Mobile App / Portal",
+        "Official Email Updates",
+        "Direct Phone Call from Mentor"
+      ],
+      "optionsTa": [
+        "வாட்ஸ்அப் / SMS தகவல்கள்",
+        "கல்லூரி மொபைல் ஆப் / போர்ட்டல்",
+        "அதிகாரப்பூர்வ மின்னஞ்சல்",
+        "ஆசிரியரின் நேரடி தொலைபேசி அழைப்பு"
+      ]
+    },
+    {
+      "id": "q4",
+      "text": "Would you support weekend expert bootcamps and business hackathons for hands-on experience?",
+      "textTa": "நடைமுறை பயிற்சிக்காக வார இறுதி சிறப்பு வகுப்புகள் மற்றும் வணிக ஹேக்கத்தான்களை ஆதரிக்கிறீர்களா?",
       "options": [
         "Strongly Support",
-        "Support if Virtual",
-        "Do Not Support"
+        "Support (if hybrid / online)",
+        "Prefer Weekday Sessions Only",
+        "Not In Favor"
+      ],
+      "optionsTa": [
+        "முழு ஆதரவு அளிக்கிறேன்",
+        "ஆதரிக்கிறேன் (ஆன்லைன் என்றால்)",
+        "வார நாட்களில் மட்டும் விரும்புகிறேன்",
+        "ஆதரவு இல்லை"
+      ]
+    },
+    {
+      "id": "q5",
+      "text": "Overall, how effective is the faculty mentorship and student career guidance system in CSBS?",
+      "textTa": "ஒட்டுமொத்தமாக, CSBS துறையின் ஆசிரியர் வழிகாட்டுதல் மற்றும் தொழில் வழிகாட்டல் முறை எவ்வாறு உள்ளது?",
+      "options": [
+        "Excellent Guidance",
+        "Good Support",
+        "Average",
+        "Needs Major Enhancement"
+      ],
+      "optionsTa": [
+        "சிறந்த வழிகாட்டுதல்",
+        "நல்ல ஆதரவு",
+        "சுமாராக உள்ளது",
+        "அதிக முன்னேற்றம் தேவை"
       ]
     }
   ],
-  "currentQuestionId": "custom_q3",
+  "currentQuestionId": "q1",
   "questionStatus": "live",
   "responses": {
-    "q1": {},
+    "q1": {
+      "test_parent_v1": {
+        "optionIndex": 0,
+        "yearGroup": "2nd Year",
+        "timestamp": 1790074192880
+      }
+    },
     "q2": {},
-    "custom_q1": {},
-    "custom_q3": {}
+    "q3": {},
+    "q4": {},
+    "q5": {}
   }
 }

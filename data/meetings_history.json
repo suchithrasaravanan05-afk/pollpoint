@@ -1,0 +1,104 @@
+[
+  {
+    "id": "meeting_past_2025_csbs",
+    "meetingTitle": "CSBS Academic Review & Orientation Meeting 2025",
+    "departmentName": "Department of Computer Science and Business Systems",
+    "archivedAt": "2025-10-18T11:30:00.000Z",
+    "totalVotes": 68,
+    "questionsCount": 4,
+    "yearGroups": [
+      "1st Year",
+      "2nd Year",
+      "3rd Year",
+      "Final Year"
+    ],
+    "questions": [
+      {
+        "id": "prev_q1",
+        "text": "Are students comfortable with the hybrid industry-oriented curriculum?",
+        "textTa": "மாணவர்கள் தொழில்சார் பாடத்திட்டத்தை எளிதாக புரிந்துகொள்கிறார்களா?",
+        "options": [
+          "Completely Comfortable",
+          "Moderately Comfortable",
+          "Challenging but Good",
+          "Too Heavy"
+        ],
+        "optionsTa": [
+          "முழுமையாக திருப்தி",
+          "மிதமான எளிமை",
+          "கடினம் ஆனால் பயனுள்ளது",
+          "மிகவும் கடினம்"
+        ]
+      },
+      {
+        "id": "prev_q2",
+        "text": "How helpful are the corporate guest lecture series and industry case studies?",
+        "textTa": "நிறுவன சிறப்பு விரிவுரைகள் மற்றும் தொழில் வழக்கு ஆய்வுகள் எவ்வளவு பயனுள்ளதாக உள்ளன?",
+        "options": [
+          "Highly Impactful",
+          "Very Informative",
+          "Neutral",
+          "Needs Better Speakers"
+        ],
+        "optionsTa": [
+          "மிகவும் பயனுள்ளது",
+          "நல்ல தகவல் தருகிறது",
+          "சராசரி",
+          "சிறந்த பேச்சாளர்கள் தேவை"
+        ]
+      }
+    ],
+    "results": [
+      {
+        "questionId": "prev_q1",
+        "questionText": "Are students comfortable with the hybrid industry-oriented curriculum?",
+        "questionTextTa": "மாணவர்கள் தொழில்சார் பாடத்திட்டத்தை எளிதாக புரிந்துகொள்கிறார்களா?",
+        "options": [
+          "Completely Comfortable",
+          "Moderately Comfortable",
+          "Challenging but Good",
+          "Too Heavy"
+        ],
+        "optionsTa": [
+          "முழுமையாக திருப்தி",
+          "மிதமான எளிமை",
+          "கடினம் ஆனால் பயனுள்ளது",
+          "மிகவும் கடினம்"
+        ],
+        "totalVotes": 38,
+        "breakdown": {
+          "All Years": [21, 12, 4, 1],
+          "1st Year": [8, 4, 1, 0],
+          "2nd Year": [7, 3, 2, 0],
+          "3rd Year": [4, 3, 1, 1],
+          "Final Year": [2, 2, 0, 0]
+        }
+      },
+      {
+        "questionId": "prev_q2",
+        "questionText": "How helpful are the corporate guest lecture series and industry case studies?",
+        "questionTextTa": "நிறுவன சிறப்பு விரிவுரைகள் மற்றும் தொழில் வழக்கு ஆய்வுகள் எவ்வளவு பயனுள்ளதாக உள்ளன?",
+        "options": [
+          "Highly Impactful",
+          "Very Informative",
+          "Neutral",
+          "Needs Better Speakers"
+        ],
+        "optionsTa": [
+          "மிகவும் பயனுள்ளது",
+          "நல்ல தகவல் தருகிறது",
+          "சராசரி",
+          "சிறந்த பேச்சாளர்கள் தேவை"
+        ],
+        "totalVotes": 30,
+        "breakdown": {
+          "All Years": [18, 9, 2, 1],
+          "1st Year": [6, 3, 1, 0],
+          "2nd Year": [5, 4, 0, 0],
+          "3rd Year": [4, 1, 1, 1],
+          "Final Year": [3, 1, 0, 0]
+        }
+      }
+    ]
+  }
+]

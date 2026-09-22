@@ -1,4 +1,5 @@
 // Parent Mobile Client Logic
+// Department of Computer Science and Business Systems (CSBS)
 (function() {
   // Elements
   const deptNameEl = document.getElementById('deptName');
@@ -16,6 +17,7 @@
   const qStatusBadge = document.getElementById('qStatusBadge');
   const qStatusText = document.getElementById('qStatusText');
   const questionText = document.getElementById('questionText');
+  const questionTextTa = document.getElementById('questionTextTa');
   const optionsContainer = document.getElementById('optionsContainer');
   const voteStatusBanner = document.getElementById('voteStatusBanner');
   const voteBannerText = document.getElementById('voteBannerText');
@@ -117,8 +119,8 @@
 
   // Socket Lifecycle
   socket.on('connect', () => {
-    connectionPill.style.background = 'rgba(16, 185, 129, 0.15)';
-    connectionPill.style.color = '#34d399';
+    connectionPill.style.background = '#ecfdf5';
+    connectionPill.style.color = '#059669';
     connectionText.textContent = 'Live';
 
     if (selectedYearGroup) {
@@ -127,8 +129,8 @@
   });
 
   socket.on('disconnect', () => {
-    connectionPill.style.background = 'rgba(239, 68, 68, 0.15)';
-    connectionPill.style.color = '#f87171';
+    connectionPill.style.background = '#fff1f2';
+    connectionPill.style.color = '#e11d48';
     connectionText.textContent = 'Reconnecting...';
   });
 
@@ -161,11 +163,21 @@
     }
   });
 
+  // New Meeting Reset
+  socket.on('session:reset_for_new_meeting', (data) => {
+    if (data.departmentName) deptNameEl.textContent = data.departmentName;
+    if (data.meetingTitle) meetingTitleEl.textContent = data.meetingTitle;
+    currentQuestion = null;
+    currentQuestionStatus = 'idle';
+    mySelectedOptionIndex = null;
+    updateUI();
+  });
+
   // Live Question Launched by HOD
   socket.on('question:live', (data) => {
     currentQuestion = data;
     currentQuestionStatus = 'live';
-    mySelectedOptionIndex = null; // New question reset
+    mySelectedOptionIndex = null;
     updateUI();
   });
 
@@ -195,13 +207,20 @@
     if (!currentQuestion || currentQuestionStatus === 'idle') {
       waitingState.classList.add('active');
       questionState.classList.remove('active');
-      waitingSubtitle.textContent = 'Please wait for the HOD to launch the next question on the projector.';
+      waitingSubtitle.textContent = 'Please wait for the department faculty to launch the next question on the projector.';
       return;
     }
 
     waitingState.classList.remove('active');
     questionState.classList.add('active');
     questionText.textContent = currentQuestion.text;
+
+    if (currentQuestion.textTa && currentQuestion.textTa.trim()) {
+      questionTextTa.textContent = currentQuestion.textTa;
+      questionTextTa.style.display = 'block';
+    } else {
+      questionTextTa.style.display = 'none';
+    }
 
     updateQuestionStatusUI();
     renderOptions();
@@ -226,7 +245,7 @@
         voteBannerText.textContent = 'Poll has ended. Your answer was recorded.';
       } else {
         voteStatusBanner.className = 'vote-status-banner closed';
-        voteBannerText.textContent = 'Poll has ended by the HOD.';
+        voteBannerText.textContent = 'Poll has ended by the department faculty.';
       }
     }
   }
@@ -240,6 +259,7 @@
     const isClosed = currentQuestionStatus === 'closed';
 
     currentQuestion.options.forEach((optText, index) => {
+      const optTa = (currentQuestion.optionsTa && currentQuestion.optionsTa[index]) || '';
       const isSelected = mySelectedOptionIndex === index;
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -250,7 +270,10 @@
 
       btn.innerHTML = `
         <div class="option-letter">${letter}</div>
-        <div class="option-text-label">${escapeHtml(optText)}</div>
+        <div class="option-text-group">
+          <div class="option-text-label-en">${escapeHtml(optText)}</div>
+          ${optTa ? `<div class="option-text-label-ta">${escapeHtml(optTa)}</div>` : ''}
+        </div>
         <svg class="option-check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
@@ -295,6 +318,7 @@
   }
 
   function escapeHtml(str) {
+    if (!str) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;

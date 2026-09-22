@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HOD Meeting Setup & Live Polling Dashboard</title>
+  <title>CSBS Meeting Setup & Live Polling Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
@@ -16,8 +16,8 @@
     <header class="top-nav">
       <div class="brand-section">
         <div class="dept-badge" id="navDeptBadge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
-          <span id="navDeptText">Department of CSE</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+          <span id="navDeptText">Dept. of Computer Science & Business Systems</span>
         </div>
         <h1 class="admin-title" id="navMeetingTitle">Set Up Meeting</h1>
       </div>
@@ -31,36 +31,48 @@
         </div>
 
         <div class="nav-actions">
+          <!-- Meeting Archive & History Button (Always Available) -->
+          <button class="btn btn-secondary" id="btnMeetingArchivesNav" title="View past meeting records, question banks & results">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+            <span>Meeting Archives</span>
+          </button>
+
+          <!-- New Meeting Button (Always Available) -->
+          <button class="btn btn-accent" id="btnNewMeetingNav" title="Start a fresh meeting and archive previous responses">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>New Meeting</span>
+          </button>
+
           <!-- Setup View Top Buttons -->
           <div id="setupNavActions" style="display: flex; gap: 8px;">
             <button class="btn btn-secondary" id="btnPreviewToggleMobile">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
               <span>Toggle Preview</span>
             </button>
-            <button class="btn btn-secondary" id="btnGoToLiveIfStarted" style="display: none;">
-              <span>Go to Live Dashboard →</span>
+            <button class="btn btn-primary" id="btnGoToLiveIfStarted" style="display: none;">
+              <span>Go to Live Stage →</span>
             </button>
           </div>
 
           <!-- Live Dashboard Top Buttons -->
           <div id="liveNavActions" style="display: none; gap: 8px;">
-            <button class="btn btn-secondary" id="btnEditQuestionsNav" title="Edit upcoming questions">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              <span>Edit Questions</span>
+            <button class="btn btn-secondary" id="btnEditQuestionsNav" title="Alter or add questions">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span>Alter Questions</span>
             </button>
 
             <button class="btn btn-secondary" id="btnOpenQrModal" title="Project QR Code on screen">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
               <span>Project QR</span>
             </button>
 
-            <button class="btn btn-secondary" id="btnExportCsv">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <button class="btn btn-secondary" id="btnExportCsv" title="Export bilingual CSV report">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
               <span>Export CSV</span>
             </button>
 
-            <button class="btn btn-secondary" id="btnSummaryReport">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <button class="btn btn-secondary" id="btnSummaryReport" title="View printable summary report">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               <span>Summary</span>
             </button>
 
@@ -83,11 +95,11 @@
           <div class="setup-header-card">
             <div class="setup-title-row">
               <div class="setup-headline">
-                <span>Meeting Questions & Setup</span>
+                <span>Meeting Questions & Bilingual Setup</span>
                 <span class="setup-step-pill">Stage 1 of 2</span>
               </div>
               <div class="autosave-status" id="autoSaveIndicator">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 <span>Draft Auto-Saved</span>
               </div>
             </div>
@@ -96,7 +108,7 @@
             <div class="setup-meta-grid">
               <div class="form-group">
                 <label class="form-label" for="builderDeptNameInput">Department Name</label>
-                <input type="text" class="form-input" id="builderDeptNameInput" placeholder="e.g. Department of Computer Science & Engineering">
+                <input type="text" class="form-input" id="builderDeptNameInput" placeholder="e.g. Department of Computer Science and Business Systems">
               </div>
               <div class="form-group">
                 <label class="form-label" for="builderMeetingTitleInput">Meeting Title</label>
@@ -109,7 +121,7 @@
               <div class="toggle-info">
                 <span class="toggle-title">Show Selected Year-Group to Parents</span>
                 <span class="toggle-desc">
-                  When enabled, parents see "Joined as: 2nd Year" on their phone. When disabled, they see "Participation: Anonymous" while votes are still categorized for the HOD.
+                  When enabled, parents see "Joined as: 2nd Year" on their phone. When disabled, they participate anonymously while votes are still categorized by year for the HOD.
                 </span>
               </div>
               <label class="switch">
@@ -121,13 +133,13 @@
 
           <!-- Dynamic Questions Builder List -->
           <div class="builder-questions-list" id="builderQuestionsList">
-            <!-- Rendered Question Cards -->
+            <!-- Rendered Question Cards with English + Tamil fields -->
           </div>
 
           <!-- Add Question Big Action Block -->
           <div class="btn-add-question-block" id="btnAddQuestionCard">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>Add Another Question</span>
+            <span>+ Add Another Question (English & Tamil)</span>
           </div>
         </div>
 
@@ -135,8 +147,8 @@
         <aside class="preview-col" id="previewColumn">
           <div class="preview-card">
             <div class="preview-card-header">
-              <span style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">Parent View Preview</span>
-              <span class="preview-badge">Live Preview</span>
+              <span style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">Parent View Preview</span>
+              <span class="preview-badge">Live Bilingual Preview</span>
             </div>
 
             <!-- Phone Frame -->
@@ -179,8 +191,14 @@
               </div>
             </div>
 
+            <!-- English Question Text -->
             <div class="projector-question-text" id="displayQuestionText">
               Select or launch a question to begin polling the audience...
+            </div>
+
+            <!-- Tamil Question Text -->
+            <div class="projector-question-text-ta" id="displayQuestionTextTa" style="display: none;">
+              <!-- Tamil translation here -->
             </div>
           </div>
 
@@ -210,14 +228,14 @@
 
               <button class="btn btn-secondary" id="btnResetPoll" title="Reset responses for this question">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v6h6"></path><path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6"></path><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg>
-                <span>Reset</span>
+                <span>Reset Question</span>
               </button>
             </div>
           </div>
 
           <!-- Year Group Segregation Filter Pills -->
           <div class="filter-section">
-            <span class="filter-label">Filter Results:</span>
+            <span class="filter-label">Filter by Year:</span>
             <div class="filter-pills-container" id="filterPillsContainer">
               <!-- Dynamically populated with 'All Years', '1st Year', etc. -->
             </div>
@@ -226,14 +244,14 @@
           <!-- Live Updating Bar Chart -->
           <div class="chart-container">
             <div class="chart-header">
-              <h2 class="chart-title">Live Response Breakdown</h2>
+              <h2 class="chart-title">Live Response Breakdown (English & தமிழ்)</h2>
               <div class="vote-summary-stat" id="chartVoteSummary">
                 0 Votes Cast (0% participation)
               </div>
             </div>
 
             <div class="bars-list" id="chartBarsList">
-              <!-- Animated Bar Rows or Empty State -->
+              <!-- Animated Bar Rows with English + Tamil titles -->
             </div>
           </div>
         </div>
@@ -244,7 +262,7 @@
           <div class="side-card">
             <div class="side-card-title">
               <span>Scan to Join</span>
-              <span style="font-size: 0.72rem; color: #10b981; font-weight: 700;">Local WiFi</span>
+              <span style="font-size: 0.76rem; color: #059669; font-weight: 800; background: #ecfdf5; padding: 2px 8px; border-radius: 6px;">Venue WiFi</span>
             </div>
 
             <div class="qr-container">
@@ -252,9 +270,9 @@
               <div class="join-url-pill" id="sideJoinUrl">Loading...</div>
             </div>
 
-            <button class="btn btn-primary" id="btnBigQr">
+            <button class="btn btn-primary" id="btnBigQr" style="width: 100%;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-              <span>Project QR Fullscreen</span>
+              <span>Project Fullscreen QR</span>
             </button>
           </div>
 
@@ -262,7 +280,7 @@
           <div class="side-card">
             <div class="side-card-title">
               <span>Attendance by Year</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);" id="audienceTotalPill">0 Total</span>
+              <span style="font-size: 0.78rem; color: var(--text-primary); font-weight: 800;" id="audienceTotalPill">0 Total</span>
             </div>
             <div class="audience-list" id="audienceBreakdownList">
               <!-- Dynamically populated -->
@@ -273,7 +291,7 @@
           <div class="side-card" style="flex: 1;">
             <div class="side-card-title">
               <span>Meeting Agenda</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);" id="qCountPill">0 Questions</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted);" id="qCountPill">0 Questions</span>
             </div>
             <div class="q-nav-list" id="questionNavList">
               <!-- List of questions for fast switching -->
@@ -284,20 +302,105 @@
     </section>
   </div>
 
+  <!-- ===================================================================
+       MODAL 1: MEETING ARCHIVES & HISTORY
+       =================================================================== -->
+  <div class="modal-overlay hidden" id="historyModal">
+    <div class="modal-content" style="max-width: 820px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Meeting Archives & History</h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+            Permanent records of all completed CSBS meetings, question banks, and responses.
+          </p>
+        </div>
+        <button class="modal-close-btn" id="btnCloseHistory">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div id="historyLoadingState" style="text-align: center; padding: 24px; color: var(--text-muted);">
+          Loading archived meetings...
+        </div>
+        <div class="history-meetings-list" id="historyMeetingsList">
+          <!-- Dynamically populated past meetings -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnManualArchiveCurrent">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>Archive Current Session Snapshot</span>
+        </button>
+        <button class="btn btn-secondary" id="btnCloseHistoryFooter">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       MODAL 2: START A NEW MEETING
+       =================================================================== -->
+  <div class="modal-overlay hidden" id="newMeetingModal">
+    <div class="modal-content" style="max-width: 540px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Start a New Meeting Session</h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+            Current votes and responses will be safely archived into history.
+          </p>
+        </div>
+        <button class="modal-close-btn" id="btnCloseNewMeeting">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="newMeetingTitleInput">New Meeting Title</label>
+          <input type="text" class="form-input" id="newMeetingTitleInput" placeholder="e.g. CSBS Odd Semester PTM 2026">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Question Bank Options</label>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; color: var(--text-main);">
+              <input type="radio" name="newMeetingQChoice" value="clone" checked>
+              <span>Keep & alter current questions (modify as needed)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; color: var(--text-main);">
+              <input type="radio" name="newMeetingQChoice" value="defaults">
+              <span>Load fresh CSBS bilingual default questions</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; color: var(--text-main);">
+              <input type="radio" name="newMeetingQChoice" value="blank">
+              <span>Start with a blank question list</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelNewMeeting">Cancel</button>
+        <button class="btn btn-primary" id="btnConfirmNewMeeting">Archive & Start Meeting Setup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Fullscreen QR Code Projector Modal -->
   <div class="modal-overlay hidden" id="qrModal">
     <div class="modal-content qr-projector-modal">
-      <h2 style="font-size: 2rem; font-weight: 800; color: #ffffff; margin-bottom: 6px;">
+      <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">
         Scan QR Code to Join
       </h2>
-      <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 12px;">
-        Connect to venue Wi-Fi and point your camera to vote
+      <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 12px;">
+        Connect to venue Wi-Fi and point your camera to participate
       </p>
 
       <img id="modalQrImg" class="qr-projector-img" src="" alt="Projector QR Code">
 
       <div class="qr-projector-url" id="modalJoinUrl">http://...</div>
-      <p style="color: var(--text-dim); font-size: 0.95rem; margin-top: 8px;">
+      <p style="color: var(--text-dim); font-size: 0.92rem; margin-top: 8px;">
         Or type this URL directly into your mobile browser
       </p>
 
@@ -309,7 +412,7 @@
 
   <!-- Summary / Printable Report Modal -->
   <div class="modal-overlay hidden" id="summaryModal">
-    <div class="modal-content" style="max-width: 850px;">
+    <div class="modal-content" style="max-width: 880px;">
       <div class="modal-header">
         <h3 class="modal-title">Department Meeting Polling Report</h3>
         <button class="modal-close-btn" id="btnCloseSummary">
@@ -326,16 +429,16 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
           <span>Print / Save PDF</span>
         </button>
-        <button class="btn btn-primary" id="btnDownloadCsvFromSummary">Download CSV</button>
+        <button class="btn btn-primary" id="btnDownloadCsvFromSummary">Download Bilingual CSV</button>
       </div>
     </div>
   </div>
 
   <!-- Settings Modal -->
   <div class="modal-overlay hidden" id="settingsModal">
-    <div class="modal-content" style="max-width: 520px;">
+    <div class="modal-content" style="max-width: 540px;">
       <div class="modal-header">
-        <h3 class="modal-title">Meeting Settings</h3>
+        <h3 class="modal-title">Department & Session Settings</h3>
         <button class="modal-close-btn" id="btnCloseSettings">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -355,7 +458,7 @@
         <div class="form-group">
           <label class="form-label" for="settingJoinUrl">Custom Join URL Override (Optional)</label>
           <input type="text" class="form-input" id="settingJoinUrl" placeholder="e.g. https://ptm.college.edu">
-          <span style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
+          <span style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">
             Leave blank to use auto-detected local Wi-Fi IP.
           </span>
         </div>
