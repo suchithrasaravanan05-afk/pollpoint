@@ -13,7 +13,7 @@
   "questions": [
     {
       "id": "custom_q3",
-      "text": "MODIFIED Q3: Should the department organize Saturday industry bootcamps?",
+      "text": "",
       "options": [
         "Strongly Support",
         "Support if Virtual",
@@ -22,10 +22,11 @@
     }
   ],
   "currentQuestionId": "custom_q3",
-  "questionStatus": "idle",
+  "questionStatus": "live",
   "responses": {
     "q1": {},
     "q2": {},
-    "custom_q1": {}
+    "custom_q1": {},
+    "custom_q3": {}
   }
 }
