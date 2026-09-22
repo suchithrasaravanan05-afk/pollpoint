@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Poll Point • Live Participant Portal (இருமொழி நேரலை வாக்கெடுப்பு)</title>
-  
+  <title>CSBS Live Polling - Parent Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/parent.css">
-  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
@@ -18,15 +15,8 @@
     <!-- Header -->
     <header class="header-card">
       <div class="brand-info">
-        <div class="brand-logo-small">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 20V10M12 20V4M6 20v-6"></path>
-          </svg>
-        </div>
-        <div class="brand-titles">
-          <h1 class="portal-brand-title">Poll Point</h1>
-          <span class="portal-session-title ta-text" id="sessionHeaderTitle">நேரலை வாக்கெடுப்பு தளம்</span>
-        </div>
+        <span class="dept-name" id="deptName">Dept. of Computer Science & Business Systems</span>
+        <h1 class="meeting-title" id="meetingTitle">CSBS Live Polling</h1>
       </div>
       <div class="connection-pill" id="connectionStatus">
         <span class="connection-dot"></span>
@@ -34,9 +24,17 @@
       </div>
     </header>
 
-    <!-- Main Card Container -->
+    <!-- Year Group Selected Bar -->
+    <div class="year-badge-bar" id="yearBadgeBar" style="display: none;">
+      <div class="year-info">
+        <span>Student Year:</span>
+        <span class="year-value" id="currentYearDisplay">1st Year</span>
+      </div>
+      <button class="change-year-btn" id="changeYearBtn" type="button">Change</button>
+    </div>
+
+    <!-- Main Dynamic Card -->
     <main class="main-card">
-      
       <!-- 1. Waiting State Screen -->
       <section class="state-container active" id="waitingState">
         <div class="waiting-radar">
@@ -44,70 +42,83 @@
           <div class="radar-circle"></div>
           <div class="radar-circle"></div>
           <div class="radar-center-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
             </svg>
           </div>
         </div>
 
-        <h2 class="waiting-title">Welcome to Live Polling!</h2>
-        <div class="waiting-title-ta ta-text">நேரலை வாக்கெடுப்பிற்கு நல்வரவு!</div>
-
+        <h2 class="waiting-title">Welcome Parents!</h2>
         <p class="waiting-subtitle" id="waitingSubtitle">
-          You are connected to this live session. The question will appear on your screen as soon as the presenter launches it.
+          You are connected to the live session. Please wait for the department faculty to launch the question on the screen.
         </p>
 
         <div class="tips-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ab47bc" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
-          <span class="ta-text">கேள்விகள் ஆங்கிலம் மற்றும் தமிழில் தோன்றும். உங்கள் வாக்கு முற்றிலும் அநாமதேயமானது. (Anonymous & instant).</span>
+          <span>Questions & options appear in both English & தமிழ். Your response is completely anonymous.</span>
         </div>
       </section>
 
-      <!-- 2. Live Question State Screen -->
+      <!-- 2. Live Question Screen -->
       <section class="state-container" id="questionState">
         <div class="question-header">
           <div class="status-badge live" id="qStatusBadge">
             <span class="badge-dot"></span>
             <span id="qStatusText">Live Poll</span>
           </div>
-          <div class="q-number-pill" id="qIndexBadge">Live Question</div>
+          <div style="font-size: 0.8rem; color: #8d819e; font-weight: 700;" id="qIndexBadge">Question</div>
         </div>
 
         <!-- English Question Prompt -->
         <h2 class="question-text" id="questionText">Loading question...</h2>
 
         <!-- Tamil Question Prompt -->
-        <div class="question-text-ta ta-text" id="questionTextTa"></div>
+        <div class="question-text-ta" id="questionTextTa" style="display: none;"></div>
 
-        <!-- Dynamic Answer Options / Inputs Container -->
+        <!-- Bilingual Options Container -->
         <div class="options-container" id="optionsContainer">
-          <!-- Populated dynamically -->
+          <!-- Dynamically populated option buttons -->
         </div>
 
-        <!-- Confirmation / Success Banner -->
         <div class="vote-status-banner" id="voteStatusBanner">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <div style="display: flex; flex-direction: column; text-align: left;">
-            <span style="font-weight: 700;" id="voteBannerText">Your response has been recorded!</span>
-            <span class="ta-text" style="font-size: 0.8rem; opacity: 0.95;">உங்கள் பதில் பதிவு செய்யப்பட்டது</span>
-          </div>
+          <span id="voteBannerText">Your response is recorded! Tap another option to change.</span>
         </div>
       </section>
-
     </main>
 
-    <!-- Footer -->
     <footer class="footer-note">
-      <span>Poll Point • Fast, Bilingual, Live Interactive Polling</span>
+      Department of Computer Science and Business Systems • Tap choice to submit
     </footer>
   </div>
 
+  <!-- Year Group Selection Modal (First-time onboarding or editing) -->
+  <div class="modal-overlay" id="yearModal">
+    <div class="modal-box">
+      <div class="modal-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+      </div>
+      <h2 class="modal-title">Select Student's Year</h2>
+      <p class="modal-desc">
+        Please indicate which year your ward is currently studying in CSBS to participate in the meeting poll.
+      </p>
+
+      <div class="year-options-grid" id="yearOptionsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/parent.js"></script>
 </body>
 </html>

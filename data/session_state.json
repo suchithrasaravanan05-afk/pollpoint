@@ -1,87 +1,41 @@
 {
-  "sessionTitle": "Live Interactive Poll",
-  "sessionTitleTa": "நேரலை ஊடாடும் வாக்கெடுப்பு",
-  "sessionCode": "POLL-2026",
-  "sessionStatus": "live",
+  "departmentName": "Department of Computer Science and Business Systems",
+  "meetingTitle": "Annual Parent-Teacher Meeting 2026",
   "customJoinUrl": "",
+  "meetingStatus": "active",
+  "showYearToParents": true,
+  "yearGroups": [
+    "1st Year",
+    "2nd Year",
+    "3rd Year",
+    "Final Year"
+  ],
   "questions": [
     {
-      "id": "q1",
-      "type": "multiple_choice",
-      "text": "How satisfied are you with this event?",
-      "textTa": "இந்த நிகழ்வில் நீங்கள் எவ்வளவு திருப்தியாக உள்ளீர்கள்?",
+      "id": "q5",
+      "text": "Overall, how effective is the faculty mentorship and student career guidance system in CSBS?",
+      "textTa": "ஒட்டுமொத்தமாக, CSBS துறையின் ஆசிரியர் வழிகாட்டுதல் மற்றும் தொழில் வழிகாட்டல் முறை எவ்வாறு உள்ளது?",
       "options": [
-        "Very Satisfied",
-        "Satisfied",
-        "Neutral",
-        "Needs Improvement"
+        "Excellent Guidance",
+        "Good Support",
+        "Average",
+        "Needs Major Enhancement"
       ],
       "optionsTa": [
-        "மிகவும் திருப்தி",
-        "திருப்தி",
-        "நடுநிலை",
-        "முன்னேற்றம் தேவை"
+        "சிறந்த வழிகாட்டுதல்",
+        "நல்ல ஆதரவு",
+        "சுமாராக உள்ளது",
+        "அதிக முன்னேற்றம் தேவை"
       ]
-    },
-    {
-      "id": "q2",
-      "type": "yes_no",
-      "text": "Was the information presented today useful and actionable?",
-      "textTa": "இன்று வழங்கப்பட்ட தகவல் பயனுள்ளதாகவும் நடைமுறைக்கு உகந்ததாகவும் இருந்ததா?",
-      "options": [
-        "Yes, Absolutely",
-        "No, Needs More Detail"
-      ],
-      "optionsTa": [
-        "ஆம், நிச்சயமாக",
-        "இல்லை, கூடுதல் விவரங்கள் தேவை"
-      ]
-    },
-    {
-      "id": "q3",
-      "type": "rating",
-      "text": "How would you rate the overall experience and interaction?",
-      "textTa": "ஒட்டுமொத்த அனுபவம் மற்றும் கலந்துரையாடலை எவ்வாறு மதிப்பிடுவீர்கள்?",
-      "options": [
-        "1 Star - Poor",
-        "2 Stars - Fair",
-        "3 Stars - Good",
-        "4 Stars - Very Good",
-        "5 Stars - Outstanding"
-      ],
-      "optionsTa": [
-        "1 நட்சத்திரம் - குறைவு",
-        "2 நட்சத்திரங்கள் - சுமாரானது",
-        "3 நட்சத்திரங்கள் - நல்லது",
-        "4 நட்சத்திரங்கள் - மிக நன்று",
-        "5 நட்சத்திரங்கள் - மிகச் சிறப்பானது"
-      ]
-    },
-    {
-      "id": "q4",
-      "type": "short_answer",
-      "text": "What should we improve for our next live session?",
-      "textTa": "எங்கள் அடுத்த நேரலை அமர்வில் நாங்கள் எதை மேம்படுத்த வேண்டும்?",
-      "options": [],
-      "optionsTa": []
     }
   ],
-  "currentQuestionId": "q1",
-  "questionStatus": "live",
+  "currentQuestionId": "q5",
+  "questionStatus": "idle",
   "responses": {
-    "q1": {
-      "test_voter_1": {
-        "optionIndex": 0,
-        "timestamp": 1790085227624
-      }
-    },
+    "q1": {},
     "q2": {},
     "q3": {},
-    "q4": {}
-  },
-  "departmentName": "Poll Point Live",
-  "meetingTitle": "Live Interactive Poll",
-  "yearGroups": [
-    "All Participants"
-  ]
+    "q4": {},
+    "q5": {}
+  }
 }
