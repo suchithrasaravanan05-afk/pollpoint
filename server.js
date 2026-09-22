@@ -18,7 +18,8 @@ let currentPort = parseInt(process.env.PORT || 3000, 10);
 const DATA_DIR = path.join(__dirname, 'data');
 const STATE_FILE = path.join(DATA_DIR, 'session_state.json');
 const DEFAULT_FILE = path.join(DATA_DIR, 'default_questions.json');
-const HISTORY_FILE = path.join(DATA_DIR, 'meetings_history.json');
+const LIBRARY_FILE = path.join(DATA_DIR, 'question_library.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'sessions_history.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
@@ -26,54 +27,36 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 
 // History persistence helpers
-function loadMeetingHistory() {
+function loadSessionsHistory() {
   try {
     if (fs.existsSync(HISTORY_FILE)) {
       const data = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
       if (Array.isArray(data)) return data;
     }
   } catch (err) {
-    console.error('Failed to parse meetings_history.json:', err);
+    console.error('Failed to parse sessions_history.json:', err);
   }
   return [];
 }
 
-function saveMeetingHistory(history) {
+function saveSessionsHistory(history) {
   try {
     fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), 'utf8');
   } catch (err) {
-    console.error('Failed to save meetings_history.json:', err);
+    console.error('Failed to save sessions_history.json:', err);
   }
 }
 
-function archiveCurrentMeetingSnapshot() {
-  if (!sessionState.questions || sessionState.questions.length === 0) return null;
-  const history = loadMeetingHistory();
-  const meetingId = 'mtg_' + Date.now();
-
-  let totalVotes = 0;
-  for (const qId in sessionState.responses) {
-    totalVotes += Object.keys(sessionState.responses[qId] || {}).length;
+// Question Library loader
+function loadQuestionLibrary() {
+  try {
+    if (fs.existsSync(LIBRARY_FILE)) {
+      return JSON.parse(fs.readFileSync(LIBRARY_FILE, 'utf8'));
+    }
+  } catch (err) {
+    console.error('Failed to load question library:', err);
   }
-
-  const results = sessionState.questions.map(q => computeQuestionTallies(q.id));
-
-  const archiveEntry = {
-    id: meetingId,
-    meetingTitle: sessionState.meetingTitle || 'Meeting Session',
-    departmentName: sessionState.departmentName || 'Department of Computer Science and Business Systems',
-    archivedAt: new Date().toISOString(),
-    totalVotes,
-    questionsCount: sessionState.questions.length,
-    yearGroups: sessionState.yearGroups,
-    questions: JSON.parse(JSON.stringify(sessionState.questions)),
-    responses: JSON.parse(JSON.stringify(sessionState.responses)),
-    results
-  };
-
-  history.unshift(archiveEntry);
-  saveMeetingHistory(history);
-  return archiveEntry;
+  return { categories: [], templates: [] };
 }
 
 // Network IP helper to facilitate mobile connections on venue Wi-Fi
@@ -94,17 +77,107 @@ const localIp = getLocalNetworkIp();
 
 // Session state structure
 let sessionState = {
-  departmentName: 'Department of Computer Science and Business Systems',
-  meetingTitle: 'Annual Parent-Teacher Meeting 2026',
-  customJoinUrl: '', // if overridden by admin
-  meetingStatus: 'setup', // 'setup' | 'active'
-  showYearToParents: true, // toggle whether parents see their year-group
-  yearGroups: ['1st Year', '2nd Year', '3rd Year', 'Final Year'],
+  sessionTitle: 'Live Interactive Poll',
+  sessionTitleTa: 'நேரலை ஊடாடும் வாக்கெடுப்பு',
+  sessionCode: 'POLL-2026',
+  sessionStatus: 'draft', // 'draft' | 'live' | 'closed'
+  customJoinUrl: '',
   questions: [],
   currentQuestionId: null,
   questionStatus: 'idle', // 'idle' | 'live' | 'closed'
-  responses: {} // { [questionId]: { [voterToken]: { optionIndex, yearGroup, timestamp } } }
+  responses: {}, // { [questionId]: { [voterToken]: { optionIndex, textAnswer, timestamp } } }
+  // Compatibility fallbacks:
+  departmentName: 'Poll Point Live',
+  meetingTitle: 'Live Interactive Poll',
+  yearGroups: ['All Participants']
 };
+
+// Compute question tallies
+function computeQuestionTallies(questionId) {
+  const question = sessionState.questions.find(q => q.id === questionId);
+  if (!question) return null;
+
+  const qResponses = sessionState.responses[questionId] || {};
+  const totalVotes = Object.keys(qResponses).length;
+  const isShortAnswer = question.type === 'short_answer';
+
+  if (isShortAnswer) {
+    const textAnswers = Object.values(qResponses)
+      .map(r => r.textAnswer)
+      .filter(Boolean);
+    return {
+      questionId,
+      type: 'short_answer',
+      questionText: question.text,
+      questionTextTa: question.textTa || '',
+      options: [],
+      optionsTa: [],
+      status: sessionState.questionStatus,
+      totalVotes,
+      textAnswers,
+      counts: [],
+      percentages: []
+    };
+  }
+
+  const totalOptions = question.options ? question.options.length : 0;
+  const counts = new Array(totalOptions).fill(0);
+
+  for (const voterToken in qResponses) {
+    const { optionIndex } = qResponses[voterToken];
+    if (typeof optionIndex === 'number' && optionIndex >= 0 && optionIndex < totalOptions) {
+      counts[optionIndex]++;
+    }
+  }
+
+  const percentages = counts.map(c => totalVotes > 0 ? Math.round((c / totalVotes) * 100) : 0);
+
+  return {
+    questionId,
+    type: question.type || 'multiple_choice',
+    questionText: question.text,
+    questionTextTa: question.textTa || '',
+    options: question.options || [],
+    optionsTa: question.optionsTa || [],
+    status: sessionState.questionStatus,
+    totalVotes,
+    counts,
+    percentages,
+    // Legacy breakdown format for backward compatibility
+    breakdown: { 'All Years': counts },
+    yearTotals: { 'All Years': totalVotes }
+  };
+}
+
+function archiveCurrentSessionSnapshot() {
+  if (!sessionState.questions || sessionState.questions.length === 0) return null;
+  const history = loadSessionsHistory();
+  const sessionId = 'poll_' + Date.now();
+
+  let totalVotes = 0;
+  for (const qId in sessionState.responses) {
+    totalVotes += Object.keys(sessionState.responses[qId] || {}).length;
+  }
+
+  const results = sessionState.questions.map(q => computeQuestionTallies(q.id));
+
+  const archiveEntry = {
+    id: sessionId,
+    sessionTitle: sessionState.sessionTitle || 'Poll Session',
+    sessionTitleTa: sessionState.sessionTitleTa || '',
+    sessionCode: sessionState.sessionCode || 'POLL',
+    archivedAt: new Date().toISOString(),
+    totalVotes,
+    questionsCount: sessionState.questions.length,
+    questions: JSON.parse(JSON.stringify(sessionState.questions)),
+    responses: JSON.parse(JSON.stringify(sessionState.responses)),
+    results
+  };
+
+  history.unshift(archiveEntry);
+  saveSessionsHistory(history);
+  return archiveEntry;
+}
 
 // Load initial state
 function loadState() {
@@ -112,6 +185,9 @@ function loadState() {
     if (fs.existsSync(STATE_FILE)) {
       const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
       sessionState = { ...sessionState, ...saved };
+      // Synchronize backward compat aliases
+      sessionState.meetingTitle = sessionState.sessionTitle;
+      sessionState.departmentName = 'Poll Point Live';
       console.log('Loaded existing session state from session_state.json');
       return;
     }
@@ -122,10 +198,11 @@ function loadState() {
   try {
     if (fs.existsSync(DEFAULT_FILE)) {
       const defaults = JSON.parse(fs.readFileSync(DEFAULT_FILE, 'utf8'));
-      sessionState.departmentName = defaults.departmentName || sessionState.departmentName;
-      sessionState.meetingTitle = defaults.meetingTitle || sessionState.meetingTitle;
-      sessionState.yearGroups = defaults.yearGroups || sessionState.yearGroups;
+      sessionState.sessionTitle = defaults.sessionTitle || sessionState.sessionTitle;
+      sessionState.sessionTitleTa = defaults.sessionTitleTa || sessionState.sessionTitleTa;
+      sessionState.sessionCode = defaults.sessionCode || sessionState.sessionCode;
       sessionState.questions = defaults.questions || [];
+      sessionState.currentQuestionId = sessionState.questions[0] ? sessionState.questions[0].id : null;
       console.log(`Loaded ${sessionState.questions.length} default questions.`);
     }
   } catch (err) {
@@ -149,7 +226,7 @@ function persistState() {
 }
 
 // Connected clients tracking
-const connectedVoters = new Map(); // socketId -> { voterToken, yearGroup }
+const connectedParticipants = new Map(); // socketId -> voterToken
 
 function getActivePort() {
   const addr = server.address();
@@ -163,70 +240,12 @@ function getActiveJoinUrl() {
   return `http://${localIp}:${getActivePort()}`;
 }
 
-// Compute response tallies for a question
-function computeQuestionTallies(questionId) {
-  const question = sessionState.questions.find(q => q.id === questionId);
-  if (!question) return null;
-
-  const qResponses = sessionState.responses[questionId] || {};
-  const totalOptions = question.options.length;
-
-  // Breakdown by year group + All Years
-  // structure: { "All Years": [counts], "1st Year": [counts], ... }
-  const breakdown = {
-    'All Years': new Array(totalOptions).fill(0)
-  };
-  const yearTotals = {
-    'All Years': 0
-  };
-
-  sessionState.yearGroups.forEach(yg => {
-    breakdown[yg] = new Array(totalOptions).fill(0);
-    yearTotals[yg] = 0;
-  });
-
-  let totalVotes = 0;
-
-  for (const voterToken in qResponses) {
-    const { optionIndex, yearGroup } = qResponses[voterToken];
-    if (optionIndex >= 0 && optionIndex < totalOptions) {
-      breakdown['All Years'][optionIndex]++;
-      totalVotes++;
-      yearTotals['All Years']++;
-
-      if (breakdown[yearGroup]) {
-        breakdown[yearGroup][optionIndex]++;
-        yearTotals[yearGroup]++;
-      }
-    }
-  }
-
-  return {
-    questionId,
-    questionText: question.text,
-    questionTextTa: question.textTa || '',
-    options: question.options,
-    optionsTa: question.optionsTa || [],
-    status: sessionState.questionStatus,
-    totalVotes,
-    breakdown,
-    yearTotals
-  };
-}
-
 // Compute general stats for admin
 function getAdminStats() {
-  const uniqueConnected = new Set();
-  const yearGroupCounts = {};
-  sessionState.yearGroups.forEach(yg => { yearGroupCounts[yg] = 0; });
-
-  for (const { voterToken, yearGroup } of connectedVoters.values()) {
-    if (!uniqueConnected.has(voterToken)) {
-      uniqueConnected.add(voterToken);
-      if (yearGroupCounts[yearGroup] !== undefined) {
-        yearGroupCounts[yearGroup]++;
-      }
-    }
+  const uniqueConnected = new Set(connectedParticipants.values());
+  let totalVotesAllQuestions = 0;
+  for (const qId in sessionState.responses) {
+    totalVotesAllQuestions += Object.keys(sessionState.responses[qId] || {}).length;
   }
 
   const currentTallies = sessionState.currentQuestionId
@@ -235,9 +254,11 @@ function getAdminStats() {
 
   return {
     connectedCount: uniqueConnected.size,
-    yearGroupCounts,
+    totalVotesAllQuestions,
     currentQuestionId: sessionState.currentQuestionId,
     questionStatus: sessionState.questionStatus,
+    sessionStatus: sessionState.sessionStatus,
+    sessionCode: sessionState.sessionCode,
     tallies: currentTallies
   };
 }
@@ -255,7 +276,7 @@ app.get('/api/info', async (req, res) => {
       margin: 2,
       scale: 8,
       color: {
-        dark: '#4a148c',
+        dark: '#4c1d95',
         light: '#ffffff'
       }
     });
@@ -265,158 +286,130 @@ app.get('/api/info', async (req, res) => {
       port,
       joinUrl,
       qrDataUrl,
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle,
-      meetingStatus: sessionState.meetingStatus,
-      showYearToParents: sessionState.showYearToParents,
-      yearGroups: sessionState.yearGroups
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
+      sessionCode: sessionState.sessionCode,
+      sessionStatus: sessionState.sessionStatus,
+      questionStatus: sessionState.questionStatus,
+      questionsCount: sessionState.questions.length,
+      // Compatibility aliases:
+      meetingTitle: sessionState.sessionTitle,
+      departmentName: 'Poll Point Live',
+      yearGroups: ['All Participants']
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to generate QR code' });
   }
 });
 
-// API: Session summary for printable view
+// API: Question Library
+app.get('/api/library', (req, res) => {
+  const library = loadQuestionLibrary();
+  res.json(library);
+});
+
+// API: Sessions History
+app.get('/api/sessions', (req, res) => {
+  const history = loadSessionsHistory();
+  res.json(history);
+});
+
+// Backward compatibility alias for meetings history
+app.get('/api/meetings/history', (req, res) => {
+  const history = loadSessionsHistory();
+  res.json(history.map(item => ({
+    id: item.id,
+    meetingTitle: item.sessionTitle,
+    departmentName: 'Poll Point Live',
+    archivedAt: item.archivedAt,
+    totalVotes: item.totalVotes || 0,
+    questionsCount: item.questionsCount || 0
+  })));
+});
+
+// API: Current Session Summary
 app.get('/api/session/summary', (req, res) => {
-  const results = sessionState.questions.map(q => {
-    return computeQuestionTallies(q.id);
-  });
+  const results = sessionState.questions.map(q => computeQuestionTallies(q.id));
   res.json({
-    departmentName: sessionState.departmentName,
-    meetingTitle: sessionState.meetingTitle,
+    sessionTitle: sessionState.sessionTitle,
+    sessionTitleTa: sessionState.sessionTitleTa,
+    sessionCode: sessionState.sessionCode,
+    sessionStatus: sessionState.sessionStatus,
     generatedAt: new Date().toISOString(),
-    yearGroups: sessionState.yearGroups,
     results
   });
 });
 
-// API: Meetings History List
-app.get('/api/meetings/history', (req, res) => {
-  const history = loadMeetingHistory();
-  const summaries = history.map(item => ({
-    id: item.id,
-    meetingTitle: item.meetingTitle,
-    departmentName: item.departmentName,
-    archivedAt: item.archivedAt,
-    totalVotes: item.totalVotes || 0,
-    questionsCount: item.questionsCount || (item.questions ? item.questions.length : 0)
-  }));
-  res.json(summaries);
-});
-
-// API: Single Meeting History Details
-app.get('/api/meetings/history/:id', (req, res) => {
-  const history = loadMeetingHistory();
-  const meeting = history.find(m => m.id === req.params.id);
-  if (!meeting) {
-    return res.status(404).json({ error: 'Meeting not found' });
-  }
-  res.json(meeting);
-});
-
-// API: CSV Export for a specific historical meeting
-app.get('/api/meetings/history/:id/csv', (req, res) => {
-  const history = loadMeetingHistory();
-  const meeting = history.find(m => m.id === req.params.id);
-  if (!meeting) {
-    return res.status(404).send('Meeting not found');
-  }
-
-  const filename = `PTM_Historical_${meeting.id}_Results.csv`;
-  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-  let csv = [];
-  csv.push(`\uFEFF"Parent-Teachers Meeting Historical Polling Report"`);
-  csv.push(`"Department:","${(meeting.departmentName || '').replace(/"/g, '""')}"`);
-  csv.push(`"Meeting:","${(meeting.meetingTitle || '').replace(/"/g, '""')}"`);
-  csv.push(`"Archived At:","${new Date(meeting.archivedAt).toLocaleString()}"`);
-  csv.push('');
-
-  const headers = ['Question #', 'Question (English)', 'Question (Tamil)', 'Option #', 'Option (English)', 'Option (Tamil)'];
-  (meeting.yearGroups || sessionState.yearGroups).forEach(yg => headers.push(`"${yg} Votes"`));
-  headers.push('"Total Votes"', '"Overall %"');
-  csv.push(headers.join(','));
-
-  const results = meeting.results || [];
-  results.forEach((resItem, qIndex) => {
-    const totalQVotes = resItem.totalVotes || 0;
-    (resItem.options || []).forEach((opt, optIndex) => {
-      const optTa = (resItem.optionsTa && resItem.optionsTa[optIndex]) || '';
-      const row = [
-        `"Q${qIndex + 1}"`,
-        `"${(resItem.questionText || '').replace(/"/g, '""')}"`,
-        `"${(resItem.questionTextTa || '').replace(/"/g, '""')}"`,
-        `"${optIndex + 1}"`,
-        `"${(opt || '').replace(/"/g, '""')}"`,
-        `"${optTa.replace(/"/g, '""')}"`
-      ];
-
-      (meeting.yearGroups || sessionState.yearGroups).forEach(yg => {
-        const ygCount = resItem.breakdown && resItem.breakdown[yg] ? resItem.breakdown[yg][optIndex] : 0;
-        row.push(ygCount);
-      });
-
-      const optTotal = resItem.breakdown && resItem.breakdown['All Years'] ? resItem.breakdown['All Years'][optIndex] : 0;
-      const pct = totalQVotes > 0 ? ((optTotal / totalQVotes) * 100).toFixed(1) : '0.0';
-
-      row.push(optTotal);
-      row.push(`"${pct}%"`);
-      csv.push(row.join(','));
-    });
-    csv.push('');
-  });
-
-  res.send(csv.join('\r\n'));
-});
-
-// API: Current Session CSV Export (Bilingual with English and Tamil)
+// API: CSV Export (Bilingual English & Tamil)
 app.get('/api/export/csv', (req, res) => {
-  const filename = `PTM_CSBS_Polling_Results_${new Date().toISOString().slice(0, 10)}.csv`;
+  const filename = `Poll_Point_Results_${sessionState.sessionCode || 'Session'}_${new Date().toISOString().slice(0, 10)}.csv`;
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
   let csv = [];
-  csv.push(`\uFEFF"Parent-Teachers Meeting Polling Report"`);
-  csv.push(`"Department:","${sessionState.departmentName.replace(/"/g, '""')}"`);
-  csv.push(`"Meeting:","${sessionState.meetingTitle.replace(/"/g, '""')}"`);
+  csv.push(`\uFEFF"Poll Point Live Polling Report"`);
+  csv.push(`"Session Title:","${(sessionState.sessionTitle || '').replace(/"/g, '""')}"`);
+  csv.push(`"Session Title (Tamil):","${(sessionState.sessionTitleTa || '').replace(/"/g, '""')}"`);
+  csv.push(`"Session Code:","${sessionState.sessionCode || ''}"`);
   csv.push(`"Exported At:","${new Date().toLocaleString()}"`);
   csv.push('');
 
-  // Header row with Tamil and English columns
-  const headers = ['Question #', 'Question (English)', 'Question (Tamil)', 'Option #', 'Option (English)', 'Option (Tamil)'];
-  sessionState.yearGroups.forEach(yg => headers.push(`"${yg} Votes"`));
-  headers.push('"Total Votes"', '"Overall %"');
+  const headers = ['Question #', 'Poll Type', 'Question (English)', 'Question (Tamil)', 'Option # / Response', 'Option (English)', 'Option (Tamil)', 'Vote Count', 'Percentage'];
   csv.push(headers.join(','));
 
   sessionState.questions.forEach((q, qIndex) => {
     const tallies = computeQuestionTallies(q.id);
     const totalQVotes = tallies.totalVotes;
 
-    q.options.forEach((opt, optIndex) => {
-      const optTa = (q.optionsTa && q.optionsTa[optIndex]) || '';
-      const row = [
-        `"Q${qIndex + 1}"`,
-        `"${q.text.replace(/"/g, '""')}"`,
-        `"${(q.textTa || '').replace(/"/g, '""')}"`,
-        `"${optIndex + 1}"`,
-        `"${opt.replace(/"/g, '""')}"`,
-        `"${optTa.replace(/"/g, '""')}"`
-      ];
+    if (q.type === 'short_answer') {
+      const answers = tallies.textAnswers || [];
+      if (answers.length === 0) {
+        csv.push([
+          `"Q${qIndex + 1}"`,
+          `"Short Answer"`,
+          `"${(q.text || '').replace(/"/g, '""')}"`,
+          `"${(q.textTa || '').replace(/"/g, '""')}"`,
+          `"-"`,
+          `"No responses submitted"`,
+          `"-"`,
+          0,
+          `"0%"`
+        ].join(','));
+      } else {
+        answers.forEach((ans, aIdx) => {
+          csv.push([
+            `"Q${qIndex + 1}"`,
+            `"Short Answer"`,
+            `"${(q.text || '').replace(/"/g, '""')}"`,
+            `"${(q.textTa || '').replace(/"/g, '""')}"`,
+            `"#${aIdx + 1}"`,
+            `"${ans.replace(/"/g, '""')}"`,
+            `"-"`,
+            1,
+            `"-"`
+          ].join(','));
+        });
+      }
+    } else {
+      (q.options || []).forEach((opt, optIndex) => {
+        const optTa = (q.optionsTa && q.optionsTa[optIndex]) || '';
+        const optCount = tallies.counts[optIndex] || 0;
+        const pct = totalQVotes > 0 ? ((optCount / totalQVotes) * 100).toFixed(1) : '0.0';
 
-      // Votes per year group
-      sessionState.yearGroups.forEach(yg => {
-        const ygCount = tallies.breakdown[yg] ? tallies.breakdown[yg][optIndex] : 0;
-        row.push(ygCount);
+        const row = [
+          `"Q${qIndex + 1}"`,
+          `"${q.type || 'multiple_choice'}"`,
+          `"${(q.text || '').replace(/"/g, '""')}"`,
+          `"${(q.textTa || '').replace(/"/g, '""')}"`,
+          `"${optIndex + 1}"`,
+          `"${(opt || '').replace(/"/g, '""')}"`,
+          `"${optTa.replace(/"/g, '""')}"`,
+          optCount,
+          `"${pct}%"`
+        ];
+        csv.push(row.join(','));
       });
-
-      const optTotal = tallies.breakdown['All Years'][optIndex];
-      const pct = totalQVotes > 0 ? ((optTotal / totalQVotes) * 100).toFixed(1) : '0.0';
-
-      row.push(optTotal);
-      row.push(`"${pct}%"`);
-      csv.push(row.join(','));
-    });
+    }
     csv.push(''); // blank line between questions
   });
 
@@ -425,98 +418,101 @@ app.get('/api/export/csv', (req, res) => {
 
 // WebSocket Handling
 io.on('connection', (socket) => {
-  let clientRole = 'parent';
+  let clientRole = 'participant';
   let clientVoterToken = null;
 
-  // Parent joins
-  socket.on('parent:join', (data) => {
-    const { voterToken, yearGroup } = data || {};
+  // Participant join handler (with backward compatible parent:join alias)
+  function handleParticipantJoin(data) {
+    const { voterToken } = data || {};
     if (!voterToken) return;
 
-    clientRole = 'parent';
+    clientRole = 'participant';
     clientVoterToken = voterToken;
-    connectedVoters.set(socket.id, { voterToken, yearGroup: yearGroup || '1st Year' });
+    connectedParticipants.set(socket.id, voterToken);
 
-    // Send current session state to this parent
     const activeQuestion = sessionState.questions.find(q => q.id === sessionState.currentQuestionId);
     let myVote = null;
     if (activeQuestion && sessionState.responses[activeQuestion.id]) {
-      myVote = sessionState.responses[activeQuestion.id][voterToken]?.optionIndex ?? null;
+      const resp = sessionState.responses[activeQuestion.id][voterToken];
+      myVote = resp ? (resp.optionIndex !== undefined ? resp.optionIndex : resp.textAnswer) : null;
     }
 
     socket.emit('session:state', {
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle,
-      yearGroups: sessionState.yearGroups,
-      meetingStatus: sessionState.meetingStatus,
-      showYearToParents: sessionState.showYearToParents !== false,
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
+      sessionCode: sessionState.sessionCode,
+      sessionStatus: sessionState.sessionStatus,
       questionStatus: sessionState.questionStatus,
       currentQuestion: activeQuestion ? {
         id: activeQuestion.id,
+        type: activeQuestion.type || 'multiple_choice',
         text: activeQuestion.text,
         textTa: activeQuestion.textTa || '',
-        options: activeQuestion.options,
+        options: activeQuestion.options || [],
         optionsTa: activeQuestion.optionsTa || []
       } : null,
-      myVote
+      myVote,
+      // Backward compatibility fields:
+      meetingTitle: sessionState.sessionTitle,
+      departmentName: 'Poll Point Live',
+      showYearToParents: false,
+      yearGroups: ['All Participants']
     });
 
-    // Notify admin of updated audience stats
+    // Notify admin
     io.to('admin-room').emit('admin:stats', getAdminStats());
-  });
+  }
 
-  // Parent changes year group
-  socket.on('parent:change_year', (data) => {
-    const { voterToken, yearGroup } = data || {};
-    if (voterToken && connectedVoters.has(socket.id)) {
-      connectedVoters.set(socket.id, { voterToken, yearGroup });
+  socket.on('participant:join', handleParticipantJoin);
+  socket.on('parent:join', handleParticipantJoin);
 
-      // Update any previous votes recorded for this voter to new yearGroup
-      for (const qId in sessionState.responses) {
-        if (sessionState.responses[qId][voterToken]) {
-          sessionState.responses[qId][voterToken].yearGroup = yearGroup;
-        }
-      }
-      persistState();
-
-      io.to('admin-room').emit('admin:stats', getAdminStats());
-      socket.emit('parent:year_updated', { yearGroup });
-    }
-  });
-
-  // Parent casts vote
-  socket.on('parent:vote', (data) => {
-    const { voterToken, questionId, optionIndex, yearGroup } = data || {};
-
-    if (!voterToken || !questionId || optionIndex === undefined) {
-      return socket.emit('parent:vote_error', { message: 'Invalid vote parameters' });
+  // Participant vote handler (with backward compatible parent:vote alias)
+  function handleParticipantVote(data) {
+    const { voterToken, questionId, optionIndex, textAnswer } = data || {};
+    if (!voterToken || !questionId) {
+      return socket.emit('participant:vote_error', { message: 'Invalid vote parameters / தவறான அளவுருக்கள்' });
     }
 
     // Verify question is currently live
     if (sessionState.currentQuestionId !== questionId || sessionState.questionStatus !== 'live') {
-      return socket.emit('parent:vote_error', { message: 'Polling is not active for this question' });
+      return socket.emit('participant:vote_error', { message: 'Polling is not active for this question / இந்த கேள்விக்கான வாக்கெடுப்பு மூடப்பட்டுள்ளது' });
     }
 
     const question = sessionState.questions.find(q => q.id === questionId);
-    if (!question || optionIndex < 0 || optionIndex >= question.options.length) {
-      return socket.emit('parent:vote_error', { message: 'Invalid option selected' });
+    if (!question) {
+      return socket.emit('participant:vote_error', { message: 'Question not found' });
     }
 
-    // Record response
     if (!sessionState.responses[questionId]) {
       sessionState.responses[questionId] = {};
     }
 
-    const existingYear = connectedVoters.get(socket.id)?.yearGroup || yearGroup || '1st Year';
-    sessionState.responses[questionId][voterToken] = {
-      optionIndex,
-      yearGroup: existingYear,
-      timestamp: Date.now()
-    };
+    if (question.type === 'short_answer') {
+      if (!textAnswer || !textAnswer.trim()) {
+        return socket.emit('participant:vote_error', { message: 'Please enter your answer' });
+      }
+      sessionState.responses[questionId][voterToken] = {
+        textAnswer: textAnswer.trim().slice(0, 500),
+        timestamp: Date.now()
+      };
+    } else {
+      if (typeof optionIndex !== 'number' || optionIndex < 0 || optionIndex >= (question.options?.length || 0)) {
+        return socket.emit('participant:vote_error', { message: 'Invalid option selected' });
+      }
+      sessionState.responses[questionId][voterToken] = {
+        optionIndex,
+        timestamp: Date.now()
+      };
+    }
 
     persistState();
 
     // Confirm to voter
+    socket.emit('participant:vote_confirmed', {
+      questionId,
+      optionIndex,
+      textAnswer
+    });
     socket.emit('parent:vote_confirmed', {
       questionId,
       optionIndex
@@ -529,7 +525,10 @@ io.on('connection', (socket) => {
       tallies: updatedTallies,
       stats: getAdminStats()
     });
-  });
+  }
+
+  socket.on('participant:vote', handleParticipantVote);
+  socket.on('parent:vote', handleParticipantVote);
 
   // Admin joins
   socket.on('admin:join', () => {
@@ -537,165 +536,129 @@ io.on('connection', (socket) => {
     socket.join('admin-room');
 
     socket.emit('admin:init', {
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle,
-      meetingStatus: sessionState.meetingStatus || 'setup',
-      showYearToParents: sessionState.showYearToParents !== false,
-      yearGroups: sessionState.yearGroups,
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
+      sessionCode: sessionState.sessionCode,
+      sessionStatus: sessionState.sessionStatus,
       questions: sessionState.questions,
       currentQuestionId: sessionState.currentQuestionId,
       questionStatus: sessionState.questionStatus,
       tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
       stats: getAdminStats(),
-      joinUrl: getActiveJoinUrl()
+      joinUrl: getActiveJoinUrl(),
+      library: loadQuestionLibrary(),
+      // Legacy compatibility:
+      departmentName: 'Poll Point Live',
+      meetingTitle: sessionState.sessionTitle,
+      meetingStatus: sessionState.sessionStatus === 'live' ? 'active' : 'setup',
+      showYearToParents: false,
+      yearGroups: ['All Participants']
     });
   });
 
-  // Admin starts meeting from Question Builder
-  socket.on('admin:start_meeting', () => {
-    sessionState.meetingStatus = 'active';
-    if (!sessionState.currentQuestionId && sessionState.questions.length > 0) {
-      sessionState.currentQuestionId = sessionState.questions[0].id;
-    }
-    persistState();
+  // Admin creates a new poll session
+  socket.on('admin:create_session', (data) => {
+    const { sessionTitle, sessionTitleTa, sessionCode, cloneQuestions, newQuestions } = data || {};
 
-    io.to('admin-room').emit('admin:meeting_started', {
-      meetingStatus: 'active',
-      currentQuestionId: sessionState.currentQuestionId,
-      tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
-      stats: getAdminStats()
-    });
-
-    io.emit('session:settings', {
-      showYearToParents: sessionState.showYearToParents !== false
-    });
-  });
-
-  // Admin returns to Question Builder setup
-  socket.on('admin:return_to_setup', () => {
-    sessionState.meetingStatus = 'setup';
-    persistState();
-
-    io.to('admin-room').emit('admin:returned_to_setup', {
-      meetingStatus: 'setup'
-    });
-  });
-
-  // Admin creates a new meeting (Archives previous meeting data and allows altering questions)
-  socket.on('admin:create_new_meeting', (data) => {
-    const { meetingTitle: newTitle, departmentName: newDept, cloneQuestions, newQuestions } = data || {};
-
-    // Auto-archive current session before starting fresh
+    // Auto-archive active session
     if (sessionState.questions && sessionState.questions.length > 0) {
-      archiveCurrentMeetingSnapshot();
+      archiveCurrentSessionSnapshot();
     }
 
-    if (newDept) sessionState.departmentName = newDept.trim();
-    if (newTitle) sessionState.meetingTitle = newTitle.trim();
+    if (sessionTitle) sessionState.sessionTitle = sessionTitle.trim();
+    if (sessionTitleTa) sessionState.sessionTitleTa = sessionTitleTa.trim();
+    sessionState.sessionCode = sessionCode ? sessionCode.trim().toUpperCase() : 'POLL-' + Math.floor(1000 + Math.random() * 9000);
+    sessionState.meetingTitle = sessionState.sessionTitle;
 
     // Reset responses
     sessionState.responses = {};
+    sessionState.sessionStatus = 'draft';
     sessionState.questionStatus = 'idle';
 
     if (Array.isArray(newQuestions) && newQuestions.length > 0) {
       sessionState.questions = newQuestions;
     } else if (!cloneQuestions) {
-      // Load default bilingual questions
+      // Reload defaults
       try {
         if (fs.existsSync(DEFAULT_FILE)) {
           const defaults = JSON.parse(fs.readFileSync(DEFAULT_FILE, 'utf8'));
           sessionState.questions = defaults.questions || [];
         }
       } catch (e) {
-        console.error('Error reloading defaults for new meeting:', e);
+        console.error('Error reloading defaults for new session:', e);
       }
     }
-    // If cloneQuestions was true, current questions are retained so admin can alter them!
 
     sessionState.currentQuestionId = sessionState.questions.length > 0 ? sessionState.questions[0].id : null;
-    sessionState.meetingStatus = 'setup';
     persistState();
 
-    // Reset connected parents
-    io.emit('session:reset_for_new_meeting', {
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle
+    // Reset connected participants
+    io.emit('session:reset', {
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
+      sessionCode: sessionState.sessionCode
     });
 
     // Notify admin
     io.to('admin-room').emit('admin:init', {
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle,
-      meetingStatus: sessionState.meetingStatus,
-      showYearToParents: sessionState.showYearToParents !== false,
-      yearGroups: sessionState.yearGroups,
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
+      sessionCode: sessionState.sessionCode,
+      sessionStatus: sessionState.sessionStatus,
       questions: sessionState.questions,
       currentQuestionId: sessionState.currentQuestionId,
       questionStatus: sessionState.questionStatus,
       tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
       stats: getAdminStats(),
-      joinUrl: getActiveJoinUrl()
+      joinUrl: getActiveJoinUrl(),
+      library: loadQuestionLibrary(),
+      departmentName: 'Poll Point Live',
+      meetingTitle: sessionState.sessionTitle
     });
   });
 
-  // Explicit manual archive snapshot
-  socket.on('admin:archive_current_meeting', () => {
-    const archived = archiveCurrentMeetingSnapshot();
-    io.to('admin-room').emit('admin:meeting_archived', { archive: archived });
-  });
-
-  // Admin clones/restores questions from an archived meeting to alter them
-  socket.on('admin:restore_meeting_questions', ({ meetingId }) => {
-    const history = loadMeetingHistory();
-    const archived = history.find(m => m.id === meetingId);
-    if (!archived || !Array.isArray(archived.questions)) return;
-
-    sessionState.questions = archived.questions.map((q, idx) => ({
-      id: `q_${Date.now()}_${idx}`,
-      text: q.text || '',
-      textTa: q.textTa || '',
-      options: Array.isArray(q.options) ? [...q.options] : [],
-      optionsTa: Array.isArray(q.optionsTa) ? [...q.optionsTa] : []
-    }));
-
-    sessionState.currentQuestionId = sessionState.questions[0] ? sessionState.questions[0].id : null;
-    sessionState.questionStatus = 'idle';
-    persistState();
-
-    io.to('admin-room').emit('admin:questions_saved', {
-      questions: sessionState.questions,
-      showYearToParents: sessionState.showYearToParents,
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle,
-      currentQuestionId: sessionState.currentQuestionId,
-      tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
-      stats: getAdminStats()
-    });
-  });
-
-  // Admin batch saves questions from Question Builder (Bilingual support)
+  // Admin save questions (Builder)
   socket.on('admin:save_questions', (data) => {
-    const { questions: newQuestions, showYearToParents, departmentName, meetingTitle } = data || {};
-    if (departmentName) sessionState.departmentName = departmentName.trim();
-    if (meetingTitle) sessionState.meetingTitle = meetingTitle.trim();
-    if (showYearToParents !== undefined) sessionState.showYearToParents = Boolean(showYearToParents);
+    const { questions: newQuestions, sessionTitle, sessionTitleTa } = data || {};
+    if (sessionTitle) sessionState.sessionTitle = sessionTitle.trim();
+    if (sessionTitleTa) sessionState.sessionTitleTa = sessionTitleTa.trim();
+    sessionState.meetingTitle = sessionState.sessionTitle;
 
     if (Array.isArray(newQuestions)) {
       sessionState.questions = newQuestions.map((q, idx) => {
+        const type = q.type || 'multiple_choice';
+        let options = [];
+        let optionsTa = [];
+
+        if (type === 'yes_no') {
+          options = ['Yes', 'No'];
+          optionsTa = ['ஆம்', 'இல்லை'];
+        } else if (type === 'rating') {
+          options = ['1 Star - Poor', '2 Stars - Fair', '3 Stars - Good', '4 Stars - Very Good', '5 Stars - Outstanding'];
+          optionsTa = ['1 - குறைவு', '2 - சுமாரானது', '3 - நல்லது', '4 - மிக நன்று', '5 - மிகச் சிறப்பானது'];
+        } else if (type === 'short_answer') {
+          options = [];
+          optionsTa = [];
+        } else {
+          // multiple_choice
+          options = Array.isArray(q.options)
+            ? q.options.map(o => (o || '').trim()).filter(Boolean).slice(0, 6)
+            : ['Option 1', 'Option 2'];
+          optionsTa = Array.isArray(q.optionsTa)
+            ? q.optionsTa.map(o => (o || '').trim()).slice(0, 6)
+            : [];
+        }
+
         return {
           id: q.id || `q_${Date.now()}_${idx}`,
-          text: (q.text || '').trim(),
-          textTa: (q.textTa || '').trim(),
-          options: Array.isArray(q.options)
-            ? q.options.map(o => (o || '').trim()).filter(Boolean).slice(0, 4)
-            : [],
-          optionsTa: Array.isArray(q.optionsTa)
-            ? q.optionsTa.map(o => (o || '').trim()).slice(0, 4)
-            : []
+          type,
+          text: (q.text || '').trim() || 'Untitled Question',
+          textTa: (q.textTa || '').trim() || '',
+          options,
+          optionsTa
         };
       });
 
-      // If currentQuestionId is not valid anymore, update it
       if (!sessionState.questions.find(q => q.id === sessionState.currentQuestionId)) {
         sessionState.currentQuestionId = sessionState.questions.length > 0 ? sessionState.questions[0].id : null;
         sessionState.questionStatus = 'idle';
@@ -705,19 +668,43 @@ io.on('connection', (socket) => {
     persistState();
 
     io.to('admin-room').emit('admin:questions_saved', {
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
       questions: sessionState.questions,
-      showYearToParents: sessionState.showYearToParents,
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle,
       currentQuestionId: sessionState.currentQuestionId,
       tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
       stats: getAdminStats()
     });
+  });
 
-    io.emit('session:settings', {
-      showYearToParents: sessionState.showYearToParents !== false,
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle
+  // Admin imports template from library
+  socket.on('admin:import_template', ({ templateId }) => {
+    const library = loadQuestionLibrary();
+    const tpl = library.templates.find(t => t.id === templateId);
+    if (!tpl) return;
+
+    const newQ = {
+      id: `q_${Date.now()}_${Math.floor(Math.random()*1000)}`,
+      type: tpl.type || 'multiple_choice',
+      text: tpl.text,
+      textTa: tpl.textTa || '',
+      options: Array.isArray(tpl.options) ? [...tpl.options] : [],
+      optionsTa: Array.isArray(tpl.optionsTa) ? [...tpl.optionsTa] : []
+    };
+
+    sessionState.questions.push(newQ);
+    if (!sessionState.currentQuestionId) {
+      sessionState.currentQuestionId = newQ.id;
+    }
+    persistState();
+
+    io.to('admin-room').emit('admin:questions_saved', {
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
+      questions: sessionState.questions,
+      currentQuestionId: sessionState.currentQuestionId,
+      tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
+      stats: getAdminStats()
     });
   });
 
@@ -727,26 +714,47 @@ io.on('connection', (socket) => {
     if (!question) return;
 
     sessionState.currentQuestionId = questionId;
+    sessionState.sessionStatus = 'live';
     sessionState.questionStatus = 'live';
     if (!sessionState.responses[questionId]) {
       sessionState.responses[questionId] = {};
     }
     persistState();
 
-    // Broadcast bilingual question to parents
-    io.emit('question:live', {
+    const payload = {
       id: question.id,
+      type: question.type || 'multiple_choice',
       text: question.text,
       textTa: question.textTa || '',
-      options: question.options,
+      options: question.options || [],
       optionsTa: question.optionsTa || []
-    });
+    };
 
-    // Notify admin
+    io.emit('question:live', payload);
+
     io.to('admin-room').emit('admin:state_change', {
+      sessionStatus: 'live',
       currentQuestionId: questionId,
       questionStatus: 'live',
       tallies: computeQuestionTallies(questionId),
+      stats: getAdminStats()
+    });
+  });
+
+  // Admin pauses question
+  socket.on('admin:pause_question', () => {
+    sessionState.questionStatus = 'paused';
+    persistState();
+
+    io.emit('question:paused', {
+      questionId: sessionState.currentQuestionId
+    });
+
+    io.to('admin-room').emit('admin:state_change', {
+      sessionStatus: sessionState.sessionStatus,
+      currentQuestionId: sessionState.currentQuestionId,
+      questionStatus: 'paused',
+      tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
       stats: getAdminStats()
     });
   });
@@ -761,6 +769,7 @@ io.on('connection', (socket) => {
     });
 
     io.to('admin-room').emit('admin:state_change', {
+      sessionStatus: sessionState.sessionStatus,
       currentQuestionId: sessionState.currentQuestionId,
       questionStatus: 'closed',
       tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
@@ -778,17 +787,81 @@ io.on('connection', (socket) => {
     if (question) {
       io.emit('question:live', {
         id: question.id,
+        type: question.type || 'multiple_choice',
         text: question.text,
         textTa: question.textTa || '',
-        options: question.options,
+        options: question.options || [],
         optionsTa: question.optionsTa || []
       });
     }
 
     io.to('admin-room').emit('admin:state_change', {
+      sessionStatus: sessionState.sessionStatus,
       currentQuestionId: sessionState.currentQuestionId,
       questionStatus: 'live',
       tallies: computeQuestionTallies(sessionState.currentQuestionId),
+      stats: getAdminStats()
+    });
+  });
+
+  // Admin navigates questions (Next / Prev)
+  socket.on('admin:next_question', () => {
+    const qList = sessionState.questions;
+    if (qList.length === 0) return;
+    const curIdx = qList.findIndex(q => q.id === sessionState.currentQuestionId);
+    if (curIdx < qList.length - 1) {
+      const nextQ = qList[curIdx + 1];
+      sessionState.currentQuestionId = nextQ.id;
+      sessionState.questionStatus = 'idle';
+      persistState();
+
+      io.to('admin-room').emit('admin:state_change', {
+        sessionStatus: sessionState.sessionStatus,
+        currentQuestionId: nextQ.id,
+        questionStatus: 'idle',
+        tallies: computeQuestionTallies(nextQ.id),
+        stats: getAdminStats()
+      });
+    }
+  });
+
+  socket.on('admin:prev_question', () => {
+    const qList = sessionState.questions;
+    if (qList.length === 0) return;
+    const curIdx = qList.findIndex(q => q.id === sessionState.currentQuestionId);
+    if (curIdx > 0) {
+      const prevQ = qList[curIdx - 1];
+      sessionState.currentQuestionId = prevQ.id;
+      sessionState.questionStatus = 'idle';
+      persistState();
+
+      io.to('admin-room').emit('admin:state_change', {
+        sessionStatus: sessionState.sessionStatus,
+        currentQuestionId: prevQ.id,
+        questionStatus: 'idle',
+        tallies: computeQuestionTallies(prevQ.id),
+        stats: getAdminStats()
+      });
+    }
+  });
+
+  // Admin ends entire poll session
+  socket.on('admin:end_session', () => {
+    sessionState.sessionStatus = 'closed';
+    sessionState.questionStatus = 'closed';
+    persistState();
+
+    archiveCurrentSessionSnapshot();
+
+    io.emit('session:ended', {
+      sessionCode: sessionState.sessionCode
+    });
+
+    io.to('admin-room').emit('admin:state_change', {
+      sessionStatus: 'closed',
+      currentQuestionId: sessionState.currentQuestionId,
+      questionStatus: 'closed',
+      tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
       stats: getAdminStats()
     });
   });
@@ -798,113 +871,37 @@ io.on('connection', (socket) => {
     if (sessionState.responses[questionId]) {
       sessionState.responses[questionId] = {};
       persistState();
+
+      io.to('admin-room').emit('poll:update', {
+        questionId,
+        tallies: computeQuestionTallies(questionId),
+        stats: getAdminStats()
+      });
     }
-
-    io.emit('question:reset', { questionId });
-
-    io.to('admin-room').emit('admin:state_change', {
-      currentQuestionId: sessionState.currentQuestionId,
-      questionStatus: sessionState.questionStatus,
-      tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
-      stats: getAdminStats()
-    });
   });
 
-  // Question bank management: Add question
-  socket.on('admin:add_question', ({ text, textTa, options, optionsTa }) => {
-    if (!text || !options || options.length < 2) return;
-    const newQ = {
-      id: 'q_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-      text: text.trim(),
-      textTa: (textTa || '').trim(),
-      options: options.map(o => o.trim()).filter(Boolean),
-      optionsTa: Array.isArray(optionsTa) ? optionsTa.map(o => o.trim()) : []
-    };
-    sessionState.questions.push(newQ);
-    persistState();
-
-    io.to('admin-room').emit('admin:questions_updated', {
-      questions: sessionState.questions
-    });
-  });
-
-  // Question bank management: Update question
-  socket.on('admin:update_question', ({ id, text, textTa, options, optionsTa }) => {
-    const q = sessionState.questions.find(item => item.id === id);
-    if (!q) return;
-    q.text = text.trim();
-    if (textTa !== undefined) q.textTa = textTa.trim();
-    q.options = options.map(o => o.trim()).filter(Boolean);
-    if (Array.isArray(optionsTa)) q.optionsTa = optionsTa.map(o => o.trim());
-    persistState();
-
-    io.to('admin-room').emit('admin:questions_updated', {
-      questions: sessionState.questions
-    });
-  });
-
-  // Question bank management: Delete question
-  socket.on('admin:delete_question', ({ id }) => {
-    sessionState.questions = sessionState.questions.filter(item => item.id !== id);
-    delete sessionState.responses[id];
-    if (sessionState.currentQuestionId === id) {
-      sessionState.currentQuestionId = null;
-      sessionState.questionStatus = 'idle';
-      io.emit('question:closed', { questionId: id });
-    }
-    persistState();
-
-    io.to('admin-room').emit('admin:questions_updated', {
-      questions: sessionState.questions,
-      currentQuestionId: sessionState.currentQuestionId,
-      questionStatus: sessionState.questionStatus,
-      tallies: sessionState.currentQuestionId ? computeQuestionTallies(sessionState.currentQuestionId) : null,
-      stats: getAdminStats()
-    });
-  });
-
-  // Question bank management: Reorder questions
-  socket.on('admin:reorder_questions', ({ orderedIds }) => {
-    if (!Array.isArray(orderedIds)) return;
-    const idMap = new Map(sessionState.questions.map(q => [q.id, q]));
-    const reordered = [];
-    orderedIds.forEach(id => {
-      if (idMap.has(id)) reordered.push(idMap.get(id));
-    });
-    sessionState.questions.forEach(q => {
-      if (!reordered.find(r => r.id === q.id)) reordered.push(q);
-    });
-    sessionState.questions = reordered;
-    persistState();
-
-    io.to('admin-room').emit('admin:questions_updated', {
-      questions: sessionState.questions
-    });
-  });
-
-  // Admin updates settings (Dept title, Join URL override, Year groups)
-  socket.on('admin:update_settings', ({ departmentName, meetingTitle, customJoinUrl, yearGroups }) => {
-    if (departmentName) sessionState.departmentName = departmentName.trim();
-    if (meetingTitle) sessionState.meetingTitle = meetingTitle.trim();
+  // Admin updates settings
+  socket.on('admin:update_settings', ({ sessionTitle, sessionTitleTa, sessionCode, customJoinUrl }) => {
+    if (sessionTitle) sessionState.sessionTitle = sessionTitle.trim();
+    if (sessionTitleTa) sessionState.sessionTitleTa = sessionTitleTa.trim();
+    if (sessionCode) sessionState.sessionCode = sessionCode.trim().toUpperCase();
     if (customJoinUrl !== undefined) sessionState.customJoinUrl = customJoinUrl.trim();
-    if (Array.isArray(yearGroups) && yearGroups.length > 0) {
-      sessionState.yearGroups = yearGroups.map(y => y.trim()).filter(Boolean);
-    }
+    sessionState.meetingTitle = sessionState.sessionTitle;
     persistState();
 
     io.to('admin-room').emit('admin:settings_updated', {
-      departmentName: sessionState.departmentName,
-      meetingTitle: sessionState.meetingTitle,
+      sessionTitle: sessionState.sessionTitle,
+      sessionTitleTa: sessionState.sessionTitleTa,
+      sessionCode: sessionState.sessionCode,
       customJoinUrl: sessionState.customJoinUrl,
-      yearGroups: sessionState.yearGroups,
       joinUrl: getActiveJoinUrl()
     });
   });
 
   // Disconnect handling
   socket.on('disconnect', () => {
-    if (clientRole === 'parent') {
-      connectedVoters.delete(socket.id);
+    if (clientRole === 'participant') {
+      connectedParticipants.delete(socket.id);
       io.to('admin-room').emit('admin:stats', getAdminStats());
     }
   });
@@ -915,10 +912,10 @@ function startServer(port) {
   server.listen(port, '0.0.0.0', () => {
     const actualPort = server.address().port;
     console.log(`====================================================`);
-    console.log(`  PTM Live Polling Web App Started Successfully!   `);
+    console.log(`     Poll Point - Live Polling Web App Started     `);
     console.log(`====================================================`);
-    console.log(`  Local Admin URL:    http://localhost:${actualPort}/admin.html`);
-    console.log(`  Venue Wi-Fi Parent Join URL: http://${localIp}:${actualPort}`);
+    console.log(`  Admin Dashboard:    http://localhost:${actualPort}/admin.html`);
+    console.log(`  Participant URL:    http://${localIp}:${actualPort}`);
     console.log(`====================================================`);
   });
 }

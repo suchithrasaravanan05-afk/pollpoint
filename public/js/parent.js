@@ -1,41 +1,38 @@
-// Parent Mobile Client Logic
-// Department of Computer Science and Business Systems (CSBS)
-(function() {
+/**
+ * Poll Point - Participant Mobile Client Logic
+ * Modern, responsive, bilingual voting interface
+ */
+
+(function () {
+  'use strict';
+
   // Elements
-  const deptNameEl = document.getElementById('deptName');
-  const meetingTitleEl = document.getElementById('meetingTitle');
-  const connectionPill = document.getElementById('connectionStatus');
+  const sessionHeaderTitle = document.getElementById('sessionHeaderTitle');
+  const connectionStatus = document.getElementById('connectionStatus');
   const connectionText = document.getElementById('connectionText');
-  const yearBadgeBar = document.getElementById('yearBadgeBar');
-  const currentYearDisplay = document.getElementById('currentYearDisplay');
-  const changeYearBtn = document.getElementById('changeYearBtn');
-  const yearModal = document.getElementById('yearModal');
-  const yearOptionsGrid = document.getElementById('yearOptionsGrid');
   const waitingState = document.getElementById('waitingState');
   const waitingSubtitle = document.getElementById('waitingSubtitle');
   const questionState = document.getElementById('questionState');
   const qStatusBadge = document.getElementById('qStatusBadge');
   const qStatusText = document.getElementById('qStatusText');
+  const qIndexBadge = document.getElementById('qIndexBadge');
   const questionText = document.getElementById('questionText');
   const questionTextTa = document.getElementById('questionTextTa');
   const optionsContainer = document.getElementById('optionsContainer');
   const voteStatusBanner = document.getElementById('voteStatusBanner');
-  const voteBannerText = document.getElementById('voteBannerText');
 
-  // Client State
-  let voterToken = localStorage.getItem('ptm_voter_token');
+  // Voter State
+  let voterToken = localStorage.getItem('pollpoint_voter_token');
   if (!voterToken) {
     voterToken = 'v_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-    localStorage.setItem('ptm_voter_token', voterToken);
+    localStorage.setItem('pollpoint_voter_token', voterToken);
   }
 
-  let selectedYearGroup = localStorage.getItem('ptm_year_group') || null;
-  let availableYearGroups = ['1st Year', '2nd Year', '3rd Year', 'Final Year'];
-  let currentQuestion = null;
-  let currentQuestionStatus = 'idle';
-  let mySelectedOptionIndex = null;
+  let activeQuestion = null;
+  let activeQuestionStatus = 'idle';
+  let myVote = null;
 
-  // Initialize Socket
+  // Initialize Socket.io
   const socket = io({
     reconnection: true,
     reconnectionAttempts: Infinity,
@@ -43,284 +40,257 @@
     timeout: 10000
   });
 
-  // Setup Year Group Modal
-  function renderYearOptions() {
-    yearOptionsGrid.innerHTML = '';
-    availableYearGroups.forEach(yg => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = `year-choice-btn ${selectedYearGroup === yg ? 'selected' : ''}`;
-      btn.innerHTML = `
-        <span>${escapeHtml(yg)}</span>
-        <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      `;
-
-      btn.addEventListener('click', () => {
-        selectYearGroup(yg);
-      });
-
-      yearOptionsGrid.appendChild(btn);
-    });
-  }
-
-  function openYearModal() {
-    renderYearOptions();
-    yearModal.classList.remove('hidden');
-  }
-
-  function closeYearModal() {
-    yearModal.classList.add('hidden');
-  }
-
-  function selectYearGroup(yearGroup) {
-    const isChange = selectedYearGroup !== null && selectedYearGroup !== yearGroup;
-    selectedYearGroup = yearGroup;
-    localStorage.setItem('ptm_year_group', yearGroup);
-    currentYearDisplay.textContent = yearGroup;
-    updateYearBadge();
-    closeYearModal();
-
-    if (socket.connected) {
-      if (isChange) {
-        socket.emit('parent:change_year', { voterToken, yearGroup });
-      } else {
-        socket.emit('parent:join', { voterToken, yearGroup });
-      }
-    }
-  }
-
-  changeYearBtn.addEventListener('click', openYearModal);
-
-  let showYearToParents = true;
-
-  function updateYearBadge() {
-    if (selectedYearGroup) {
-      yearBadgeBar.style.display = 'flex';
-      const labelEl = yearBadgeBar.querySelector('.year-info span');
-      if (showYearToParents) {
-        if (labelEl) labelEl.textContent = 'Joined as:';
-        currentYearDisplay.textContent = selectedYearGroup;
-      } else {
-        if (labelEl) labelEl.textContent = 'Participation:';
-        currentYearDisplay.textContent = 'Anonymous';
-      }
-    }
-  }
-
-  // If no year group chosen yet, prompt user immediately
-  if (!selectedYearGroup) {
-    openYearModal();
-  } else {
-    updateYearBadge();
-    closeYearModal();
-  }
-
-  // Socket Lifecycle
+  // Socket Events
   socket.on('connect', () => {
-    connectionPill.style.background = '#ecfdf5';
-    connectionPill.style.color = '#059669';
+    connectionStatus.style.background = '#ecfdf5';
+    connectionStatus.style.color = '#059669';
     connectionText.textContent = 'Live';
 
-    if (selectedYearGroup) {
-      socket.emit('parent:join', { voterToken, yearGroup: selectedYearGroup });
-    }
+    // Register with server
+    socket.emit('participant:join', { voterToken });
   });
 
   socket.on('disconnect', () => {
-    connectionPill.style.background = '#fff1f2';
-    connectionPill.style.color = '#e11d48';
+    connectionStatus.style.background = '#fff1f2';
+    connectionStatus.style.color = '#e11d48';
     connectionText.textContent = 'Reconnecting...';
   });
 
-  // Receive Full Session State on Join
   socket.on('session:state', (data) => {
-    if (data.departmentName) deptNameEl.textContent = data.departmentName;
-    if (data.meetingTitle) meetingTitleEl.textContent = data.meetingTitle;
-    if (data.yearGroups && Array.isArray(data.yearGroups)) {
-      availableYearGroups = data.yearGroups;
-      renderYearOptions();
-    }
-    if (data.showYearToParents !== undefined) {
-      showYearToParents = data.showYearToParents;
-      updateYearBadge();
+    if (!data) return;
+    if (data.sessionTitleTa) {
+      sessionHeaderTitle.textContent = data.sessionTitleTa;
+    } else if (data.sessionTitle) {
+      sessionHeaderTitle.textContent = data.sessionTitle;
     }
 
-    currentQuestionStatus = data.questionStatus;
-    currentQuestion = data.currentQuestion;
-    mySelectedOptionIndex = data.myVote;
+    activeQuestionStatus = data.questionStatus;
+    myVote = data.myVote;
 
-    updateUI();
-  });
-
-  socket.on('session:settings', (data) => {
-    if (data.departmentName) deptNameEl.textContent = data.departmentName;
-    if (data.meetingTitle) meetingTitleEl.textContent = data.meetingTitle;
-    if (data.showYearToParents !== undefined) {
-      showYearToParents = data.showYearToParents;
-      updateYearBadge();
+    if (data.currentQuestion && (activeQuestionStatus === 'live' || activeQuestionStatus === 'paused')) {
+      showLiveQuestion(data.currentQuestion, myVote);
+    } else {
+      showWaitingScreen();
     }
   });
 
-  // New Meeting Reset
-  socket.on('session:reset_for_new_meeting', (data) => {
-    if (data.departmentName) deptNameEl.textContent = data.departmentName;
-    if (data.meetingTitle) meetingTitleEl.textContent = data.meetingTitle;
-    currentQuestion = null;
-    currentQuestionStatus = 'idle';
-    mySelectedOptionIndex = null;
-    updateUI();
+  socket.on('question:live', (q) => {
+    activeQuestionStatus = 'live';
+    // Check if we previously voted on this question
+    const storedVote = localStorage.getItem('pollpoint_vote_' + q.id);
+    const prevVote = storedVote !== null ? JSON.parse(storedVote) : null;
+    showLiveQuestion(q, prevVote);
   });
 
-  // Live Question Launched by HOD
-  socket.on('question:live', (data) => {
-    currentQuestion = data;
-    currentQuestionStatus = 'live';
-    mySelectedOptionIndex = null;
-    updateUI();
+  socket.on('question:paused', () => {
+    activeQuestionStatus = 'paused';
+    if (qStatusBadge && qStatusText) {
+      qStatusBadge.className = 'status-badge draft';
+      qStatusText.textContent = 'Poll Paused / தற்காலிகமாக நிறுத்தப்பட்டது';
+    }
   });
 
-  // Question Closed by HOD
   socket.on('question:closed', () => {
-    currentQuestionStatus = 'closed';
-    updateQuestionStatusUI();
-  });
-
-  // Question Reset
-  socket.on('question:reset', (data) => {
-    if (currentQuestion && currentQuestion.id === data.questionId) {
-      mySelectedOptionIndex = null;
-      updateUI();
+    activeQuestionStatus = 'closed';
+    if (qStatusBadge && qStatusText) {
+      qStatusBadge.className = 'status-badge closed';
+      qStatusText.textContent = 'Poll Closed / வாக்கெடுப்பு முடிந்தது';
     }
   });
 
-  // Vote Confirmed
-  socket.on('parent:vote_confirmed', (data) => {
-    mySelectedOptionIndex = data.optionIndex;
-    renderOptions();
-    showVoteConfirmation();
+  socket.on('session:reset', () => {
+    activeQuestion = null;
+    activeQuestionStatus = 'idle';
+    showWaitingScreen();
   });
 
-  // Update Main UI based on current question & status
-  function updateUI() {
-    if (!currentQuestion || currentQuestionStatus === 'idle') {
-      waitingState.classList.add('active');
-      questionState.classList.remove('active');
-      waitingSubtitle.textContent = 'Please wait for the department faculty to launch the next question on the projector.';
-      return;
+  socket.on('session:ended', () => {
+    activeQuestion = null;
+    activeQuestionStatus = 'closed';
+    showWaitingScreen('Thank you for participating! This live poll session has ended. / நேரலை வாக்கெடுப்பில் பங்கேற்றதற்கு நன்றி!');
+  });
+
+  socket.on('participant:vote_confirmed', (data) => {
+    if (voteStatusBanner) {
+      voteStatusBanner.classList.add('show');
     }
+  });
+
+  socket.on('participant:vote_error', (data) => {
+    alert(data.message || 'Error recording vote');
+  });
+
+  // Render Waiting Screen
+  function showWaitingScreen(customMessage) {
+    waitingState.classList.add('active');
+    questionState.classList.remove('active');
+    if (customMessage && waitingSubtitle) {
+      waitingSubtitle.textContent = customMessage;
+    }
+  }
+
+  // Render Live Question
+  function showLiveQuestion(q, currentVote) {
+    activeQuestion = q;
+    myVote = currentVote;
 
     waitingState.classList.remove('active');
     questionState.classList.add('active');
-    questionText.textContent = currentQuestion.text;
 
-    if (currentQuestion.textTa && currentQuestion.textTa.trim()) {
-      questionTextTa.textContent = currentQuestion.textTa;
+    // Status Badge
+    if (qStatusBadge && qStatusText) {
+      qStatusBadge.className = 'status-badge live';
+      qStatusText.textContent = 'Live Poll • நேரலை';
+    }
+
+    // Prompts
+    questionText.textContent = q.text || '';
+    if (q.textTa && q.textTa.trim()) {
+      questionTextTa.textContent = q.textTa;
       questionTextTa.style.display = 'block';
     } else {
       questionTextTa.style.display = 'none';
     }
 
-    updateQuestionStatusUI();
-    renderOptions();
+    // Render Options Container
+    renderOptions(q, currentVote);
 
-    if (mySelectedOptionIndex !== null) {
-      showVoteConfirmation();
+    // Confirmation Banner
+    if (currentVote !== null && currentVote !== undefined) {
+      voteStatusBanner.classList.add('show');
     } else {
-      voteStatusBanner.className = 'vote-status-banner';
+      voteStatusBanner.classList.remove('show');
     }
   }
 
-  function updateQuestionStatusUI() {
-    if (currentQuestionStatus === 'live') {
-      qStatusBadge.className = 'status-badge live';
-      qStatusText.textContent = 'Live Poll';
-      voteBannerText.textContent = 'Your vote is recorded! Tap another option to change.';
-    } else if (currentQuestionStatus === 'closed') {
-      qStatusBadge.className = 'status-badge closed';
-      qStatusText.textContent = 'Poll Closed';
-      if (mySelectedOptionIndex !== null) {
-        voteStatusBanner.className = 'vote-status-banner closed';
-        voteBannerText.textContent = 'Poll has ended. Your answer was recorded.';
-      } else {
-        voteStatusBanner.className = 'vote-status-banner closed';
-        voteBannerText.textContent = 'Poll has ended by the department faculty.';
-      }
-    }
-  }
-
-  const optionLetters = ['A', 'B', 'C', 'D'];
-
-  function renderOptions() {
+  function renderOptions(q, currentVote) {
     optionsContainer.innerHTML = '';
-    if (!currentQuestion || !currentQuestion.options) return;
+    const type = q.type || 'multiple_choice';
 
-    const isClosed = currentQuestionStatus === 'closed';
-
-    currentQuestion.options.forEach((optText, index) => {
-      const optTa = (currentQuestion.optionsTa && currentQuestion.optionsTa[index]) || '';
-      const isSelected = mySelectedOptionIndex === index;
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = `option-btn ${isSelected ? 'selected' : ''}`;
-      btn.disabled = isClosed;
-
-      const letter = optionLetters[index] || (index + 1);
-
-      btn.innerHTML = `
-        <div class="option-letter">${letter}</div>
-        <div class="option-text-group">
-          <div class="option-text-label-en">${escapeHtml(optText)}</div>
-          ${optTa ? `<div class="option-text-label-ta">${escapeHtml(optTa)}</div>` : ''}
-        </div>
-        <svg class="option-check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
+    if (type === 'short_answer') {
+      const box = document.createElement('div');
+      box.className = 'short-answer-box';
+      box.innerHTML = `
+        <textarea class="short-answer-textarea" id="shortAnswerInput" placeholder="Type your response here / உங்கள் பதிலை இங்கே உள்ளிடுங்கள்...">${typeof currentVote === 'string' ? escapeHtml(currentVote) : ''}</textarea>
+        <button type="button" class="btn-submit-answer" id="btnSubmitShortAnswer">
+          <span>Submit Response</span>
+          <span class="sub-ta">பதிலை சமர்ப்பிக்கவும்</span>
+        </button>
       `;
 
-      btn.addEventListener('click', () => {
-        if (isClosed) return;
-        submitVote(index);
+      box.querySelector('#btnSubmitShortAnswer').addEventListener('click', () => {
+        const text = box.querySelector('#shortAnswerInput').value.trim();
+        if (!text) {
+          alert('Please enter your response / உங்கள் பதிலை உள்ளிடவும்');
+          return;
+        }
+        submitVote(q.id, null, text);
       });
 
+      optionsContainer.appendChild(box);
+      return;
+    }
+
+    if (type === 'yes_no') {
+      const grid = document.createElement('div');
+      grid.className = 'yes-no-grid';
+
+      const yesBtn = createOptionButton(0, 'Yes', 'ஆம்', currentVote === 0, 'btn-yes');
+      const noBtn = createOptionButton(1, 'No', 'இல்லை', currentVote === 1, 'btn-no');
+
+      grid.appendChild(yesBtn);
+      grid.appendChild(noBtn);
+      optionsContainer.appendChild(grid);
+      return;
+    }
+
+    if (type === 'rating') {
+      const list = document.createElement('div');
+      list.className = 'rating-grid';
+
+      const ratingLabelsEn = ['1 Star - Poor', '2 Stars - Fair', '3 Stars - Good', '4 Stars - Very Good', '5 Stars - Outstanding'];
+      const ratingLabelsTa = ['1 - குறைவு', '2 - சுமாரானது', '3 - நல்லது', '4 - மிக நன்று', '5 - மிகச் சிறப்பானது'];
+
+      for (let i = 0; i < 5; i++) {
+        const btn = createOptionButton(i, ratingLabelsEn[i], ratingLabelsTa[i], currentVote === i, '');
+        list.appendChild(btn);
+      }
+
+      optionsContainer.appendChild(list);
+      return;
+    }
+
+    // Default: Multiple Choice
+    const options = q.options || [];
+    const optionsTa = q.optionsTa || [];
+
+    options.forEach((opt, idx) => {
+      const optTa = optionsTa[idx] || '';
+      const isSelected = currentVote === idx;
+      const btn = createOptionButton(idx, opt, optTa, isSelected, '');
       optionsContainer.appendChild(btn);
     });
   }
 
-  function submitVote(optionIndex) {
-    if (!selectedYearGroup) {
-      openYearModal();
-      return;
-    }
-    if (currentQuestionStatus !== 'live' || !currentQuestion) return;
+  function createOptionButton(index, textEn, textTa, isSelected, extraClass) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `option-btn ${extraClass} ${isSelected ? 'selected' : ''}`;
+    const letter = String.fromCharCode(65 + index);
 
-    mySelectedOptionIndex = optionIndex;
-    renderOptions();
-    showVoteConfirmation();
+    btn.innerHTML = `
+      <span class="opt-badge">${letter}</span>
+      <div class="opt-labels">
+        <span class="opt-text-en">${escapeHtml(textEn)}</span>
+        ${textTa ? `<span class="opt-text-ta ta-text">${escapeHtml(textTa)}</span>` : ''}
+      </div>
+    `;
 
-    socket.emit('parent:vote', {
-      voterToken,
-      questionId: currentQuestion.id,
-      optionIndex,
-      yearGroup: selectedYearGroup
+    btn.addEventListener('click', () => {
+      if (activeQuestionStatus !== 'live') {
+        alert('Voting is currently not live for this question / இந்த கேள்விக்கான வாக்கெடுப்பு இப்போது நேரலையில் இல்லை');
+        return;
+      }
+      submitVote(activeQuestion.id, index, null);
     });
+
+    return btn;
   }
 
-  function showVoteConfirmation() {
-    if (currentQuestionStatus === 'live') {
-      voteStatusBanner.className = 'vote-status-banner recorded';
-      voteBannerText.textContent = 'Response recorded! You can tap another option to change.';
-    } else {
-      voteStatusBanner.className = 'vote-status-banner closed';
-      voteBannerText.textContent = 'Poll closed. Your response was successfully logged.';
+  function submitVote(questionId, optionIndex, textAnswer) {
+    myVote = optionIndex !== null ? optionIndex : textAnswer;
+
+    // Update UI highlights
+    const allBtns = optionsContainer.querySelectorAll('.option-btn');
+    allBtns.forEach((b, idx) => {
+      b.classList.toggle('selected', idx === optionIndex);
+    });
+
+    // Save vote locally to prevent duplicate votes
+    localStorage.setItem('pollpoint_vote_' + questionId, JSON.stringify(myVote));
+
+    // Emit to server
+    socket.emit('participant:vote', {
+      voterToken,
+      questionId,
+      optionIndex,
+      textAnswer
+    });
+
+    // Show confirmation banner
+    if (voteStatusBanner) {
+      voteStatusBanner.classList.add('show');
     }
   }
 
   function escapeHtml(str) {
     if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
+
 })();

@@ -3,487 +3,518 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSBS Meeting Setup & Live Polling Dashboard</title>
+  <title>Poll Point • Modern Bilingual Live Polling Dashboard</title>
+  
+  <!-- Preconnect Google Fonts for English & Tamil -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/admin.css">
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
-  <div class="admin-shell">
-    <!-- Top Shared Navigation Bar -->
-    <header class="top-nav">
-      <div class="brand-section">
-        <div class="dept-badge" id="navDeptBadge">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
-          <span id="navDeptText">Dept. of Computer Science & Business Systems</span>
-        </div>
-        <h1 class="admin-title" id="navMeetingTitle">Set Up Meeting</h1>
+  <!-- Top Navigation Bar -->
+  <header class="top-nav">
+    <div class="brand-wrapper">
+      <div class="logo-badge">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 20V10M12 20V4M6 20v-6"></path>
+        </svg>
       </div>
-
-      <div class="nav-stats-bar">
-        <!-- Live view only elements -->
-        <div class="stat-pill" id="liveConnectedPill" style="display: none;">
-          <span class="dot"></span>
-          <span id="navConnectedCount">0</span>
-          <span style="color: var(--text-muted);">Parents Connected</span>
-        </div>
-
-        <div class="nav-actions">
-          <!-- Meeting Archive & History Button (Always Available) -->
-          <button class="btn btn-secondary" id="btnMeetingArchivesNav" title="View past meeting records, question banks & results">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
-            <span>Meeting Archives</span>
-          </button>
-
-          <!-- New Meeting Button (Always Available) -->
-          <button class="btn btn-accent" id="btnNewMeetingNav" title="Start a fresh meeting and archive previous responses">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>New Meeting</span>
-          </button>
-
-          <!-- Setup View Top Buttons -->
-          <div id="setupNavActions" style="display: flex; gap: 8px;">
-            <button class="btn btn-secondary" id="btnPreviewToggleMobile">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-              <span>Toggle Preview</span>
-            </button>
-            <button class="btn btn-primary" id="btnGoToLiveIfStarted" style="display: none;">
-              <span>Go to Live Stage →</span>
-            </button>
-          </div>
-
-          <!-- Live Dashboard Top Buttons -->
-          <div id="liveNavActions" style="display: none; gap: 8px;">
-            <button class="btn btn-secondary" id="btnEditQuestionsNav" title="Alter or add questions">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              <span>Alter Questions</span>
-            </button>
-
-            <button class="btn btn-secondary" id="btnOpenQrModal" title="Project QR Code on screen">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              <span>Project QR</span>
-            </button>
-
-            <button class="btn btn-secondary" id="btnExportCsv" title="Export bilingual CSV report">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span>Export CSV</span>
-            </button>
-
-            <button class="btn btn-secondary" id="btnSummaryReport" title="View printable summary report">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              <span>Summary</span>
-            </button>
-
-            <button class="btn btn-secondary btn-icon-only" id="btnSettings" title="Session Settings">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- ===================================================================
-         VIEW 1: QUESTION BUILDER ("SET UP MEETING")
-         =================================================================== -->
-    <section class="view-container active" id="setupView">
-      <div class="setup-layout">
-        <!-- Left Main Column: Setup & Question Cards -->
-        <div class="setup-main-col">
-          <!-- Setup Header Card -->
-          <div class="setup-header-card">
-            <div class="setup-title-row">
-              <div class="setup-headline">
-                <span>Meeting Questions & Bilingual Setup</span>
-                <span class="setup-step-pill">Stage 1 of 2</span>
-              </div>
-              <div class="autosave-status" id="autoSaveIndicator">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Draft Auto-Saved</span>
-              </div>
-            </div>
-
-            <!-- Setup Meta Grid (Dept & Meeting Title) -->
-            <div class="setup-meta-grid">
-              <div class="form-group">
-                <label class="form-label" for="builderDeptNameInput">Department Name</label>
-                <input type="text" class="form-input" id="builderDeptNameInput" placeholder="e.g. Department of Computer Science and Business Systems">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="builderMeetingTitleInput">Meeting Title</label>
-                <input type="text" class="form-input" id="builderMeetingTitleInput" placeholder="e.g. Annual Parent-Teacher Meeting 2026">
-              </div>
-            </div>
-
-            <!-- Toggle: Show Year Group to Parents -->
-            <div class="setting-toggle-card">
-              <div class="toggle-info">
-                <span class="toggle-title">Show Selected Year-Group to Parents</span>
-                <span class="toggle-desc">
-                  When enabled, parents see "Joined as: 2nd Year" on their phone. When disabled, they participate anonymously while votes are still categorized by year for the HOD.
-                </span>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="toggleShowYearToParents" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Dynamic Questions Builder List -->
-          <div class="builder-questions-list" id="builderQuestionsList">
-            <!-- Rendered Question Cards with English + Tamil fields -->
-          </div>
-
-          <!-- Add Question Big Action Block -->
-          <div class="btn-add-question-block" id="btnAddQuestionCard">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>+ Add Another Question (English & Tamil)</span>
-          </div>
-        </div>
-
-        <!-- Right Column: Live Mobile Device Preview Pane -->
-        <aside class="preview-col" id="previewColumn">
-          <div class="preview-card">
-            <div class="preview-card-header">
-              <span style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">Parent View Preview</span>
-              <span class="preview-badge">Live Bilingual Preview</span>
-            </div>
-
-            <!-- Phone Frame -->
-            <div class="phone-mockup-frame">
-              <div class="phone-speaker-bar"></div>
-              <div class="phone-screen-content" id="previewPhoneContent">
-                <!-- Dynamically updated as HOD edits questions -->
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
-
-      <!-- Sticky Bottom Finish Bar -->
-      <footer class="setup-bottom-bar">
-        <div class="setup-summary-text">
-          Configured <span class="setup-summary-count" id="builderValidCount">0 questions</span> ready for meeting
-        </div>
-
-        <button class="btn btn-primary btn-lg" id="btnFinishAndStartMeeting" disabled>
-          <span>Finish & Start Meeting →</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </button>
-      </footer>
-    </section>
-
-    <!-- ===================================================================
-         VIEW 2: LIVE POLLING DASHBOARD (PROJECTOR VIEW)
-         =================================================================== -->
-    <section class="view-container" id="liveDashboardView">
-      <main class="dashboard-grid">
-        <!-- Center Stage: Presentation & Live Polling -->
-        <div class="center-stage">
-          <!-- Question Banner Card -->
-          <div class="projector-card">
-            <div class="question-meta-row">
-              <span class="q-index-tag" id="displayQuestionIndex">Question 1 of 5</span>
-              <div class="q-status-badge idle" id="displayStatusBadge">
-                <span id="displayStatusText">Ready to Launch</span>
-              </div>
-            </div>
-
-            <!-- English Question Text -->
-            <div class="projector-question-text" id="displayQuestionText">
-              Select or launch a question to begin polling the audience...
-            </div>
-
-            <!-- Tamil Question Text -->
-            <div class="projector-question-text-ta" id="displayQuestionTextTa" style="display: none;">
-              <!-- Tamil translation here -->
-            </div>
-          </div>
-
-          <!-- Controls Bar -->
-          <div class="hod-controls-bar">
-            <div class="control-group">
-              <button class="btn btn-secondary" id="btnPrevQuestion" title="Previous Question">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                <span>Previous</span>
-              </button>
-              <button class="btn btn-secondary" id="btnNextQuestion" title="Next Question">
-                <span>Next</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </button>
-            </div>
-
-            <div class="control-group">
-              <button class="btn btn-success" id="btnLaunchPoll">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                <span>Launch Poll to Parents</span>
-              </button>
-
-              <button class="btn btn-destructive" id="btnClosePoll" style="display: none;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="6" width="12" height="12"></rect></svg>
-                <span>Close Poll & Lock Results</span>
-              </button>
-
-              <button class="btn btn-secondary" id="btnResetPoll" title="Reset responses for this question">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v6h6"></path><path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6"></path><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg>
-                <span>Reset Question</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Year Group Segregation Filter Pills -->
-          <div class="filter-section">
-            <span class="filter-label">Filter by Year:</span>
-            <div class="filter-pills-container" id="filterPillsContainer">
-              <!-- Dynamically populated with 'All Years', '1st Year', etc. -->
-            </div>
-          </div>
-
-          <!-- Live Updating Bar Chart -->
-          <div class="chart-container">
-            <div class="chart-header">
-              <h2 class="chart-title">Live Response Breakdown (English & தமிழ்)</h2>
-              <div class="vote-summary-stat" id="chartVoteSummary">
-                0 Votes Cast (0% participation)
-              </div>
-            </div>
-
-            <div class="bars-list" id="chartBarsList">
-              <!-- Animated Bar Rows with English + Tamil titles -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Column: Sidebar & Venue Operations -->
-        <aside class="right-sidebar">
-          <!-- QR Code Card -->
-          <div class="side-card">
-            <div class="side-card-title">
-              <span>Scan to Join</span>
-              <span style="font-size: 0.76rem; color: #059669; font-weight: 800; background: #ecfdf5; padding: 2px 8px; border-radius: 6px;">Venue WiFi</span>
-            </div>
-
-            <div class="qr-container">
-              <img id="sideQrImg" class="qr-image" src="" alt="QR Code to Join">
-              <div class="join-url-pill" id="sideJoinUrl">Loading...</div>
-            </div>
-
-            <button class="btn btn-primary" id="btnBigQr" style="width: 100%;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-              <span>Project Fullscreen QR</span>
-            </button>
-          </div>
-
-          <!-- Attendance Breakdown -->
-          <div class="side-card">
-            <div class="side-card-title">
-              <span>Attendance by Year</span>
-              <span style="font-size: 0.78rem; color: var(--text-primary); font-weight: 800;" id="audienceTotalPill">0 Total</span>
-            </div>
-            <div class="audience-list" id="audienceBreakdownList">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-          <!-- Question Navigator -->
-          <div class="side-card" style="flex: 1;">
-            <div class="side-card-title">
-              <span>Meeting Agenda</span>
-              <span style="font-size: 0.78rem; color: var(--text-muted);" id="qCountPill">0 Questions</span>
-            </div>
-            <div class="q-nav-list" id="questionNavList">
-              <!-- List of questions for fast switching -->
-            </div>
-          </div>
-        </aside>
-      </main>
-    </section>
-  </div>
-
-  <!-- ===================================================================
-       MODAL 1: MEETING ARCHIVES & HISTORY
-       =================================================================== -->
-  <div class="modal-overlay hidden" id="historyModal">
-    <div class="modal-content" style="max-width: 820px;">
-      <div class="modal-header">
-        <div>
-          <h3 class="modal-title">Meeting Archives & History</h3>
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
-            Permanent records of all completed CSBS meetings, question banks, and responses.
-          </p>
-        </div>
-        <button class="modal-close-btn" id="btnCloseHistory">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div id="historyLoadingState" style="text-align: center; padding: 24px; color: var(--text-muted);">
-          Loading archived meetings...
-        </div>
-        <div class="history-meetings-list" id="historyMeetingsList">
-          <!-- Dynamically populated past meetings -->
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btnManualArchiveCurrent">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-          <span>Archive Current Session Snapshot</span>
-        </button>
-        <button class="btn btn-secondary" id="btnCloseHistoryFooter">Close</button>
+      <div class="brand-text">
+        <h1>Poll Point</h1>
+        <span class="ta-subtitle">நேரலை வாக்கெடுப்பு தளம்</span>
       </div>
     </div>
-  </div>
 
-  <!-- ===================================================================
-       MODAL 2: START A NEW MEETING
-       =================================================================== -->
-  <div class="modal-overlay hidden" id="newMeetingModal">
-    <div class="modal-content" style="max-width: 540px;">
-      <div class="modal-header">
-        <div>
-          <h3 class="modal-title">Start a New Meeting Session</h3>
-          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
-            Current votes and responses will be safely archived into history.
-          </p>
-        </div>
-        <button class="modal-close-btn" id="btnCloseNewMeeting">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab-btn active" data-view="overview">
+        <span>Overview</span>
+        <span class="tab-ta">கண்ணோட்டம்</span>
+      </button>
+      <button class="nav-tab-btn" data-view="builder">
+        <span>Question Builder</span>
+        <span class="tab-ta">கேள்வி உருவாக்குநர்</span>
+      </button>
+      <button class="nav-tab-btn" data-view="library">
+        <span>Question Library</span>
+        <span class="tab-ta">கேள்வி நூலகம்</span>
+      </button>
+      <button class="nav-tab-btn" data-view="live">
+        <span>Live Results</span>
+        <span class="tab-ta">நேரலை முடிவுகள்</span>
+      </button>
+      <button class="nav-tab-btn" data-view="qr">
+        <span>QR Join</span>
+        <span class="tab-ta">QR குறியீடு</span>
+      </button>
+      <button class="nav-tab-btn" data-view="sessions">
+        <span>Poll Sessions</span>
+        <span class="tab-ta">அமர்வுகள்</span>
+      </button>
+    </nav>
 
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label" for="newMeetingTitleInput">New Meeting Title</label>
-          <input type="text" class="form-input" id="newMeetingTitleInput" placeholder="e.g. CSBS Odd Semester PTM 2026">
-        </div>
+    <!-- Top Right Actions -->
+    <div class="nav-actions">
+      <button class="btn-ghost-icon" id="openSettingsBtn" title="Poll Settings / அமைப்புகள்">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
 
-        <div class="form-group">
-          <label class="form-label">Question Bank Options</label>
-          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; color: var(--text-main);">
-              <input type="radio" name="newMeetingQChoice" value="clone" checked>
-              <span>Keep & alter current questions (modify as needed)</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; color: var(--text-main);">
-              <input type="radio" name="newMeetingQChoice" value="defaults">
-              <span>Load fresh CSBS bilingual default questions</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; color: var(--text-main);">
-              <input type="radio" name="newMeetingQChoice" value="blank">
-              <span>Start with a blank question list</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btnCancelNewMeeting">Cancel</button>
-        <button class="btn btn-primary" id="btnConfirmNewMeeting">Archive & Start Meeting Setup</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Fullscreen QR Code Projector Modal -->
-  <div class="modal-overlay hidden" id="qrModal">
-    <div class="modal-content qr-projector-modal">
-      <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">
-        Scan QR Code to Join
-      </h2>
-      <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 12px;">
-        Connect to venue Wi-Fi and point your camera to participate
-      </p>
-
-      <img id="modalQrImg" class="qr-projector-img" src="" alt="Projector QR Code">
-
-      <div class="qr-projector-url" id="modalJoinUrl">http://...</div>
-      <p style="color: var(--text-dim); font-size: 0.92rem; margin-top: 8px;">
-        Or type this URL directly into your mobile browser
-      </p>
-
-      <button class="btn btn-secondary" id="btnCloseQrModal" style="margin-top: 24px;">
-        Close QR Display
+      <button class="btn-create-session" id="createSessionBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Create Poll Session</span>
       </button>
     </div>
-  </div>
+  </header>
 
-  <!-- Summary / Printable Report Modal -->
-  <div class="modal-overlay hidden" id="summaryModal">
-    <div class="modal-content" style="max-width: 880px;">
-      <div class="modal-header">
-        <h3 class="modal-title">Department Meeting Polling Report</h3>
-        <button class="modal-close-btn" id="btnCloseSummary">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <div class="modal-body" id="summaryReportContent">
-        <!-- Dynamically rendered report -->
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btnPrintReport">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-          <span>Print / Save PDF</span>
-        </button>
-        <button class="btn btn-primary" id="btnDownloadCsvFromSummary">Download Bilingual CSV</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal-overlay hidden" id="settingsModal">
-    <div class="modal-content" style="max-width: 540px;">
-      <div class="modal-header">
-        <h3 class="modal-title">Department & Session Settings</h3>
-        <button class="modal-close-btn" id="btnCloseSettings">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label" for="settingDeptName">Department Name</label>
-          <input type="text" class="form-input" id="settingDeptName">
+  <!-- Application Body Container -->
+  <main class="app-body">
+    
+    <!-- ======================================================================
+         1. Overview View Panel
+         ====================================================================== -->
+    <section class="view-panel active" id="view-overview">
+      
+      <!-- Welcome Hero Banner -->
+      <div class="welcome-hero">
+        <div class="welcome-hero-content">
+          <h2>
+            <span>Create and run engaging live polls</span>
+            <span style="font-size: 1.4rem;">✨</span>
+          </h2>
+          <span class="ta-hero-sub">நேரலை வாக்கெடுப்புகளை எளிதாக உருவாக்கி நடத்துங்கள்</span>
+          <p>
+            Engage your audience in real time with bilingual English & தமிழ் questions, live charts, and instant QR participation.
+          </p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="settingMeetingTitle">Meeting Title</label>
-          <input type="text" class="form-input" id="settingMeetingTitle">
+        <div class="welcome-hero-badge">
+          <div class="badge-label">Active Session Code</div>
+          <div class="session-code-display" id="dashSessionCode">POLL-2026</div>
+          <div style="font-size: 0.72rem; color: var(--lavender-200);">அமர்வு குறியீடு</div>
+        </div>
+      </div>
+
+      <!-- Active Session Status Card -->
+      <div class="active-session-card">
+        <div class="session-primary-info">
+          <div class="session-header-row">
+            <span class="status-badge draft" id="dashStatusBadge">
+              <span class="pulse-dot"></span>
+              <span id="dashStatusText">Draft Mode</span>
+            </span>
+            <span class="session-code-tag" id="dashSessionCodeTag">POLL-2026</span>
+          </div>
+
+          <h2 class="session-title-en" id="dashSessionTitle">Live Interactive Poll</h2>
+          <div class="session-title-ta ta-text" id="dashSessionTitleTa">நேரலை ஊடாடும் வாக்கெடுப்பு</div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+            <a href="/api/export/csv" class="btn-action" style="flex-direction: row; gap: 0.4rem; padding: 0.4rem 0.85rem;" title="Download Results CSV">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Export CSV (இருமொழி)</span>
+            </a>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="settingJoinUrl">Custom Join URL Override (Optional)</label>
-          <input type="text" class="form-input" id="settingJoinUrl" placeholder="e.g. https://ptm.college.edu">
-          <span style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">
-            Leave blank to use auto-detected local Wi-Fi IP.
-          </span>
+        <!-- Metric Badges -->
+        <div class="session-metrics-grid">
+          <div class="metric-box">
+            <div class="metric-value" id="dashParticipantCount">0</div>
+            <span class="metric-label">Participants</span>
+            <span class="metric-label-ta">பங்கேற்பாளர்கள்</span>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value" id="dashTotalVotes">0</div>
+            <span class="metric-label">Total Responses</span>
+            <span class="metric-label-ta">மொத்த பதில்கள்</span>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value" id="dashQuestionsCount">4</div>
+            <span class="metric-label">Questions</span>
+            <span class="metric-label-ta">கேள்விகள்</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Bar -->
+      <div class="quick-actions-bar">
+        <div class="quick-actions-title">
+          <h3>Quick Poll Actions</h3>
+          <span>விரைவு நடவடிக்கைகள்</span>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="settingYearGroups">Year Groups (comma-separated)</label>
-          <input type="text" class="form-input" id="settingYearGroups">
-        </div>
-
-        <div style="border-top: 1px solid var(--border); padding-top: 14px; margin-top: 6px;">
-          <button class="btn btn-secondary" id="btnSwitchToSetupFromSettings" style="width: 100%;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            <span>Return to Question Builder Screen</span>
+        <div class="quick-action-buttons">
+          <button class="btn-action" id="dashBtnAddQ">
+            <span>+ Add Question</span>
+            <span class="btn-sub-ta">+ கேள்வி சேர்</span>
+          </button>
+          <button class="btn-action" id="dashBtnLibrary">
+            <span>Import from Library</span>
+            <span class="btn-sub-ta">நூலகத்திலிருந்து இறக்குமதி</span>
+          </button>
+          <button class="btn-action" id="dashBtnQr">
+            <span>Generate QR Code</span>
+            <span class="btn-sub-ta">QR குறியீடு காட்டு</span>
+          </button>
+          <button class="btn-action btn-primary-launch" id="dashBtnLaunch">
+            <span>Launch Poll Live</span>
+            <span class="btn-sub-ta">வாக்கெடுப்பை தொடங்கு</span>
           </button>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btnCancelSettings">Cancel</button>
-        <button class="btn btn-primary" id="btnSaveSettings">Save Settings</button>
+    </section>
+
+    <!-- ======================================================================
+         2. Question Builder Panel
+         ====================================================================== -->
+    <section class="view-panel" id="view-builder">
+      
+      <div class="builder-header">
+        <div class="builder-header-title">
+          <h2>
+            <span>Bilingual Question Builder</span>
+            <span style="font-size: 1.1rem; color: var(--text-light); font-weight: 500;">(English & தமிழ்)</span>
+          </h2>
+          <span class="ta-sub">கேள்விகளை உருவாக்குங்கள், வரிசைப்படுத்துங்கள் மற்றும் மாற்றியமையுங்கள்</span>
+        </div>
+
+        <div class="builder-header-actions">
+          <button class="btn-action" id="btnSaveAllQuestions">
+            <span>Save Changes</span>
+            <span class="btn-sub-ta">சேமிக்கவும்</span>
+          </button>
+          <button class="btn-add-question" id="btnAddNewQuestion">
+            <span>+ Add New Bilingual Question</span>
+            <span class="btn-sub-ta">+ புதிய இருமொழி கேள்வி</span>
+          </button>
+        </div>
       </div>
+
+      <!-- Question List Container -->
+      <div class="questions-list" id="builderQuestionsList">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </section>
+
+    <!-- ======================================================================
+         3. Question Library Panel
+         ====================================================================== -->
+    <section class="view-panel" id="view-library">
+      
+      <div class="library-search-bar">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" class="search-input" id="librarySearchInput" placeholder="Search templates in English or தமிழ் (e.g. satisfaction, feedback, கருத்து)...">
+        </div>
+
+        <div class="category-filter-pills" id="libraryCategoryPills">
+          <!-- Populated from API -->
+        </div>
+      </div>
+
+      <div class="library-templates-grid" id="libraryTemplatesGrid">
+        <!-- Template cards rendered dynamically -->
+      </div>
+
+    </section>
+
+    <!-- ======================================================================
+         4. Live Results & Projector Presentation Panel
+         ====================================================================== -->
+    <section class="view-panel" id="view-live">
+      
+      <div class="live-poll-stage" id="liveStage">
+        
+        <!-- Stage Top Bar -->
+        <div class="stage-top-bar">
+          <div class="stage-q-badge">
+            <span class="q-number-badge" id="stageQIndexBadge">Question 1 of 4</span>
+            <span class="status-badge live" id="stageStatusBadge">
+              <span class="pulse-dot"></span>
+              <span id="stageStatusText">Ready</span>
+            </span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--violet-900);">
+              <span id="stageVotesCount">0</span> Responses
+              <span style="color: var(--text-light); font-weight: 500;">/</span>
+              <span id="stageParticipantsCount">0</span> Joined
+            </div>
+            <button class="btn-action" id="stageBtnReset" title="Reset Votes / வாக்குகளை மீட்டமை">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Stage Question Prompt -->
+        <div class="stage-prompt-box">
+          <h2 class="stage-question-en" id="stageQuestionEn">How satisfied are you with this event?</h2>
+          <div class="stage-question-ta ta-text" id="stageQuestionTa">இந்த நிகழ்வில் நீங்கள் எவ்வளவு திருப்தியாக உள்ளீர்கள்?</div>
+        </div>
+
+        <!-- Live Dynamic Results -->
+        <div class="live-results-grid" id="stageResultsGrid">
+          <!-- Real-time option bars rendered dynamically -->
+        </div>
+
+        <!-- Floating Controls Dock -->
+        <div class="stage-controls-dock">
+          <button class="btn-dock-ctrl" id="ctrlPrevBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>Previous</span>
+          </button>
+
+          <button class="btn-dock-ctrl primary-launch" id="ctrlLaunchBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span id="ctrlLaunchLabel">Launch Poll</span>
+          </button>
+
+          <button class="btn-dock-ctrl pause-btn" id="ctrlPauseBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+            <span>Pause Poll</span>
+          </button>
+
+          <button class="btn-dock-ctrl end-btn" id="ctrlEndBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            <span>End Session</span>
+          </button>
+
+          <button class="btn-dock-ctrl" id="ctrlNextBtn">
+            <span>Next</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ======================================================================
+         5. QR Join Panel
+         ====================================================================== -->
+    <section class="view-panel" id="view-qr">
+      
+      <div class="qr-join-card">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--violet-950); margin-bottom: 0.25rem;">
+          Scan to Join Live Poll
+        </h2>
+        <div class="ta-text" style="font-size: 1.15rem; color: var(--purple-600); font-weight: 600;">
+          நேரலை வாக்கெடுப்பில் சேர ஸ்கேன் செய்யுங்கள்
+        </div>
+
+        <img src="" alt="Live Poll QR Code" class="qr-code-img" id="joinQrCodeImg">
+
+        <div>
+          <div class="join-url-pill" id="joinUrlDisplay">
+            <span id="joinUrlText">http://localhost:3000</span>
+            <button class="btn-copy-url" id="btnCopyJoinUrl">Copy Link</button>
+          </div>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 420px; margin: 0 auto;">
+          Participants can point any smartphone camera at this QR code to vote in real-time. Zero login or app download required!
+        </p>
+
+        <div style="margin-top: 1.5rem;">
+          <button class="btn-action" id="btnFullscreenQr" style="padding: 0.75rem 1.5rem; flex-direction: row; gap: 0.5rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <polyline points="9 21 3 21 3 15"></polyline>
+              <line x1="21" y1="3" x2="14" y2="10"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+            <span>Project Fullscreen QR (அரங்கக் காட்சி)</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================
+         6. Poll Sessions History Panel
+         ====================================================================== -->
+    <section class="view-panel" id="view-sessions">
+      
+      <div class="builder-header">
+        <div class="builder-header-title">
+          <h2>Poll Sessions History</h2>
+          <span class="ta-sub">முந்தைய வாக்கெடுப்பு அமர்வுகள் மற்றும் காப்பகங்கள்</span>
+        </div>
+        <button class="btn-create-session" id="btnNewSessionHistory">
+          <span>+ Create New Poll Session</span>
+        </button>
+      </div>
+
+      <div class="library-templates-grid" id="sessionsHistoryGrid">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL: Create New Poll Session
+       ======================================================================== -->
+  <div class="modal-backdrop" id="createSessionModal">
+    <div class="modal-dialog">
+      <div class="modal-dialog-header">
+        <div>
+          <h3>Create Poll Session</h3>
+          <div class="ta-text" style="font-size: 0.85rem; color: var(--purple-600); font-weight: 600;">புதிய வாக்கெடுப்பு அமர்வு</div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseCreateModal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="createSessionForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <div class="field-group">
+          <label>
+            <span>Session Title (English)</span>
+            <span class="lang-chip en">EN</span>
+          </label>
+          <input type="text" class="input-text" id="newSessionTitle" placeholder="e.g. Annual Tech Symposium 2026 Live Poll" required>
+        </div>
+
+        <div class="field-group">
+          <label>
+            <span>Session Title (Tamil)</span>
+            <span class="lang-chip ta">தமிழ்</span>
+          </label>
+          <input type="text" class="input-text ta-input" id="newSessionTitleTa" placeholder="எ.கா. வருடாந்திர தொழில்நுட்ப கருத்தரங்கு நேரலை வாக்கெடுப்பு">
+        </div>
+
+        <div class="field-group">
+          <label>Session Code / அடையாளக் குறியீடு</label>
+          <input type="text" class="input-text" id="newSessionCode" placeholder="e.g. POLL-402">
+        </div>
+
+        <div class="field-group" style="margin-top: 0.5rem;">
+          <label style="font-size: 0.85rem; font-weight: 600;">Starter Questions:</label>
+          <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="radio" name="questionsSource" value="default" checked>
+              <span>Load recommended bilingual questions / பரிந்துரைக்கப்பட்ட கேள்விகள்</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="radio" name="questionsSource" value="clone">
+              <span>Clone current questions / தற்போதைய கேள்விகளை நகலெடு</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="radio" name="questionsSource" value="blank">
+              <span>Start with empty poll / புதிய வெற்றுப் பக்கம்</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+          <button type="button" class="btn-action" id="btnCancelCreateModal">Cancel</button>
+          <button type="submit" class="btn-create-session" style="padding: 0.65rem 1.5rem;">
+            <span>Create Session & Start</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <!-- ========================================================================
+       MODAL: Settings
+       ======================================================================== -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-dialog">
+      <div class="modal-dialog-header">
+        <div>
+          <h3>Poll Settings</h3>
+          <div class="ta-text" style="font-size: 0.85rem; color: var(--purple-600);">அமைப்புகள்</div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseSettingsModal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="settingsForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <div class="field-group">
+          <label>Poll Title (English)</label>
+          <input type="text" class="input-text" id="settingsTitle">
+        </div>
+
+        <div class="field-group">
+          <label>Poll Title (Tamil)</label>
+          <input type="text" class="input-text ta-input" id="settingsTitleTa">
+        </div>
+
+        <div class="field-group">
+          <label>Session Code</label>
+          <input type="text" class="input-text" id="settingsCode">
+        </div>
+
+        <div class="field-group">
+          <label>Custom Join URL (Optional Wi-Fi / Tunnel Override)</label>
+          <input type="url" class="input-text" id="settingsJoinUrl" placeholder="http://192.168.1.100:3000">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+          <button type="button" class="btn-action" id="btnCancelSettingsModal">Close</button>
+          <button type="submit" class="btn-create-session" style="padding: 0.65rem 1.5rem;">
+            <span>Save Settings</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-msg" id="appToast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toastText">Action completed successfully</span>
+  </div>
+
   <script src="/js/admin.js"></script>
 </body>
 </html>
