@@ -1,321 +1,360 @@
-// Parent Mobile Client Logic
-// Department of Computer Science and Business Systems (CSBS)
-(function() {
-  // Elements
-  const deptNameEl = document.getElementById('deptName');
-  const meetingTitleEl = document.getElementById('meetingTitle');
-  const connectionPill = document.getElementById('connectionStatus');
-  const connectionText = document.getElementById('connectionText');
-  const yearBadgeBar = document.getElementById('yearBadgeBar');
-  const currentYearDisplay = document.getElementById('currentYearDisplay');
-  const changeYearBtn = document.getElementById('changeYearBtn');
-  const yearModal = document.getElementById('yearModal');
-  const yearOptionsGrid = document.getElementById('yearOptionsGrid');
-  const waitingState = document.getElementById('waitingState');
-  const waitingSubtitle = document.getElementById('waitingSubtitle');
-  const questionState = document.getElementById('questionState');
-  const qStatusBadge = document.getElementById('qStatusBadge');
-  const qStatusText = document.getElementById('qStatusText');
-  const questionText = document.getElementById('questionText');
-  const questionTextTa = document.getElementById('questionTextTa');
-  const optionsContainer = document.getElementById('optionsContainer');
-  const voteStatusBanner = document.getElementById('voteStatusBanner');
-  const voteBannerText = document.getElementById('voteBannerText');
+// ==========================================================================
+// CSBS Parent–Teacher Meeting - Parent Mobile Client Logic
+// Step-by-Step Flow: Welcome -> Select Year -> Waiting -> Live Question -> Review
+// ==========================================================================
 
-  // Client State
+(function() {
+  'use strict';
+
+  // Session Token Initialization
   let voterToken = localStorage.getItem('ptm_voter_token');
   if (!voterToken) {
-    voterToken = 'v_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    voterToken = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('ptm_voter_token', voterToken);
   }
 
-  let selectedYearGroup = localStorage.getItem('ptm_year_group') || null;
-  let availableYearGroups = ['1st Year', '2nd Year', '3rd Year', 'Final Year'];
+  let selectedYear = localStorage.getItem('ptm_student_year') || null;
+  let currentMeetingId = null;
   let currentQuestion = null;
-  let currentQuestionStatus = 'idle';
-  let mySelectedOptionIndex = null;
+  let currentQuestionStatus = 'idle'; // 'idle' | 'live' | 'closed'
+  let meetingStatus = 'WAITING_FOR_PARENTS';
 
-  // Initialize Socket
+  // Answer tracking: questionId -> optionIndex
+  let myAnswers = {};
+
+  // DOM Elements
+  const screens = {
+    welcome: document.getElementById('screenWelcome'),
+    selectYear: document.getElementById('screenSelectYear'),
+    waiting: document.getElementById('screenWaiting'),
+    question: document.getElementById('screenQuestion'),
+    completed: document.getElementById('screenCompleted')
+  };
+
+  const pHeaderTitle = document.getElementById('pHeaderTitle');
+  const pHeaderSubtitle = document.getElementById('pHeaderSubtitle');
+  const pConnectionStatus = document.getElementById('pConnectionStatus');
+  const pConnectionText = document.getElementById('pConnectionText');
+
+  const pStudentYearBar = document.getElementById('pStudentYearBar');
+  const pStudentYearVal = document.getElementById('pStudentYearVal');
+  const pBtnChangeYear = document.getElementById('pBtnChangeYear');
+
+  const btnJoinMeeting = document.getElementById('btnJoinMeeting');
+  const pYearOptionsList = document.getElementById('pYearOptionsList');
+  const btnContinueYear = document.getElementById('btnContinueYear');
+
+  const pWaitingTitle = document.getElementById('pWaitingTitle');
+  const pWaitingSubtitle = document.getElementById('pWaitingSubtitle');
+
+  const pQuestionProgressLabel = document.getElementById('pQuestionProgressLabel');
+  const pQuestionTextEn = document.getElementById('pQuestionTextEn');
+  const pQuestionTextTa = document.getElementById('pQuestionTextTa');
+  const pVoteStatusBanner = document.getElementById('pVoteStatusBanner');
+  const pOptionsList = document.getElementById('pOptionsList');
+  const btnSubmitVote = document.getElementById('btnSubmitVote');
+
+  let pendingOptionSelection = null;
+
+  // Socket Connection
   const socket = io({
     reconnection: true,
     reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
-    timeout: 10000
+    reconnectionDelay: 1000
   });
 
-  // Setup Year Group Modal
-  function renderYearOptions() {
-    yearOptionsGrid.innerHTML = '';
-    availableYearGroups.forEach(yg => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = `year-choice-btn ${selectedYearGroup === yg ? 'selected' : ''}`;
-      btn.innerHTML = `
-        <span>${escapeHtml(yg)}</span>
-        <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      `;
-
-      btn.addEventListener('click', () => {
-        selectYearGroup(yg);
-      });
-
-      yearOptionsGrid.appendChild(btn);
+  // Screen Switching Function
+  function showScreen(screenKey) {
+    Object.keys(screens).forEach(key => {
+      if (screens[key]) {
+        screens[key].classList.toggle('active', key === screenKey);
+      }
     });
   }
 
-  function openYearModal() {
-    renderYearOptions();
-    yearModal.classList.remove('hidden');
-  }
-
-  function closeYearModal() {
-    yearModal.classList.add('hidden');
-  }
-
-  function selectYearGroup(yearGroup) {
-    const isChange = selectedYearGroup !== null && selectedYearGroup !== yearGroup;
-    selectedYearGroup = yearGroup;
-    localStorage.setItem('ptm_year_group', yearGroup);
-    currentYearDisplay.textContent = yearGroup;
-    updateYearBadge();
-    closeYearModal();
-
-    if (socket.connected) {
-      if (isChange) {
-        socket.emit('parent:change_year', { voterToken, yearGroup });
-      } else {
-        socket.emit('parent:join', { voterToken, yearGroup });
-      }
+  // Update Year Bar
+  function updateYearBar() {
+    if (selectedYear) {
+      pStudentYearBar.style.display = 'flex';
+      pStudentYearVal.textContent = selectedYear;
+    } else {
+      pStudentYearBar.style.display = 'none';
     }
   }
 
-  changeYearBtn.addEventListener('click', openYearModal);
+  // Determine which screen to display based on state
+  function syncScreenState() {
+    updateYearBar();
 
-  let showYearToParents = true;
-
-  function updateYearBadge() {
-    if (selectedYearGroup) {
-      yearBadgeBar.style.display = 'flex';
-      const labelEl = yearBadgeBar.querySelector('.year-info span');
-      if (showYearToParents) {
-        if (labelEl) labelEl.textContent = 'Joined as:';
-        currentYearDisplay.textContent = selectedYearGroup;
-      } else {
-        if (labelEl) labelEl.textContent = 'Participation:';
-        currentYearDisplay.textContent = 'Anonymous';
-      }
-    }
-  }
-
-  // If no year group chosen yet, prompt user immediately
-  if (!selectedYearGroup) {
-    openYearModal();
-  } else {
-    updateYearBadge();
-    closeYearModal();
-  }
-
-  // Socket Lifecycle
-  socket.on('connect', () => {
-    connectionPill.style.background = '#ecfdf5';
-    connectionPill.style.color = '#059669';
-    connectionText.textContent = 'Live';
-
-    if (selectedYearGroup) {
-      socket.emit('parent:join', { voterToken, yearGroup: selectedYearGroup });
-    }
-  });
-
-  socket.on('disconnect', () => {
-    connectionPill.style.background = '#fff1f2';
-    connectionPill.style.color = '#e11d48';
-    connectionText.textContent = 'Reconnecting...';
-  });
-
-  // Receive Full Session State on Join
-  socket.on('session:state', (data) => {
-    if (data.departmentName) deptNameEl.textContent = data.departmentName;
-    if (data.meetingTitle) meetingTitleEl.textContent = data.meetingTitle;
-    if (data.yearGroups && Array.isArray(data.yearGroups)) {
-      availableYearGroups = data.yearGroups;
-      renderYearOptions();
-    }
-    if (data.showYearToParents !== undefined) {
-      showYearToParents = data.showYearToParents;
-      updateYearBadge();
-    }
-
-    currentQuestionStatus = data.questionStatus;
-    currentQuestion = data.currentQuestion;
-    mySelectedOptionIndex = data.myVote;
-
-    updateUI();
-  });
-
-  socket.on('session:settings', (data) => {
-    if (data.departmentName) deptNameEl.textContent = data.departmentName;
-    if (data.meetingTitle) meetingTitleEl.textContent = data.meetingTitle;
-    if (data.showYearToParents !== undefined) {
-      showYearToParents = data.showYearToParents;
-      updateYearBadge();
-    }
-  });
-
-  // New Meeting Reset
-  socket.on('session:reset_for_new_meeting', (data) => {
-    if (data.departmentName) deptNameEl.textContent = data.departmentName;
-    if (data.meetingTitle) meetingTitleEl.textContent = data.meetingTitle;
-    currentQuestion = null;
-    currentQuestionStatus = 'idle';
-    mySelectedOptionIndex = null;
-    updateUI();
-  });
-
-  // Live Question Launched by HOD
-  socket.on('question:live', (data) => {
-    currentQuestion = data;
-    currentQuestionStatus = 'live';
-    mySelectedOptionIndex = null;
-    updateUI();
-  });
-
-  // Question Closed by HOD
-  socket.on('question:closed', () => {
-    currentQuestionStatus = 'closed';
-    updateQuestionStatusUI();
-  });
-
-  // Question Reset
-  socket.on('question:reset', (data) => {
-    if (currentQuestion && currentQuestion.id === data.questionId) {
-      mySelectedOptionIndex = null;
-      updateUI();
-    }
-  });
-
-  // Vote Confirmed
-  socket.on('parent:vote_confirmed', (data) => {
-    mySelectedOptionIndex = data.optionIndex;
-    renderOptions();
-    showVoteConfirmation();
-  });
-
-  // Update Main UI based on current question & status
-  function updateUI() {
-    if (!currentQuestion || currentQuestionStatus === 'idle') {
-      waitingState.classList.add('active');
-      questionState.classList.remove('active');
-      waitingSubtitle.textContent = 'Please wait for the department faculty to launch the next question on the projector.';
+    if (meetingStatus === 'COMPLETED') {
+      showScreen('completed');
       return;
     }
 
-    waitingState.classList.remove('active');
-    questionState.classList.add('active');
-    questionText.textContent = currentQuestion.text;
+    // Must select year first before any questions
+    if (!selectedYear) {
+      showScreen('selectYear');
+      return;
+    }
+
+    // If a question is live, show question screen
+    if (currentQuestion && (currentQuestionStatus === 'live' || currentQuestionStatus === 'closed')) {
+      showScreen('question');
+      renderQuestion();
+      return;
+    }
+
+    // Otherwise waiting room
+    showScreen('waiting');
+    if (meetingStatus === 'WAITING_FOR_PARENTS') {
+      pWaitingTitle.textContent = 'Welcome to CSBS PTM!';
+      pWaitingSubtitle.textContent = 'You are connected. Please wait for faculty to launch the meeting questions.';
+    } else {
+      pWaitingTitle.textContent = 'Ready for Questions';
+      pWaitingSubtitle.textContent = 'Please wait for the faculty to launch the next question on the screen.';
+    }
+  }
+
+  // -------------------------------------------------------------
+  // Screen 1: Welcome / Join
+  // -------------------------------------------------------------
+  btnJoinMeeting?.addEventListener('click', () => {
+    if (!selectedYear) {
+      showScreen('selectYear');
+    } else {
+      syncScreenState();
+    }
+  });
+
+  // -------------------------------------------------------------
+  // Screen 2: Year Selection
+  // -------------------------------------------------------------
+  let tempSelectedYear = selectedYear;
+
+  function renderYearSelectionChoices() {
+    const buttons = pYearOptionsList.querySelectorAll('.year-choice-item');
+    buttons.forEach(btn => {
+      const yr = btn.getAttribute('data-year');
+      btn.classList.toggle('selected', yr === tempSelectedYear);
+
+      btn.onclick = () => {
+        tempSelectedYear = yr;
+        renderYearSelectionChoices();
+        btnContinueYear.disabled = false;
+      };
+    });
+
+    btnContinueYear.disabled = !tempSelectedYear;
+  }
+
+  renderYearSelectionChoices();
+
+  btnContinueYear?.addEventListener('click', () => {
+    if (!tempSelectedYear) return;
+    selectedYear = tempSelectedYear;
+    localStorage.setItem('ptm_student_year', selectedYear);
+
+    // Notify server
+    socket.emit('parent:select_year', {
+      voterToken,
+      yearGroup: selectedYear
+    });
+
+    syncScreenState();
+  });
+
+  pBtnChangeYear?.addEventListener('click', () => {
+    tempSelectedYear = selectedYear;
+    renderYearSelectionChoices();
+    showScreen('selectYear');
+  });
+
+  // -------------------------------------------------------------
+  // Screen 4: Question & Polling
+  // -------------------------------------------------------------
+  function renderQuestion() {
+    if (!currentQuestion) return;
+
+    pQuestionProgressLabel.textContent = `Question ${currentQuestion.index || 1} of ${currentQuestion.totalQuestions || 5}`;
+    pQuestionTextEn.textContent = currentQuestion.text;
 
     if (currentQuestion.textTa && currentQuestion.textTa.trim()) {
-      questionTextTa.textContent = currentQuestion.textTa;
-      questionTextTa.style.display = 'block';
+      pQuestionTextTa.textContent = currentQuestion.textTa;
+      pQuestionTextTa.style.display = 'block';
     } else {
-      questionTextTa.style.display = 'none';
+      pQuestionTextTa.style.display = 'none';
     }
 
-    updateQuestionStatusUI();
-    renderOptions();
-
-    if (mySelectedOptionIndex !== null) {
-      showVoteConfirmation();
+    // Previous vote for this question
+    const existingVote = myAnswers[currentQuestion.id];
+    if (existingVote !== undefined && existingVote !== null) {
+      pendingOptionSelection = existingVote;
+      showVoteFeedback(true);
     } else {
-      voteStatusBanner.className = 'vote-status-banner';
+      pVoteStatusBanner.style.display = 'none';
+      pendingOptionSelection = null;
     }
+
+    renderOptionButtons();
   }
 
-  function updateQuestionStatusUI() {
-    if (currentQuestionStatus === 'live') {
-      qStatusBadge.className = 'status-badge live';
-      qStatusText.textContent = 'Live Poll';
-      voteBannerText.textContent = 'Your vote is recorded! Tap another option to change.';
-    } else if (currentQuestionStatus === 'closed') {
-      qStatusBadge.className = 'status-badge closed';
-      qStatusText.textContent = 'Poll Closed';
-      if (mySelectedOptionIndex !== null) {
-        voteStatusBanner.className = 'vote-status-banner closed';
-        voteBannerText.textContent = 'Poll has ended. Your answer was recorded.';
-      } else {
-        voteStatusBanner.className = 'vote-status-banner closed';
-        voteBannerText.textContent = 'Poll has ended by the department faculty.';
-      }
-    }
-  }
-
-  const optionLetters = ['A', 'B', 'C', 'D'];
-
-  function renderOptions() {
-    optionsContainer.innerHTML = '';
+  function renderOptionButtons() {
     if (!currentQuestion || !currentQuestion.options) return;
 
     const isClosed = currentQuestionStatus === 'closed';
+    const letters = ['A', 'B', 'C', 'D'];
 
-    currentQuestion.options.forEach((optText, index) => {
-      const optTa = (currentQuestion.optionsTa && currentQuestion.optionsTa[index]) || '';
-      const isSelected = mySelectedOptionIndex === index;
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = `option-btn ${isSelected ? 'selected' : ''}`;
-      btn.disabled = isClosed;
+    pOptionsList.innerHTML = currentQuestion.options.map((optText, index) => {
+      const optTa = currentQuestion.optionsTa?.[index] || '';
+      const isSelected = pendingOptionSelection === index;
+      const letter = letters[index] || (index + 1);
 
-      const letter = optionLetters[index] || (index + 1);
-
-      btn.innerHTML = `
-        <div class="option-letter">${letter}</div>
-        <div class="option-text-group">
-          <div class="option-text-label-en">${escapeHtml(optText)}</div>
-          ${optTa ? `<div class="option-text-label-ta">${escapeHtml(optTa)}</div>` : ''}
-        </div>
-        <svg class="option-check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
+      return `
+        <button type="button" class="option-choice-item ${isSelected ? 'selected' : ''}" ${isClosed ? 'disabled' : ''} onclick="window.selectOption(${index})">
+          <div class="option-letter-badge">${letter}</div>
+          <div class="option-labels">
+            <div class="option-label-en">${escapeHtml(optText)}</div>
+            ${optTa ? `<div class="option-label-ta">${escapeHtml(optTa)}</div>` : ''}
+          </div>
+          <span class="option-selected-tag">✓ selected</span>
+        </button>
       `;
+    }).join('');
 
-      btn.addEventListener('click', () => {
-        if (isClosed) return;
-        submitVote(index);
-      });
-
-      optionsContainer.appendChild(btn);
-    });
+    // Enable/disable submit button
+    if (isClosed) {
+      btnSubmitVote.disabled = true;
+      btnSubmitVote.textContent = 'Question Closed';
+    } else {
+      const existingVote = myAnswers[currentQuestion.id];
+      if (existingVote !== undefined && existingVote !== null) {
+        btnSubmitVote.disabled = false;
+        btnSubmitVote.textContent = 'Update Answer';
+      } else {
+        btnSubmitVote.disabled = (pendingOptionSelection === null);
+        btnSubmitVote.textContent = 'Submit & Continue';
+      }
+    }
   }
 
-  function submitVote(optionIndex) {
-    if (!selectedYearGroup) {
-      openYearModal();
-      return;
-    }
-    if (currentQuestionStatus !== 'live' || !currentQuestion) return;
+  window.selectOption = function(optionIndex) {
+    if (currentQuestionStatus === 'closed') return;
+    pendingOptionSelection = optionIndex;
+    renderOptionButtons();
+  };
 
-    mySelectedOptionIndex = optionIndex;
-    renderOptions();
-    showVoteConfirmation();
+  btnSubmitVote?.addEventListener('click', () => {
+    if (pendingOptionSelection === null || !currentQuestion) return;
 
+    // Send vote to server
     socket.emit('parent:vote', {
       voterToken,
       questionId: currentQuestion.id,
-      optionIndex,
-      yearGroup: selectedYearGroup
+      optionIndex: pendingOptionSelection
     });
-  }
 
-  function showVoteConfirmation() {
-    if (currentQuestionStatus === 'live') {
-      voteStatusBanner.className = 'vote-status-banner recorded';
-      voteBannerText.textContent = 'Response recorded! You can tap another option to change.';
+    myAnswers[currentQuestion.id] = pendingOptionSelection;
+    showVoteFeedback(false);
+  });
+
+  function showVoteFeedback(isExisting) {
+    pVoteStatusBanner.style.display = 'flex';
+    if (currentQuestionStatus === 'closed') {
+      pVoteStatusBanner.className = 'feedback-banner info';
+      pVoteStatusBanner.innerHTML = '<span>Poll closed. Your response was recorded.</span>';
     } else {
-      voteStatusBanner.className = 'vote-status-banner closed';
-      voteBannerText.textContent = 'Poll closed. Your response was successfully logged.';
+      pVoteStatusBanner.className = 'feedback-banner success';
+      pVoteStatusBanner.innerHTML = '<span>✓ Response recorded! You can tap another option to change.</span>';
     }
   }
+
+  // -------------------------------------------------------------
+  // Socket.io Lifecycle
+  // -------------------------------------------------------------
+  socket.on('connect', () => {
+    pConnectionStatus.style.background = '#ecfdf5';
+    pConnectionStatus.style.color = '#059669';
+    pConnectionText.textContent = 'Live';
+
+    // Join with voter token
+    socket.emit('parent:join', {
+      voterToken,
+      yearGroup: selectedYear
+    });
+
+    // Fetch existing submitted answers
+    socket.emit('parent:get_my_answers', { voterToken });
+  });
+
+  socket.on('disconnect', () => {
+    pConnectionStatus.style.background = '#fef2f2';
+    pConnectionStatus.style.color = '#dc2626';
+    pConnectionText.textContent = 'Reconnecting...';
+  });
+
+  socket.on('session:state', (data) => {
+    if (data.title) pHeaderTitle.textContent = data.title;
+    if (data.departmentName) pHeaderSubtitle.textContent = data.departmentName;
+
+    currentMeetingId = data.meetingId;
+    meetingStatus = data.meetingStatus;
+    currentQuestionStatus = data.questionStatus;
+    currentQuestion = data.currentQuestion;
+
+    if (data.myVote !== null && data.myVote !== undefined && currentQuestion) {
+      myAnswers[currentQuestion.id] = data.myVote;
+    }
+
+    syncScreenState();
+  });
+
+  socket.on('question:live', (data) => {
+    currentQuestion = data;
+    currentQuestionStatus = 'live';
+    syncScreenState();
+  });
+
+  socket.on('question:closed', () => {
+    currentQuestionStatus = 'closed';
+    renderOptionButtons();
+    showVoteFeedback(true);
+  });
+
+  socket.on('question:reset', (data) => {
+    if (currentQuestion && currentQuestion.id === data.questionId) {
+      delete myAnswers[data.questionId];
+      pendingOptionSelection = null;
+      renderQuestion();
+    }
+  });
+
+  socket.on('parent:vote_confirmed', (data) => {
+    myAnswers[data.questionId] = data.optionIndex;
+    showVoteFeedback(false);
+    renderOptionButtons();
+  });
+
+  socket.on('parent:answers_list', (answersMap) => {
+    myAnswers = { ...myAnswers, ...(answersMap || {}) };
+    if (currentQuestion && myAnswers[currentQuestion.id] !== undefined) {
+      renderQuestion();
+    }
+  });
+
+  socket.on('session:reset_for_new_meeting', (data) => {
+    myAnswers = {};
+    currentQuestion = null;
+    currentQuestionStatus = 'idle';
+    meetingStatus = data.status || 'WAITING_FOR_PARENTS';
+    if (data.title) pHeaderTitle.textContent = data.title;
+    syncScreenState();
+  });
+
+  socket.on('session:meeting_state', (data) => {
+    meetingStatus = data.status;
+    if (data.title) pHeaderTitle.textContent = data.title;
+    syncScreenState();
+  });
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -323,4 +362,7 @@
     div.textContent = str;
     return div.innerHTML;
   }
+
+  // Initial screen sync
+  syncScreenState();
 })();

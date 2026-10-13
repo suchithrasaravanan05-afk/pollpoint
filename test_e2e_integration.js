@@ -1,7 +1,7 @@
 const http = require('http');
 const { io } = require('socket.io-client');
 
-const PORT = 3001;
+const PORT = 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 
 function fetchHttp(urlPath) {
@@ -20,12 +20,12 @@ async function runE2ETests() {
   // 1. Verify Parent HTML
   const parentRes = await fetchHttp('/');
   console.log(`[1] Parent Page: HTTP ${parentRes.status} (Length: ${parentRes.body.length} bytes)`);
-  if (!parentRes.body.includes('PTM Live Polling - Parent Portal')) throw new Error('Parent page title missing');
+  if (!parentRes.body.includes('CSBS Parent–Teacher Meeting')) throw new Error('Parent page title missing');
 
   // 2. Verify Admin HTML
   const adminRes = await fetchHttp('/admin.html');
   console.log(`[2] Admin Dashboard: HTTP ${adminRes.status} (Length: ${adminRes.body.length} bytes)`);
-  if (!adminRes.body.includes('HOD Projector & Admin Dashboard')) throw new Error('Admin page title missing');
+  if (!adminRes.body.includes('CSBS Parent–Teacher Meeting')) throw new Error('Admin page title missing');
 
   // 3. Verify API Info & QR Code
   const infoRes = await fetchHttp('/api/info');
@@ -51,7 +51,8 @@ async function runE2ETests() {
 
     adminSocket.on('admin:init', (data) => {
       adminReceivedInit = true;
-      console.log(`[4] Admin Socket Connected & Initialized. Department: "${data.departmentName}"`);
+      const dept = data.settings?.departmentName || data.departmentName || 'CSBS';
+      console.log(`[4] Admin Socket Connected & Initialized. Department: "${dept}"`);
 
       // Admin launches Question 2
       const targetQ = data.questions[1] || data.questions[0];
@@ -116,7 +117,7 @@ async function runE2ETests() {
   // 7. Verify CSV Export API
   const csvRes = await fetchHttp('/api/export/csv');
   console.log(`[10] CSV Export: Status ${csvRes.status}, Content-Type: ${csvRes.headers['content-type']}`);
-  if (!csvRes.body.includes('Parent-Teachers Meeting Polling Report')) throw new Error('CSV content invalid');
+  if (!csvRes.body.includes('Parent-Teacher Meeting Polling Report')) throw new Error('CSV content invalid');
 
   adminSocket.disconnect();
   parentSocket.disconnect();

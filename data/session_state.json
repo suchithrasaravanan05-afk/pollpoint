@@ -1,15 +1,23 @@
 {
-  "departmentName": "Department of Computer Science and Business Systems",
-  "meetingTitle": "Annual Parent-Teacher Meeting 2026",
-  "customJoinUrl": "",
-  "meetingStatus": "active",
-  "showYearToParents": true,
-  "yearGroups": [
-    "1st Year",
-    "2nd Year",
-    "3rd Year",
-    "Final Year"
-  ],
+  "currentMeeting": {
+    "id": "mtg_1791868638132",
+    "title": "CSBS Test Parent–Teacher Meeting 2026",
+    "academicYear": "2026",
+    "date": "2026-09-23",
+    "description": "Automated Test Verification Session",
+    "status": "QUESTION_LIVE",
+    "currentQuestionIndex": 1,
+    "currentQuestionId": "q1",
+    "questionStatus": "live",
+    "selectedQuestionIds": [
+      "q1",
+      "q2",
+      "q3",
+      "q4",
+      "q5"
+    ],
+    "createdAt": "2026-10-13T05:17:18.132Z"
+  },
   "questions": [
     {
       "id": "q1",
@@ -95,15 +103,114 @@
         "சுமாராக உள்ளது",
         "அதிக முன்னேற்றம் தேவை"
       ]
+    },
+    {
+      "id": "q_1790154301051_m2bt",
+      "text": "E2E Test Question: Would you recommend this department?",
+      "textTa": "",
+      "options": [
+        "Definitely Yes",
+        "Probably Yes",
+        "Uncertain",
+        "No"
+      ],
+      "optionsTa": []
     }
   ],
-  "currentQuestionId": "q1",
-  "questionStatus": "closed",
+  "participants": {
+    "token_parent_A_1791868638146": {
+      "participantId": "token_parent_A_1791868638146",
+      "meetingId": "mtg_1791868638132",
+      "studentYear": "1st Year",
+      "joinedAt": 1791868638278,
+      "lastSeen": 1791868642183,
+      "socketId": "7erbmKq2qkpwwojOAAAB"
+    },
+    "token_parent_B_1791868638146": {
+      "participantId": "token_parent_B_1791868638146",
+      "meetingId": "mtg_1791868638132",
+      "studentYear": "3rd Year",
+      "joinedAt": 1791868638284,
+      "lastSeen": 1791868642184,
+      "socketId": "SN8R-UodELH871oHAAAE"
+    },
+    "token_parent_C_1791868638146": {
+      "participantId": "token_parent_C_1791868638146",
+      "meetingId": "mtg_1791868638132",
+      "studentYear": "Final Year",
+      "joinedAt": 1791868638286,
+      "lastSeen": 1791868638286,
+      "socketId": "Zq-9-M0dFDLm2DJDAAAD"
+    },
+    "p_1791868711200_uq1wxcukj": {
+      "participantId": "p_1791868711200_uq1wxcukj",
+      "meetingId": "mtg_1791868638132",
+      "studentYear": "Final Year",
+      "joinedAt": 1791868711238,
+      "lastSeen": 1791870308843,
+      "socketId": "VXpDNGt5XN0lopwHAAAP"
+    }
+  },
   "responses": {
-    "q1": {},
-    "q2": {},
-    "q3": {},
-    "q4": {},
-    "q5": {}
+    "mtg_1791868638132:q1:token_parent_A_1791868638146": {
+      "id": "resp_1791868639564_ewxr",
+      "meetingId": "mtg_1791868638132",
+      "participantId": "token_parent_A_1791868638146",
+      "questionId": "q1",
+      "selectedOption": 0,
+      "studentYear": "1st Year",
+      "submittedAt": 1791868639564,
+      "updatedAt": 1791868639564
+    },
+    "mtg_1791868638132:q1:token_parent_B_1791868638146": {
+      "id": "resp_1791868640800_18ad",
+      "meetingId": "mtg_1791868638132",
+      "participantId": "token_parent_B_1791868638146",
+      "questionId": "q1",
+      "selectedOption": 2,
+      "studentYear": "3rd Year",
+      "submittedAt": 1791868639566,
+      "updatedAt": 1791868640800
+    },
+    "mtg_1791868638132:q1:token_parent_C_1791868638146": {
+      "id": "resp_1791868639568_vamo",
+      "meetingId": "mtg_1791868638132",
+      "participantId": "token_parent_C_1791868638146",
+      "questionId": "q1",
+      "selectedOption": 0,
+      "studentYear": "Final Year",
+      "submittedAt": 1791868639568,
+      "updatedAt": 1791868639568
+    },
+    "mtg_1791868638132:q2:token_parent_A_1791868638146": {
+      "id": "resp_1791868640383_dtxt",
+      "meetingId": "mtg_1791868638132",
+      "participantId": "token_parent_A_1791868638146",
+      "questionId": "q2",
+      "selectedOption": 2,
+      "studentYear": "1st Year",
+      "submittedAt": 1791868640383,
+      "updatedAt": 1791868640383
+    },
+    "mtg_1791868638132:q2:token_parent_B_1791868638146": {
+      "id": "resp_1791868640384_u5mq",
+      "meetingId": "mtg_1791868638132",
+      "participantId": "token_parent_B_1791868638146",
+      "questionId": "q2",
+      "selectedOption": 0,
+      "studentYear": "3rd Year",
+      "submittedAt": 1791868640385,
+      "updatedAt": 1791868640385
+    },
+    "mtg_1791868638132:q2:token_parent_C_1791868638146": {
+      "id": "resp_1791868640386_2hcz",
+      "meetingId": "mtg_1791868638132",
+      "participantId": "token_parent_C_1791868638146",
+      "questionId": "q2",
+      "selectedOption": 3,
+      "studentYear": "Final Year",
+      "submittedAt": 1791868640386,
+      "updatedAt": 1791868640386
+    }
   }
 }

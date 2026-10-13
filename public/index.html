@@ -3,119 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CSBS Live Polling - Parent Portal</title>
+  <title>CSBS Parent–Teacher Meeting</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/parent.css">
 </head>
 <body>
 
-  <div class="app-container">
+  <div class="parent-app-container">
     <!-- Header -->
-    <header class="header-card">
-      <div class="brand-info">
-        <span class="dept-name" id="deptName">Dept. of Computer Science & Business Systems</span>
-        <h1 class="meeting-title" id="meetingTitle">CSBS Live Polling</h1>
+    <header class="parent-header">
+      <div>
+        <h1 class="header-brand-title" id="pHeaderTitle">CSBS Parent–Teacher Meeting</h1>
+        <div class="dept-subtitle" id="pHeaderSubtitle">Dept. of Computer Science & Business Systems</div>
       </div>
-      <div class="connection-pill" id="connectionStatus">
-        <span class="connection-dot"></span>
-        <span id="connectionText">Live</span>
+      <div class="connection-indicator" id="pConnectionStatus">
+        <span class="indicator-dot"></span>
+        <span id="pConnectionText">Live</span>
       </div>
     </header>
 
-    <!-- Year Group Selected Bar -->
-    <div class="year-badge-bar" id="yearBadgeBar" style="display: none;">
-      <div class="year-info">
+    <!-- Student Year Selected Bar (Shown once year selected) -->
+    <div class="student-year-bar" id="pStudentYearBar" style="display: none;">
+      <div>
         <span>Student Year:</span>
-        <span class="year-value" id="currentYearDisplay">1st Year</span>
+        <span class="student-year-val" id="pStudentYearVal">1st Year</span>
       </div>
-      <button class="change-year-btn" id="changeYearBtn" type="button">Change</button>
+      <button class="btn-change-year" id="pBtnChangeYear">Change</button>
     </div>
 
-    <!-- Main Dynamic Card -->
-    <main class="main-card">
-      <!-- 1. Waiting State Screen -->
-      <section class="state-container active" id="waitingState">
-        <div class="waiting-radar">
-          <div class="radar-circle"></div>
-          <div class="radar-circle"></div>
-          <div class="radar-circle"></div>
-          <div class="radar-center-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-            </svg>
-          </div>
-        </div>
-
-        <h2 class="waiting-title">Welcome Parents!</h2>
-        <p class="waiting-subtitle" id="waitingSubtitle">
-          You are connected to the live session. Please wait for the department faculty to launch the question on the screen.
-        </p>
-
-        <div class="tips-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ab47bc" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-          <span>Questions & options appear in both English & தமிழ். Your response is completely anonymous.</span>
-        </div>
-      </section>
-
-      <!-- 2. Live Question Screen -->
-      <section class="state-container" id="questionState">
-        <div class="question-header">
-          <div class="status-badge live" id="qStatusBadge">
-            <span class="badge-dot"></span>
-            <span id="qStatusText">Live Poll</span>
-          </div>
-          <div style="font-size: 0.8rem; color: #8d819e; font-weight: 700;" id="qIndexBadge">Question</div>
-        </div>
-
-        <!-- English Question Prompt -->
-        <h2 class="question-text" id="questionText">Loading question...</h2>
-
-        <!-- Tamil Question Prompt -->
-        <div class="question-text-ta" id="questionTextTa" style="display: none;"></div>
-
-        <!-- Bilingual Options Container -->
-        <div class="options-container" id="optionsContainer">
-          <!-- Dynamically populated option buttons -->
-        </div>
-
-        <div class="vote-status-banner" id="voteStatusBanner">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          <span id="voteBannerText">Your response is recorded! Tap another option to change.</span>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer-note">
-      Department of Computer Science and Business Systems • Tap choice to submit
-    </footer>
-  </div>
-
-  <!-- Year Group Selection Modal (First-time onboarding or editing) -->
-  <div class="modal-overlay" id="yearModal">
-    <div class="modal-box">
-      <div class="modal-icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-        </svg>
-      </div>
-      <h2 class="modal-title">Select Student's Year</h2>
-      <p class="modal-desc">
-        Please indicate which year your ward is currently studying in CSBS to participate in the meeting poll.
+    <!-- ===================================================================
+         SCREEN 1: WELCOME / JOIN SCREEN
+         =================================================================== -->
+    <section class="screen-card active" id="screenWelcome">
+      <h2 class="screen-title">Welcome</h2>
+      <p class="screen-desc">
+        Welcome to the CSBS Parent–Teacher Meeting. Tap below to join the live session.
       </p>
+      <button class="btn-primary-mobile" id="btnJoinMeeting">Join Meeting →</button>
+    </section>
 
-      <div class="year-options-grid" id="yearOptionsGrid">
-        <!-- Rendered dynamically -->
+    <!-- ===================================================================
+         SCREEN 2: YEAR SELECTION SCREEN
+         Questions are strictly NOT displayed before this selection!
+         =================================================================== -->
+    <section class="screen-card" id="screenSelectYear">
+      <h2 class="screen-title">Welcome to the Parent–Teacher Meeting</h2>
+      <p class="screen-desc">Which year does your child belong to?</p>
+
+      <div class="year-options-list" id="pYearOptionsList">
+        <button type="button" class="year-choice-item" data-year="1st Year">
+          <span>1st Year</span>
+          <span class="year-choice-check">✓</span>
+        </button>
+        <button type="button" class="year-choice-item" data-year="2nd Year">
+          <span>2nd Year</span>
+          <span class="year-choice-check">✓</span>
+        </button>
+        <button type="button" class="year-choice-item" data-year="3rd Year">
+          <span>3rd Year</span>
+          <span class="year-choice-check">✓</span>
+        </button>
+        <button type="button" class="year-choice-item" data-year="Final Year">
+          <span>Final Year</span>
+          <span class="year-choice-check">✓</span>
+        </button>
       </div>
-    </div>
+
+      <button class="btn-primary-mobile" id="btnContinueYear" disabled>Continue →</button>
+    </section>
+
+    <!-- ===================================================================
+         SCREEN 3: WAITING ROOM SCREEN
+         =================================================================== -->
+    <section class="screen-card" id="screenWaiting">
+      <div class="waiting-box">
+        <div class="waiting-spinner"></div>
+        <h2 class="screen-title" id="pWaitingTitle">Welcome Parents!</h2>
+        <p class="screen-desc" id="pWaitingSubtitle" style="margin-bottom: 0;">
+          You are connected to the live meeting session. Please wait for faculty to launch the question on the screen.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCREEN 4: QUESTION & POLLING SCREEN
+         =================================================================== -->
+    <section class="screen-card" id="screenQuestion">
+      <div class="question-progress-label" id="pQuestionProgressLabel">Question 1 of 5</div>
+
+      <!-- Question Text -->
+      <h2 class="question-text-en" id="pQuestionTextEn">Loading question...</h2>
+      <div class="question-text-ta" id="pQuestionTextTa" style="display: none;"></div>
+
+      <!-- Feedback Banner -->
+      <div class="feedback-banner success" id="pVoteStatusBanner" style="display: none;">
+        <span>✓ Response recorded! You can select another option to change.</span>
+      </div>
+
+      <!-- Options -->
+      <div class="options-list" id="pOptionsList">
+        <!-- Dynamically rendered options A, B, C, D -->
+      </div>
+
+      <button class="btn-primary-mobile" id="btnSubmitVote" disabled>Submit & Continue</button>
+
+      <!-- Navigation for reviewed/previous questions -->
+      <div class="question-nav-row" id="pQuestionNavRow" style="display: none;">
+        <button class="btn-nav-arrow" id="btnPrevAnswered">← Previous Question</button>
+        <button class="btn-nav-arrow" id="btnNextAnswered">Next Question →</button>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCREEN 5: MEETING COMPLETED SCREEN
+         =================================================================== -->
+    <section class="screen-card" id="screenCompleted">
+      <div class="waiting-box">
+        <h2 class="screen-title">Meeting Completed</h2>
+        <p class="screen-desc">
+          Thank you for attending the CSBS Parent–Teacher Meeting and sharing your valuable feedback.
+        </p>
+      </div>
+    </section>
+
+    <footer class="parent-footer">
+      Department of Computer Science and Business Systems
+    </footer>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>

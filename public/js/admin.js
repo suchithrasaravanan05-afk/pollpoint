@@ -1,1264 +1,1052 @@
-// HOD Admin: Stage 1 (Question Builder) + Stage 2 (Live Polling Dashboard)
-// Department of Computer Science and Business Systems (CSBS)
+// ==========================================================================
+// CSBS Parent–Teacher Meeting - Admin Application Controller
+// Professional College Management Application
+// ==========================================================================
+
 (function() {
-  // Navigation & Branding Elements
-  const navDeptBadge = document.getElementById('navDeptBadge');
-  const navDeptText = document.getElementById('navDeptText');
-  const navMeetingTitle = document.getElementById('navMeetingTitle');
-  const liveConnectedPill = document.getElementById('liveConnectedPill');
-  const navConnectedCount = document.getElementById('navConnectedCount');
-  const setupNavActions = document.getElementById('setupNavActions');
-  const liveNavActions = document.getElementById('liveNavActions');
-  const btnEditQuestionsNav = document.getElementById('btnEditQuestionsNav');
-  const btnGoToLiveIfStarted = document.getElementById('btnGoToLiveIfStarted');
-  const btnPreviewToggleMobile = document.getElementById('btnPreviewToggleMobile');
-  const btnMeetingArchivesNav = document.getElementById('btnMeetingArchivesNav');
-  const btnNewMeetingNav = document.getElementById('btnNewMeetingNav');
-
-  // Views
-  const setupView = document.getElementById('setupView');
-  const liveDashboardView = document.getElementById('liveDashboardView');
-
-  // Stage 1: Question Builder Elements
-  const builderDeptNameInput = document.getElementById('builderDeptNameInput');
-  const builderMeetingTitleInput = document.getElementById('builderMeetingTitleInput');
-  const toggleShowYearToParents = document.getElementById('toggleShowYearToParents');
-  const autoSaveIndicator = document.getElementById('autoSaveIndicator');
-  const builderQuestionsList = document.getElementById('builderQuestionsList');
-  const btnAddQuestionCard = document.getElementById('btnAddQuestionCard');
-  const previewColumn = document.getElementById('previewColumn');
-  const previewPhoneContent = document.getElementById('previewPhoneContent');
-  const builderValidCount = document.getElementById('builderValidCount');
-  const btnFinishAndStartMeeting = document.getElementById('btnFinishAndStartMeeting');
-
-  // Stage 2: Live Dashboard Elements
-  const displayQuestionIndex = document.getElementById('displayQuestionIndex');
-  const displayStatusBadge = document.getElementById('displayStatusBadge');
-  const displayStatusText = document.getElementById('displayStatusText');
-  const displayQuestionText = document.getElementById('displayQuestionText');
-  const displayQuestionTextTa = document.getElementById('displayQuestionTextTa');
-  const btnPrevQuestion = document.getElementById('btnPrevQuestion');
-  const btnNextQuestion = document.getElementById('btnNextQuestion');
-  const btnLaunchPoll = document.getElementById('btnLaunchPoll');
-  const btnClosePoll = document.getElementById('btnClosePoll');
-  const btnResetPoll = document.getElementById('btnResetPoll');
-  const filterPillsContainer = document.getElementById('filterPillsContainer');
-  const chartVoteSummary = document.getElementById('chartVoteSummary');
-  const chartBarsList = document.getElementById('chartBarsList');
-  const sideQrImg = document.getElementById('sideQrImg');
-  const sideJoinUrl = document.getElementById('sideJoinUrl');
-  const btnBigQr = document.getElementById('btnBigQr');
-  const btnOpenQrModal = document.getElementById('btnOpenQrModal');
-  const audienceTotalPill = document.getElementById('audienceTotalPill');
-  const audienceBreakdownList = document.getElementById('audienceBreakdownList');
-  const qCountPill = document.getElementById('qCountPill');
-  const questionNavList = document.getElementById('questionNavList');
-
-  // Modals
-  const qrModal = document.getElementById('qrModal');
-  const modalQrImg = document.getElementById('modalQrImg');
-  const modalJoinUrl = document.getElementById('modalJoinUrl');
-  const btnCloseQrModal = document.getElementById('btnCloseQrModal');
-
-  const summaryModal = document.getElementById('summaryModal');
-  const btnSummaryReport = document.getElementById('btnSummaryReport');
-  const btnCloseSummary = document.getElementById('btnCloseSummary');
-  const summaryReportContent = document.getElementById('summaryReportContent');
-  const btnPrintReport = document.getElementById('btnPrintReport');
-  const btnDownloadCsvFromSummary = document.getElementById('btnDownloadCsvFromSummary');
-  const btnExportCsv = document.getElementById('btnExportCsv');
-
-  const settingsModal = document.getElementById('settingsModal');
-  const btnSettings = document.getElementById('btnSettings');
-  const btnCloseSettings = document.getElementById('btnCloseSettings');
-  const btnCancelSettings = document.getElementById('btnCancelSettings');
-  const btnSaveSettings = document.getElementById('btnSaveSettings');
-  const settingDeptName = document.getElementById('settingDeptName');
-  const settingMeetingTitle = document.getElementById('settingMeetingTitle');
-  const settingJoinUrl = document.getElementById('settingJoinUrl');
-  const settingYearGroups = document.getElementById('settingYearGroups');
-  const btnSwitchToSetupFromSettings = document.getElementById('btnSwitchToSetupFromSettings');
-
-  // Meeting History Modal Elements
-  const historyModal = document.getElementById('historyModal');
-  const btnCloseHistory = document.getElementById('btnCloseHistory');
-  const btnCloseHistoryFooter = document.getElementById('btnCloseHistoryFooter');
-  const historyMeetingsList = document.getElementById('historyMeetingsList');
-  const historyLoadingState = document.getElementById('historyLoadingState');
-  const btnManualArchiveCurrent = document.getElementById('btnManualArchiveCurrent');
-
-  // New Meeting Modal Elements
-  const newMeetingModal = document.getElementById('newMeetingModal');
-  const btnCloseNewMeeting = document.getElementById('btnCloseNewMeeting');
-  const btnCancelNewMeeting = document.getElementById('btnCancelNewMeeting');
-  const btnConfirmNewMeeting = document.getElementById('btnConfirmNewMeeting');
-  const newMeetingTitleInput = document.getElementById('newMeetingTitleInput');
+  'use strict';
 
   // Application State
-  let currentStage = 'setup'; // 'setup' | 'live'
-  let meetingStatus = 'setup'; // 'setup' | 'active'
-  let departmentName = 'Department of Computer Science and Business Systems';
-  let meetingTitle = 'Annual Parent-Teacher Meeting 2026';
-  let showYearToParents = true;
-  let yearGroups = ['1st Year', '2nd Year', '3rd Year', 'Final Year'];
-  let questions = [];
-  let previewQuestionIndex = 0;
-  let currentQuestionId = null;
-  let questionStatus = 'idle'; // 'idle' | 'live' | 'closed'
-  let currentTallies = null;
-  let stats = { connectedCount: 0, yearGroupCounts: {} };
-  let selectedYearFilter = 'All Years';
-  let joinUrl = '';
-
-  const optionLetters = ['A', 'B', 'C', 'D'];
+  let state = {
+    settings: {},
+    currentMeeting: null,
+    attendance: { total: 0, yearBreakdown: {} },
+    progress: { questionsCompleted: 0, totalQuestions: 0, totalResponses: 0, overallParticipation: 0 },
+    tallies: null,
+    questions: [],
+    history: [],
+    joinUrl: '',
+    qrDataUrl: '',
+    previewQuestionId: null,
+    activeYearFilter: 'All Years'
+  };
 
   // Socket Connection
-  const socket = io();
+  const socket = io({
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000
+  });
 
+  // DOM Elements - Router & Nav
+  const navLinks = {
+    dashboard: document.getElementById('navDashboard'),
+    meetings: document.getElementById('navMeetings'),
+    questions: document.getElementById('navQuestions'),
+    reports: document.getElementById('navReports'),
+    settings: document.getElementById('navSettings')
+  };
+
+  const views = {
+    dashboard: document.getElementById('viewDashboard'),
+    newMeeting: document.getElementById('viewNewMeeting'),
+    meetingControl: document.getElementById('viewMeetingControl'),
+    questions: document.getElementById('viewQuestions'),
+    results: document.getElementById('viewResults'),
+    attendance: document.getElementById('viewAttendance'),
+    qr: document.getElementById('viewQr'),
+    meetings: document.getElementById('viewMeetings'),
+    reports: document.getElementById('viewReports'),
+    export: document.getElementById('viewExport'),
+    settings: document.getElementById('viewSettings')
+  };
+
+  // -------------------------------------------------------------
+  // Router Logic (Hash-based)
+  // -------------------------------------------------------------
+  function handleRoute() {
+    const rawHash = window.location.hash.slice(1) || 'dashboard';
+    const [route] = rawHash.split('/');
+
+    // Hide all views
+    Object.values(views).forEach(view => {
+      if (view) view.classList.remove('active');
+    });
+
+    // Reset active nav
+    Object.values(navLinks).forEach(link => {
+      if (link) link.classList.remove('active');
+    });
+
+    // Map route to view
+    switch (route) {
+      case 'new-meeting':
+        if (views.newMeeting) views.newMeeting.classList.add('active');
+        prepareNewMeetingForm();
+        break;
+
+      case 'meeting-control':
+        if (views.meetingControl) views.meetingControl.classList.add('active');
+        renderMeetingControl();
+        break;
+
+      case 'questions':
+        if (views.questions) views.questions.classList.add('active');
+        if (navLinks.questions) navLinks.questions.classList.add('active');
+        renderQuestionsBank();
+        break;
+
+      case 'results':
+        if (views.results) views.results.classList.add('active');
+        renderResultsPage();
+        break;
+
+      case 'attendance':
+        if (views.attendance) views.attendance.classList.add('active');
+        renderAttendancePage();
+        break;
+
+      case 'qr':
+        if (views.qr) views.qr.classList.add('active');
+        renderQrPage();
+        break;
+
+      case 'meetings':
+        if (views.meetings) views.meetings.classList.add('active');
+        if (navLinks.meetings) navLinks.meetings.classList.add('active');
+        renderArchivesPage();
+        break;
+
+      case 'reports':
+        if (views.reports) views.reports.classList.add('active');
+        if (navLinks.reports) navLinks.reports.classList.add('active');
+        renderReportsSummary();
+        break;
+
+      case 'export':
+        if (views.export) views.export.classList.add('active');
+        break;
+
+      case 'settings':
+        if (views.settings) views.settings.classList.add('active');
+        if (navLinks.settings) navLinks.settings.classList.add('active');
+        populateSettingsForm();
+        break;
+
+      case 'dashboard':
+      default:
+        if (views.dashboard) views.dashboard.classList.add('active');
+        if (navLinks.dashboard) navLinks.dashboard.classList.add('active');
+        renderDashboard();
+        break;
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('hashchange', handleRoute);
+
+  // -------------------------------------------------------------
+  // Socket.io Events
+  // -------------------------------------------------------------
   socket.on('connect', () => {
     socket.emit('admin:join');
   });
 
   socket.on('admin:init', (data) => {
-    departmentName = data.departmentName || departmentName;
-    meetingTitle = data.meetingTitle || meetingTitle;
-    meetingStatus = data.meetingStatus || 'setup';
-    showYearToParents = data.showYearToParents !== false;
-    yearGroups = data.yearGroups || yearGroups;
-    questions = (data.questions && data.questions.length > 0) ? data.questions : getFallbackQuestions();
-    currentQuestionId = data.currentQuestionId || (questions[0] ? questions[0].id : null);
-    questionStatus = data.questionStatus || 'idle';
-    currentTallies = data.tallies;
-    stats = data.stats || stats;
-    joinUrl = data.joinUrl || '';
-
-    // If meeting was already active, jump to live view; otherwise stay in setup
-    if (meetingStatus === 'active') {
-      switchView('live');
-    } else {
-      switchView('setup');
+    state.settings = data.settings || {};
+    state.questions = data.questions || [];
+    state.joinUrl = data.joinUrl || '';
+    state.history = data.historySummaries || [];
+    if (data.stats) {
+      applyAdminStats(data.stats);
     }
-
-    initSetupForm();
-    renderBuilderQuestions();
-    renderMobilePreview();
-    updateBranding();
-    renderFilterPills();
-    renderQuestionNavigator();
-    renderAudienceBreakdown();
-    updateQuestionDisplay();
-    renderChart();
-    loadQrInfo();
+    fetchInfoAndQr();
+    handleRoute();
   });
 
-  socket.on('admin:meeting_started', (data) => {
-    meetingStatus = 'active';
-    if (data.currentQuestionId) currentQuestionId = data.currentQuestionId;
-    if (data.tallies) currentTallies = data.tallies;
-    if (data.stats) stats = data.stats;
-
-    switchView('live');
-    updateQuestionDisplay();
-    renderChart();
-    renderFilterPills();
-    renderQuestionNavigator();
-  });
-
-  socket.on('admin:returned_to_setup', () => {
-    meetingStatus = 'setup';
-    switchView('setup');
-  });
-
-  socket.on('admin:questions_saved', (data) => {
-    questions = data.questions;
-    showYearToParents = data.showYearToParents !== false;
-    if (data.departmentName) departmentName = data.departmentName;
-    if (data.meetingTitle) meetingTitle = data.meetingTitle;
-    if (data.currentQuestionId) currentQuestionId = data.currentQuestionId;
-    if (data.tallies) currentTallies = data.tallies;
-    if (data.stats) stats = data.stats;
-
-    showAutoSaveConfirmation();
-    updateBranding();
-    renderFilterPills();
-    renderQuestionNavigator();
-    updateQuestionDisplay();
-    renderChart();
-  });
-
-  socket.on('admin:state_change', (data) => {
-    currentQuestionId = data.currentQuestionId;
-    questionStatus = data.questionStatus;
-    currentTallies = data.tallies;
-    if (data.stats) stats = data.stats;
-
-    updateQuestionDisplay();
-    renderChart();
-    renderQuestionNavigator();
+  socket.on('meeting:state_changed', (stats) => {
+    applyAdminStats(stats);
+    updateCurrentView();
   });
 
   socket.on('poll:update', (data) => {
-    if (data.questionId === currentQuestionId) {
-      currentTallies = data.tallies;
-    }
-    if (data.stats) stats = data.stats;
-
-    renderChart();
-    renderAudienceBreakdown();
+    state.tallies = data.tallies;
+    if (data.stats) applyAdminStats(data.stats);
+    updateCurrentView();
   });
 
-  socket.on('admin:stats', (data) => {
-    stats = data;
-    renderAudienceBreakdown();
-    renderChart();
+  socket.on('attendance:update', (att) => {
+    state.attendance = att;
+    updateCurrentView();
   });
 
-  socket.on('admin:meeting_archived', (data) => {
-    alert(`Current meeting "${data.archive.meetingTitle}" successfully saved to archives!`);
-    loadHistoryMeetings();
+  socket.on('questions:updated', (qs) => {
+    state.questions = qs;
+    if (views.questions.classList.contains('active')) renderQuestionsBank();
+    if (views.newMeeting.classList.contains('active')) prepareNewMeetingForm();
+    if (views.meetingControl.classList.contains('active')) renderMeetingControl();
   });
 
-  // Switch between Setup View and Live View
-  function switchView(viewName) {
-    currentStage = viewName;
-    if (viewName === 'setup') {
-      setupView.classList.add('active');
-      liveDashboardView.classList.remove('active');
-      liveConnectedPill.style.display = 'none';
-      setupNavActions.style.display = 'flex';
-      liveNavActions.style.display = 'none';
-      navMeetingTitle.textContent = 'Set Up Meeting';
+  socket.on('settings:updated', (s) => {
+    state.settings = s;
+    if (views.settings.classList.contains('active')) populateSettingsForm();
+  });
 
-      // If meeting has already been started, show button to jump back to live
-      if (meetingStatus === 'active') {
-        btnGoToLiveIfStarted.style.display = 'inline-flex';
-      } else {
-        btnGoToLiveIfStarted.style.display = 'none';
-      }
-    } else {
-      setupView.classList.remove('active');
-      liveDashboardView.classList.add('active');
-      liveConnectedPill.style.display = 'inline-flex';
-      setupNavActions.style.display = 'none';
-      liveNavActions.style.display = 'flex';
-      navMeetingTitle.textContent = meetingTitle || 'Live Meeting';
+  socket.on('admin:history_updated', (hist) => {
+    state.history = hist;
+    if (views.dashboard.classList.contains('active')) renderRecentMeetingsList();
+    if (views.meetings.classList.contains('active')) renderArchivesPage();
+  });
+
+  function applyAdminStats(stats) {
+    if (!stats) return;
+    state.currentMeeting = stats.meeting;
+    state.attendance = stats.attendance || state.attendance;
+    state.progress = stats.progress || state.progress;
+    if (stats.tallies) state.tallies = stats.tallies;
+    if (!state.previewQuestionId && state.currentMeeting?.currentQuestionId) {
+      state.previewQuestionId = state.currentMeeting.currentQuestionId;
     }
   }
 
-  btnGoToLiveIfStarted.addEventListener('click', () => switchView('live'));
-  btnEditQuestionsNav.addEventListener('click', () => {
-    switchView('setup');
-    renderBuilderQuestions();
-    renderMobilePreview();
-  });
+  function updateCurrentView() {
+    const rawHash = window.location.hash.slice(1) || 'dashboard';
+    const [route] = rawHash.split('/');
 
-  // Mobile preview column toggle (for smaller screens)
-  btnPreviewToggleMobile.addEventListener('click', () => {
-    if (previewColumn.style.display === 'none') {
-      previewColumn.style.display = 'flex';
-    } else {
-      previewColumn.style.display = 'none';
+    if (route === 'dashboard') renderDashboard();
+    else if (route === 'meeting-control') renderMeetingControl();
+    else if (route === 'results') renderResultsPage();
+    else if (route === 'attendance') renderAttendancePage();
+    else if (route === 'reports') renderReportsSummary();
+  }
+
+  async function fetchInfoAndQr() {
+    try {
+      const res = await fetch('/api/info');
+      const data = await res.json();
+      state.joinUrl = data.joinUrl;
+      state.qrDataUrl = data.qrDataUrl;
+      const qrImg = document.getElementById('qrCodeImage');
+      if (qrImg) qrImg.src = data.qrDataUrl;
+      const urlText = document.getElementById('qrJoinUrlText');
+      if (urlText) urlText.textContent = data.joinUrl;
+    } catch (e) {
+      console.error('Failed to load QR info:', e);
     }
+  }
+
+  // -------------------------------------------------------------
+  // View 1: Dashboard Rendering (No Questions displayed)
+  // -------------------------------------------------------------
+  function renderDashboard() {
+    const m = state.currentMeeting;
+    const dashMeetingTitle = document.getElementById('dashMeetingTitle');
+    const dashMeetingStatusBadge = document.getElementById('dashMeetingStatusBadge');
+
+    if (m && dashMeetingTitle) {
+      dashMeetingTitle.textContent = m.title || 'Parent–Teacher Meeting';
+      if (dashMeetingStatusBadge) {
+        dashMeetingStatusBadge.className = `status-badge ${getStatusBadgeClass(m.status)}`;
+        dashMeetingStatusBadge.textContent = formatStatusLabel(m.status);
+      }
+    }
+
+    // Parents Joined Overview
+    const totalParents = state.attendance.total || 0;
+    const yearCounts = state.attendance.yearBreakdown || {};
+    document.getElementById('dashTotalParents').textContent = totalParents;
+    document.getElementById('dashYear1').textContent = yearCounts['1st Year'] || 0;
+    document.getElementById('dashYear2').textContent = yearCounts['2nd Year'] || 0;
+    document.getElementById('dashYear3').textContent = yearCounts['3rd Year'] || 0;
+    document.getElementById('dashYear4').textContent = yearCounts['Final Year'] || 0;
+
+    // Meeting Progress
+    const prog = state.progress;
+    document.getElementById('dashQuestionsProgress').textContent =
+      `${prog.questionsCompleted || 0} / ${prog.totalQuestions || 0} completed`;
+    document.getElementById('dashResponsesCount').textContent =
+      `${prog.totalResponses || 0} responses`;
+    document.getElementById('dashParticipationPct').textContent =
+      `${prog.overallParticipation || 0}%`;
+
+    renderRecentMeetingsList();
+  }
+
+  function renderRecentMeetingsList() {
+    const tbody = document.getElementById('dashRecentMeetingsList');
+    if (!tbody) return;
+
+    if (!state.history || state.history.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No archived meetings yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = state.history.map(m => `
+      <tr>
+        <td class="cell-main">${escapeHtml(m.title)}</td>
+        <td>${escapeHtml(m.date || m.archivedAt?.slice(0, 10) || '-')}</td>
+        <td>${m.questionsCount || 0}</td>
+        <td>${m.totalParents || 0}</td>
+        <td>${m.participationRate || 0}%</td>
+        <td><span class="status-badge completed">ARCHIVED</span></td>
+        <td>
+          <a href="#results" class="btn btn-secondary btn-sm" onclick="window.loadHistoricalResults('${m.id}')">Results</a>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Dashboard Button Listeners
+  document.getElementById('dashBtnOpenMeeting')?.addEventListener('click', () => {
+    window.location.hash = '#meeting-control';
   });
 
-  // =========================================================================
-  // QUESTION BUILDER LOGIC (BILINGUAL ENGLISH & TAMIL)
-  // =========================================================================
-  function getFallbackQuestions() {
-    return [
-      {
-        id: 'q1',
-        text: 'How satisfied are you with the academic progress and curriculum delivery in CSBS so far?',
-        textTa: 'இதுவரை CSBS பாடத்திட்டம் மற்றும் கல்வி முன்னேற்றத்தில் நீங்கள் எவ்வளவு திருப்தி அடைகிறீர்கள்?',
-        options: ['Highly Satisfied', 'Satisfied', 'Needs Improvement', 'Dissatisfied'],
-        optionsTa: ['மிகவும் திருப்தி', 'திருப்தி', 'முன்னேற்றம் தேவை', 'திருப்தியற்றது']
-      },
-      {
-        id: 'q2',
-        text: 'Which industry readiness initiative should the CSBS department prioritize this semester?',
-        textTa: 'இந்த செமஸ்டரில் CSBS துறை எந்த தொழில்முனைவு மற்றும் வேலைவாய்ப்பு பயிற்சிக்கு முன்னுரிமை அளிக்க வேண்டும்?',
-        options: [
-          'Business Analytics & AI Workshops',
-          'Corporate Internships & Live Projects',
-          'Full-Stack & Cloud Certifications',
-          'Soft Skills & Management Consulting Prep'
-        ],
-        optionsTa: [
-          'பிசினஸ் அனலிட்டிக்ஸ் & AI பட்டறைகள்',
-          'நிறுவன இன்டர்ன்ஷிப் & நேரடி திட்டங்கள்',
-          'ஃபுல்-ஸ்டாக் & கிளவுட் சான்றிதழ்கள்',
-          'திறன் மேம்பாடு & நேர்காணல் பயிற்சி'
-        ]
-      }
-    ];
-  }
+  document.getElementById('dashBtnViewQr')?.addEventListener('click', () => {
+    window.location.hash = '#qr';
+  });
 
-  function initSetupForm() {
-    builderDeptNameInput.value = departmentName;
-    builderMeetingTitleInput.value = meetingTitle;
-    toggleShowYearToParents.checked = showYearToParents;
+  // -------------------------------------------------------------
+  // View 2: Create New Meeting
+  // -------------------------------------------------------------
+  function prepareNewMeetingForm() {
+    const dateInput = document.getElementById('newMeetingDate');
+    if (dateInput && !dateInput.value) {
+      dateInput.value = new Date().toISOString().slice(0, 10);
+    }
 
-    builderDeptNameInput.addEventListener('input', () => {
-      departmentName = builderDeptNameInput.value.trim();
-      updateBranding();
-      debouncedSaveQuestions();
-    });
+    const container = document.getElementById('newMeetingQuestionsList');
+    if (!container) return;
 
-    builderMeetingTitleInput.addEventListener('input', () => {
-      meetingTitle = builderMeetingTitleInput.value.trim();
-      if (currentStage === 'live') navMeetingTitle.textContent = meetingTitle;
-      debouncedSaveQuestions();
-    });
-
-    toggleShowYearToParents.addEventListener('change', () => {
-      showYearToParents = toggleShowYearToParents.checked;
-      renderMobilePreview();
-      debouncedSaveQuestions();
-    });
-  }
-
-  function renderBuilderQuestions() {
-    builderQuestionsList.innerHTML = '';
-
-    questions.forEach((q, qIdx) => {
-      if (!Array.isArray(q.optionsTa)) {
-        q.optionsTa = new Array(q.options.length).fill('');
-      }
-
-      const card = document.createElement('div');
-      card.className = `builder-q-card ${qIdx === previewQuestionIndex ? 'selected-for-preview' : ''}`;
-      card.dataset.index = qIdx;
-
-      // Header: Question number & reorder/delete controls
-      const header = document.createElement('div');
-      header.className = 'builder-q-header';
-      header.innerHTML = `
-        <div class="builder-q-num-badge">Question ${qIdx + 1}</div>
-        <div class="builder-q-actions">
-          <button type="button" class="btn-icon" title="Move Up" ${qIdx === 0 ? 'disabled style="opacity:0.3;"' : ''} data-action="up">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
-          </button>
-          <button type="button" class="btn-icon" title="Move Down" ${qIdx === questions.length - 1 ? 'disabled style="opacity:0.3;"' : ''} data-action="down">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </button>
-          <button type="button" class="btn-icon delete" title="Delete Question" data-action="delete">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
+    container.innerHTML = state.questions.map((q, idx) => `
+      <label class="checkbox-item" style="padding: 6px 0; border-bottom: 1px solid var(--border);">
+        <input type="checkbox" name="selectedQuestion" value="${q.id}" checked>
+        <div>
+          <span class="checkbox-title">Q${idx + 1}: ${escapeHtml(q.text)}</span>
         </div>
-      `;
+      </label>
+    `).join('');
 
-      // Event listeners for reorder and delete
-      header.querySelector('[data-action="up"]')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        moveQuestion(qIdx, -1);
-      });
-      header.querySelector('[data-action="down"]')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        moveQuestion(qIdx, 1);
-      });
-      header.querySelector('[data-action="delete"]')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        deleteQuestion(qIdx);
-      });
+    const successCard = document.getElementById('newMeetingSuccessCard');
+    if (successCard) successCard.style.display = 'none';
+  }
 
-      // Bilingual Question Prompt (English + Tamil inputs side by side)
-      const bilingualPromptsWrapper = document.createElement('div');
-      bilingualPromptsWrapper.className = 'bilingual-inputs-wrapper';
+  document.getElementById('formCreateMeeting')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = document.getElementById('newMeetingTitle').value.trim();
+    const academicYear = document.getElementById('newAcademicYear').value.trim();
+    const date = document.getElementById('newMeetingDate').value;
+    const description = document.getElementById('newMeetingDesc').value.trim();
 
-      // English Prompt
-      const enPromptField = document.createElement('div');
-      enPromptField.className = 'bilingual-field';
-      enPromptField.innerHTML = `<span class="field-sub-label"><span class="lang-pill-en">EN</span> Question Prompt (English)</span>`;
-      const enTextarea = document.createElement('textarea');
-      enTextarea.className = 'builder-q-textarea';
-      enTextarea.rows = 2;
-      enTextarea.placeholder = 'Enter English question prompt...';
-      enTextarea.value = q.text || '';
-      enTextarea.addEventListener('input', (e) => {
-        q.text = e.target.value;
-        renderMobilePreview();
-        debouncedSaveQuestions();
-        validateSetup();
-      });
-      enTextarea.addEventListener('focus', () => setPreviewQuestion(qIdx));
-      enPromptField.appendChild(enTextarea);
+    const checkboxes = document.querySelectorAll('input[name="selectedQuestion"]:checked');
+    const questionIds = Array.from(checkboxes).map(cb => cb.value);
 
-      // Tamil Prompt
-      const taPromptField = document.createElement('div');
-      taPromptField.className = 'bilingual-field';
-      taPromptField.innerHTML = `<span class="field-sub-label"><span class="lang-pill-ta">தமிழ்</span> கேள்வி (Tamil Translation)</span>`;
-      const taTextarea = document.createElement('textarea');
-      taTextarea.className = 'builder-q-textarea tamil-font';
-      taTextarea.rows = 2;
-      taTextarea.placeholder = 'தமிழில் கேள்வியை உள்ளிடவும்...';
-      taTextarea.value = q.textTa || '';
-      taTextarea.addEventListener('input', (e) => {
-        q.textTa = e.target.value;
-        renderMobilePreview();
-        debouncedSaveQuestions();
-      });
-      taTextarea.addEventListener('focus', () => setPreviewQuestion(qIdx));
-      taPromptField.appendChild(taTextarea);
-
-      bilingualPromptsWrapper.appendChild(enPromptField);
-      bilingualPromptsWrapper.appendChild(taPromptField);
-
-      // Options Container
-      const optionsContainer = document.createElement('div');
-      optionsContainer.className = 'builder-options-container';
-
-      q.options.forEach((optText, optIdx) => {
-        const optRow = document.createElement('div');
-        optRow.className = 'builder-option-row';
-
-        const optLabel = document.createElement('div');
-        optLabel.className = `builder-option-label opt-color-${optIdx}`;
-        optLabel.textContent = optionLetters[optIdx] || (optIdx + 1);
-
-        const dualInputs = document.createElement('div');
-        dualInputs.className = 'builder-option-dual-inputs';
-
-        // English Option Input
-        const optInputEn = document.createElement('input');
-        optInputEn.type = 'text';
-        optInputEn.className = 'builder-option-input';
-        optInputEn.placeholder = `Option ${optionLetters[optIdx] || (optIdx + 1)} (English)...`;
-        optInputEn.value = optText || '';
-        optInputEn.addEventListener('input', (e) => {
-          q.options[optIdx] = e.target.value;
-          renderMobilePreview();
-          debouncedSaveQuestions();
-          validateSetup();
-        });
-        optInputEn.addEventListener('focus', () => setPreviewQuestion(qIdx));
-
-        // Tamil Option Input
-        const optInputTa = document.createElement('input');
-        optInputTa.type = 'text';
-        optInputTa.className = 'builder-option-input tamil-font';
-        optInputTa.placeholder = `விருப்பம் ${optionLetters[optIdx] || (optIdx + 1)} (தமிழ்)...`;
-        optInputTa.value = (q.optionsTa && q.optionsTa[optIdx]) || '';
-        optInputTa.addEventListener('input', (e) => {
-          if (!Array.isArray(q.optionsTa)) q.optionsTa = [];
-          q.optionsTa[optIdx] = e.target.value;
-          renderMobilePreview();
-          debouncedSaveQuestions();
-        });
-        optInputTa.addEventListener('focus', () => setPreviewQuestion(qIdx));
-
-        dualInputs.appendChild(optInputEn);
-        dualInputs.appendChild(optInputTa);
-
-        // Remove option button (only if > 2 options)
-        const btnRemove = document.createElement('button');
-        btnRemove.type = 'button';
-        btnRemove.className = 'btn-remove-option';
-        btnRemove.title = 'Remove Option';
-        btnRemove.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-        btnRemove.disabled = q.options.length <= 2;
-        btnRemove.style.opacity = q.options.length <= 2 ? '0.2' : '1';
-        btnRemove.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (q.options.length > 2) {
-            q.options.splice(optIdx, 1);
-            if (Array.isArray(q.optionsTa)) q.optionsTa.splice(optIdx, 1);
-            renderBuilderQuestions();
-            renderMobilePreview();
-            debouncedSaveQuestions();
-            validateSetup();
-          }
-        });
-
-        optRow.appendChild(optLabel);
-        optRow.appendChild(dualInputs);
-        optRow.appendChild(btnRemove);
-        optionsContainer.appendChild(optRow);
-      });
-
-      // Footer: Add Option button
-      const optFooter = document.createElement('div');
-      optFooter.className = 'builder-options-footer';
-      if (q.options.length < 4) {
-        const btnAddOpt = document.createElement('button');
-        btnAddOpt.type = 'button';
-        btnAddOpt.className = 'btn-add-option';
-        btnAddOpt.innerHTML = `<span>+ Add Option (${optionLetters[q.options.length]})</span>`;
-        btnAddOpt.addEventListener('click', (e) => {
-          e.stopPropagation();
-          q.options.push('');
-          if (!Array.isArray(q.optionsTa)) q.optionsTa = [];
-          q.optionsTa.push('');
-          renderBuilderQuestions();
-          renderMobilePreview();
-          debouncedSaveQuestions();
-          validateSetup();
-        });
-        optFooter.appendChild(btnAddOpt);
-      } else {
-        const limitNote = document.createElement('span');
-        limitNote.className = 'option-limit-note';
-        limitNote.textContent = 'Maximum 4 options reached';
-        optFooter.appendChild(limitNote);
-      }
-
-      card.appendChild(header);
-      card.appendChild(bilingualPromptsWrapper);
-      card.appendChild(optionsContainer);
-      card.appendChild(optFooter);
-
-      card.addEventListener('click', () => {
-        setPreviewQuestion(qIdx);
-      });
-
-      builderQuestionsList.appendChild(card);
+    socket.emit('admin:create_meeting', {
+      title,
+      academicYear,
+      date,
+      description,
+      questionIds
     });
 
-    validateSetup();
-  }
-
-  function setPreviewQuestion(idx) {
-    previewQuestionIndex = idx;
-    document.querySelectorAll('.builder-q-card').forEach((c, i) => {
-      c.classList.toggle('selected-for-preview', i === idx);
-    });
-    renderMobilePreview();
-  }
-
-  function moveQuestion(index, direction) {
-    const target = index + direction;
-    if (target < 0 || target >= questions.length) return;
-    const temp = questions[index];
-    questions[index] = questions[target];
-    questions[target] = temp;
-    previewQuestionIndex = target;
-    renderBuilderQuestions();
-    renderMobilePreview();
-    debouncedSaveQuestions();
-  }
-
-  function deleteQuestion(index) {
-    if (questions.length <= 1) {
-      alert('You must have at least one question for the meeting.');
-      return;
-    }
-    if (confirm(`Delete Question ${index + 1}?`)) {
-      questions.splice(index, 1);
-      if (previewQuestionIndex >= questions.length) {
-        previewQuestionIndex = questions.length - 1;
-      }
-      renderBuilderQuestions();
-      renderMobilePreview();
-      debouncedSaveQuestions();
-      validateSetup();
-    }
-  }
-
-  btnAddQuestionCard.addEventListener('click', () => {
-    const newId = 'q_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-    questions.push({
-      id: newId,
-      text: '',
-      textTa: '',
-      options: ['', ''],
-      optionsTa: ['', '']
-    });
-    previewQuestionIndex = questions.length - 1;
-    renderBuilderQuestions();
-    renderMobilePreview();
-    debouncedSaveQuestions();
-    validateSetup();
-
-    // Scroll to new question card
-    setTimeout(() => {
-      const cards = builderQuestionsList.querySelectorAll('.builder-q-card');
-      const lastCard = cards[cards.length - 1];
-      if (lastCard) lastCard.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    const successCard = document.getElementById('newMeetingSuccessCard');
+    if (successCard) successCard.style.display = 'block';
   });
 
-  // Render Mobile Mockup Preview (Bilingual)
-  function renderMobilePreview() {
-    const q = questions[previewQuestionIndex] || questions[0];
-    if (!q) {
-      previewPhoneContent.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:40px;">No question to preview</div>';
-      return;
+  document.getElementById('btnSuccessOpenMeeting')?.addEventListener('click', () => {
+    window.location.hash = '#meeting-control';
+  });
+
+  document.getElementById('btnSuccessViewQr')?.addEventListener('click', () => {
+    window.location.hash = '#qr';
+  });
+
+  // -------------------------------------------------------------
+  // View 3: Meeting Control Page
+  // -------------------------------------------------------------
+  function renderMeetingControl() {
+    const m = state.currentMeeting;
+    if (!m) return;
+
+    // Header info
+    document.getElementById('ctrlMeetingTitle').textContent = m.title;
+    document.getElementById('ctrlMeetingSubtitle').textContent =
+      `Academic Year: ${m.academicYear || '2026'} • Date: ${m.date || ''}`;
+
+    const badge = document.getElementById('ctrlStatusBadge');
+    badge.className = `status-badge ${getStatusBadgeClass(m.status)}`;
+    badge.textContent = formatStatusLabel(m.status);
+
+    // Attendance breakdown
+    const yearCounts = state.attendance.yearBreakdown || {};
+    document.getElementById('ctrlAttendanceTotal').textContent = state.attendance.total || 0;
+    document.getElementById('ctrlYear1').textContent = yearCounts['1st Year'] || 0;
+    document.getElementById('ctrlYear2').textContent = yearCounts['2nd Year'] || 0;
+    document.getElementById('ctrlYear3').textContent = yearCounts['3rd Year'] || 0;
+    document.getElementById('ctrlYear4').textContent = yearCounts['Final Year'] || 0;
+
+    // Agenda List
+    const agendaList = document.getElementById('ctrlAgendaList');
+    if (agendaList) {
+      agendaList.innerHTML = state.questions.map((q, idx) => {
+        const isSelected = q.id === state.previewQuestionId;
+        const isLive = m.currentQuestionId === q.id && m.questionStatus === 'live';
+        return `
+          <button type="button" class="btn btn-secondary btn-sm" style="justify-content: space-between; width: 100%; text-align: left; ${isSelected ? 'border-color: var(--primary); background: var(--primary-subtle); color: var(--primary); font-weight: 700;' : ''}" onclick="window.selectPreviewQuestion('${q.id}')">
+            <span>Q${idx + 1}: ${escapeHtml(q.text.slice(0, 32))}...</span>
+            ${isLive ? '<span class="status-badge live" style="font-size: 0.68rem; padding: 2px 6px;">LIVE</span>' : ''}
+          </button>
+        `;
+      }).join('');
     }
 
-    const yearDisplayHtml = showYearToParents
-      ? `<span>Joined as: <strong style="color: var(--primary-dark);">2nd Year</strong></span>`
-      : `<span>Participation: <strong style="color: #059669;">Anonymous</strong></span>`;
+    // Preview Question Display
+    const previewQ = state.questions.find(q => q.id === state.previewQuestionId) || state.questions[0];
+    if (previewQ) {
+      const idx = state.questions.findIndex(q => q.id === previewQ.id);
+      document.getElementById('ctrlQuestionIndexTag').textContent = `Question ${idx + 1} of ${state.questions.length}`;
 
-    let optionsHtml = '';
-    q.options.forEach((optText, i) => {
-      const optTa = (q.optionsTa && q.optionsTa[i]) || '';
-      optionsHtml += `
-        <div class="preview-opt-item">
-          <span class="preview-opt-letter opt-color-${i}">${optionLetters[i] || (i + 1)}</span>
-          <div style="display:flex; flex-direction:column; gap:2px; flex:1;">
-            <span>${escapeHtml(optText || `Option ${optionLetters[i] || (i + 1)}`)}</span>
-            ${optTa ? `<span style="font-size:0.75rem; color:#7b1fa2; font-family:var(--font-tamil);">${escapeHtml(optTa)}</span>` : ''}
+      const qStatusBadge = document.getElementById('ctrlQuestionStatusBadge');
+      const isLive = m.currentQuestionId === previewQ.id && m.questionStatus === 'live';
+      const isClosed = m.currentQuestionId === previewQ.id && m.questionStatus === 'closed';
+
+      if (isLive) {
+        qStatusBadge.className = 'status-badge live';
+        qStatusText(qStatusBadge, 'LIVE');
+        document.getElementById('ctrlBtnLaunchQ').style.display = 'none';
+        document.getElementById('ctrlBtnCloseQ').style.display = 'inline-flex';
+      } else if (isClosed) {
+        qStatusBadge.className = 'status-badge closed';
+        qStatusText(qStatusBadge, 'CLOSED');
+        document.getElementById('ctrlBtnLaunchQ').style.display = 'inline-flex';
+        document.getElementById('ctrlBtnCloseQ').style.display = 'none';
+      } else {
+        qStatusBadge.className = 'status-badge draft';
+        qStatusText(qStatusBadge, 'READY TO LAUNCH');
+        document.getElementById('ctrlBtnLaunchQ').style.display = 'inline-flex';
+        document.getElementById('ctrlBtnCloseQ').style.display = 'none';
+      }
+
+      document.getElementById('ctrlQuestionTextEn').textContent = previewQ.text;
+      const taEl = document.getElementById('ctrlQuestionTextTa');
+      if (previewQ.textTa && state.settings.showTamilTranslation !== false) {
+        taEl.textContent = previewQ.textTa;
+        taEl.style.display = 'block';
+      } else {
+        taEl.style.display = 'none';
+      }
+
+      // Breakdown bars
+      renderBreakdownBars(previewQ);
+    }
+  }
+
+  function qStatusText(el, text) {
+    el.innerHTML = `<span class="badge-dot"></span>${text}`;
+  }
+
+  function renderBreakdownBars(question) {
+    const list = document.getElementById('ctrlBreakdownList');
+    if (!list) return;
+
+    // Use current tallies if matching
+    const tallies = (state.tallies && state.tallies.questionId === question.id) ? state.tallies : null;
+    const totalVotes = tallies ? tallies.totalVotes : 0;
+    const totalAudience = state.attendance.total || 0;
+    const pct = totalAudience > 0 ? Math.round((totalVotes / totalAudience) * 100) : 0;
+
+    document.getElementById('ctrlLiveResponsesStat').textContent = `${totalVotes} Votes Cast (${pct}% participation)`;
+
+    const options = question.options || [];
+    const optionsTa = question.optionsTa || [];
+
+    list.innerHTML = options.map((opt, idx) => {
+      const optTa = (state.settings.showTamilTranslation !== false && optionsTa[idx]) ? optionsTa[idx] : '';
+      const votesCount = tallies?.breakdown?.['All Years']?.[idx] || 0;
+      const optPct = totalVotes > 0 ? ((votesCount / totalVotes) * 100).toFixed(1) : '0.0';
+      const letter = ['A', 'B', 'C', 'D'][idx] || (idx + 1);
+
+      return `
+        <div class="breakdown-bar-item">
+          <div class="bar-label-row">
+            <span class="bar-opt-text">
+              <strong>${letter}.</strong> ${escapeHtml(opt)}
+              ${optTa ? `<span style="font-family: 'Noto Sans Tamil'; color: var(--text-muted); font-size: 0.84rem; margin-left: 6px;">(${escapeHtml(optTa)})</span>` : ''}
+            </span>
+            <span class="bar-opt-stat">${votesCount} votes (${optPct}%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: ${optPct}%;"></div>
           </div>
         </div>
       `;
-    });
-
-    previewPhoneContent.innerHTML = `
-      <div style="font-size:0.7rem; color:var(--primary-dark); font-weight:800; text-transform:uppercase;">
-        ${escapeHtml(departmentName || 'Department of Computer Science and Business Systems')}
-      </div>
-      <div class="preview-parent-badge">
-        ${yearDisplayHtml}
-        <span style="font-size:0.7rem; color:#059669; font-weight:800;">● Live</span>
-      </div>
-      <div class="preview-parent-question">
-        ${escapeHtml(q.text || 'Question text will appear here...')}
-      </div>
-      ${q.textTa ? `<div class="preview-parent-question-ta">${escapeHtml(q.textTa)}</div>` : ''}
-      <div class="preview-options-list">
-        ${optionsHtml}
-      </div>
-      <div style="font-size:0.7rem; color:var(--text-dim); text-align:center; margin-top:auto; padding-top:10px;">
-        Tap option to answer • English & தமிழ்
-      </div>
-    `;
+    }).join('');
   }
 
-  // Validate Questions & Enable/Disable Finish Button
-  function validateSetup() {
-    let validCount = 0;
-    questions.forEach(q => {
-      const hasText = (q.text || '').trim().length > 0;
-      const validOptions = (q.options || []).filter(o => (o || '').trim().length > 0);
-      if (hasText && validOptions.length >= 2) {
-        validCount++;
-      }
-    });
+  window.selectPreviewQuestion = function(qId) {
+    state.previewQuestionId = qId;
+    socket.emit('admin:navigate_preview', { questionId: qId });
+    renderMeetingControl();
+  };
 
-    builderValidCount.textContent = `${validCount} of ${questions.length} questions`;
-
-    if (validCount >= 1) {
-      btnFinishAndStartMeeting.disabled = false;
-    } else {
-      btnFinishAndStartMeeting.disabled = true;
-    }
-  }
-
-  // Auto-Save Questions with Debouncing
-  let autoSaveTimeout = null;
-  function debouncedSaveQuestions() {
-    autoSaveIndicator.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
-      <span>Saving...</span>
-    `;
-
-    if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
-    autoSaveTimeout = setTimeout(() => {
-      saveQuestionsToServer();
-    }, 500);
-  }
-
-  function saveQuestionsToServer() {
-    const payload = {
-      questions,
-      showYearToParents,
-      departmentName,
-      meetingTitle
-    };
-
-    localStorage.setItem('ptm_draft_questions', JSON.stringify(payload));
-    socket.emit('admin:save_questions', payload);
-  }
-
-  function showAutoSaveConfirmation() {
-    autoSaveIndicator.innerHTML = `
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-      <span>Draft Auto-Saved</span>
-    `;
-  }
-
-  // Finish & Start Meeting Action
-  btnFinishAndStartMeeting.addEventListener('click', () => {
-    const cleanedQuestions = questions.filter(q => {
-      const hasText = (q.text || '').trim().length > 0;
-      const validOptions = (q.options || []).filter(o => (o || '').trim().length > 0);
-      return hasText && validOptions.length >= 2;
-    });
-
-    if (cleanedQuestions.length === 0) {
-      alert('Please add at least 1 question with at least 2 options.');
-      return;
-    }
-
-    questions = cleanedQuestions;
-    saveQuestionsToServer();
+  // Meeting Control Actions
+  document.getElementById('ctrlBtnStartMeeting')?.addEventListener('click', () => {
     socket.emit('admin:start_meeting');
   });
 
-  // =========================================================================
-  // STAGE 2: LIVE POLLING DASHBOARD LOGIC (AUDITORIUM PROJECTOR)
-  // =========================================================================
-  function loadQrInfo() {
-    fetch('/api/info')
-      .then(res => res.json())
-      .then(info => {
-        joinUrl = info.joinUrl;
-        sideQrImg.src = info.qrDataUrl;
-        modalQrImg.src = info.qrDataUrl;
-        sideJoinUrl.textContent = info.joinUrl;
-        modalJoinUrl.textContent = info.joinUrl;
-      })
-      .catch(err => console.error('Failed to load QR info:', err));
-  }
-
-  function updateBranding() {
-    navDeptText.textContent = departmentName || 'Dept. of Computer Science & Business Systems';
-    if (currentStage === 'live') {
-      navMeetingTitle.textContent = meetingTitle || 'Live Meeting';
-    }
-  }
-
-  function renderFilterPills() {
-    filterPillsContainer.innerHTML = '';
-    const allFilters = ['All Years', ...yearGroups];
-
-    allFilters.forEach(filterName => {
-      const pill = document.createElement('button');
-      pill.type = 'button';
-      pill.className = `filter-pill ${selectedYearFilter === filterName ? 'active' : ''}`;
-
-      const count = filterName === 'All Years'
-        ? stats.connectedCount
-        : (stats.yearGroupCounts && stats.yearGroupCounts[filterName] || 0);
-
-      pill.innerHTML = `
-        <span>${escapeHtml(filterName)}</span>
-        <span class="pill-count">${count}</span>
-      `;
-
-      pill.addEventListener('click', () => {
-        selectedYearFilter = filterName;
-        renderFilterPills();
-        renderChart();
-      });
-
-      filterPillsContainer.appendChild(pill);
-    });
-  }
-
-  function renderAudienceBreakdown() {
-    animateNumber(navConnectedCount, stats.connectedCount || 0);
-    audienceTotalPill.textContent = `${stats.connectedCount || 0} Total`;
-
-    audienceBreakdownList.innerHTML = '';
-    if ((stats.connectedCount || 0) === 0) {
-      audienceBreakdownList.innerHTML = `
-        <div style="font-size:0.82rem; color:var(--text-dim); text-align:center; padding:10px 0;">
-          No parents connected yet — project QR code to begin.
-        </div>
-      `;
-      return;
-    }
-
-    yearGroups.forEach(yg => {
-      const count = (stats.yearGroupCounts && stats.yearGroupCounts[yg]) || 0;
-      const row = document.createElement('div');
-      row.className = 'audience-row';
-      row.innerHTML = `
-        <span style="color: var(--text-muted); font-weight: 600;">${escapeHtml(yg)}</span>
-        <span style="font-weight: 800; color: var(--primary-dark);">${count}</span>
-      `;
-      audienceBreakdownList.appendChild(row);
-    });
-  }
-
-  function getCurrentQuestion() {
-    return questions.find(q => q.id === currentQuestionId) || questions[0] || null;
-  }
-
-  function updateQuestionDisplay() {
-    const q = getCurrentQuestion();
-    const qIndex = questions.findIndex(item => item.id === (q ? q.id : ''));
-
-    if (!q) {
-      displayQuestionIndex.textContent = 'No Questions Configured';
-      displayQuestionText.textContent = 'Click "Alter Questions" to add questions.';
-      displayQuestionTextTa.style.display = 'none';
-      displayStatusBadge.className = 'q-status-badge idle';
-      displayStatusText.textContent = 'Empty';
-      btnLaunchPoll.disabled = true;
-      btnClosePoll.style.display = 'none';
-      btnResetPoll.disabled = true;
-      return;
-    }
-
-    displayQuestionIndex.textContent = `Question ${qIndex + 1} of ${questions.length}`;
-    displayQuestionText.textContent = q.text;
-
-    if (q.textTa && q.textTa.trim()) {
-      displayQuestionTextTa.textContent = q.textTa;
-      displayQuestionTextTa.style.display = 'block';
-    } else {
-      displayQuestionTextTa.style.display = 'none';
-    }
-
-    if (questionStatus === 'live') {
-      displayStatusBadge.className = 'q-status-badge live';
-      displayStatusText.textContent = '● Live Polling Active';
-      btnLaunchPoll.style.display = 'none';
-      btnClosePoll.style.display = 'inline-flex';
-      btnResetPoll.disabled = false;
-    } else if (questionStatus === 'closed') {
-      displayStatusBadge.className = 'q-status-badge closed';
-      displayStatusText.textContent = 'Poll Closed';
-      btnLaunchPoll.style.display = 'inline-flex';
-      btnLaunchPoll.querySelector('span').textContent = 'Reopen Poll';
-      btnClosePoll.style.display = 'none';
-      btnResetPoll.disabled = false;
-    } else {
-      displayStatusBadge.className = 'q-status-badge idle';
-      displayStatusText.textContent = 'Ready to Launch';
-      btnLaunchPoll.style.display = 'inline-flex';
-      btnLaunchPoll.querySelector('span').textContent = 'Launch Poll to Parents';
-      btnClosePoll.style.display = 'none';
-      btnResetPoll.disabled = false;
-    }
-
-    btnPrevQuestion.disabled = qIndex <= 0;
-    btnNextQuestion.disabled = qIndex >= questions.length - 1;
-  }
-
-  function renderQuestionNavigator() {
-    qCountPill.textContent = `${questions.length} Questions`;
-    questionNavList.innerHTML = '';
-
-    questions.forEach((q, idx) => {
-      const item = document.createElement('div');
-      item.className = `q-nav-item ${q.id === currentQuestionId ? 'active' : ''}`;
-      item.innerHTML = `
-        <div class="q-nav-info">
-          <span class="q-nav-num">Question ${idx + 1}</span>
-          <span class="q-nav-title">${escapeHtml(q.text || 'Untitled Question')}</span>
-        </div>
-        ${q.id === currentQuestionId && questionStatus === 'live' ? '<span style="color:var(--destructive); font-size: 0.72rem; font-weight:800;">LIVE</span>' : ''}
-      `;
-
-      item.addEventListener('click', () => {
-        if (q.id !== currentQuestionId) {
-          switchToQuestion(q.id);
-        }
-      });
-
-      questionNavList.appendChild(item);
-    });
-  }
-
-  function switchToQuestion(qId) {
-    currentQuestionId = qId;
-    questionStatus = 'idle';
-    socket.emit('admin:launch_question', { questionId: qId });
-  }
-
-  // Animated Live Bar Chart (Bilingual English & Tamil)
-  function renderChart() {
-    const q = getCurrentQuestion();
-    if (!q) {
-      chartBarsList.innerHTML = '<div class="empty-chart-state">No question loaded.</div>';
-      chartVoteSummary.textContent = '0 Votes Cast';
-      return;
-    }
-
-    const options = q.options || [];
-    const optionsTa = q.optionsTa || [];
-    let filterCounts = [];
-    let totalFilterVotes = 0;
-
-    if (currentTallies && currentTallies.breakdown) {
-      const breakdown = currentTallies.breakdown[selectedYearFilter] || new Array(options.length).fill(0);
-      filterCounts = breakdown;
-      totalFilterVotes = filterCounts.reduce((acc, v) => acc + v, 0);
-    } else {
-      filterCounts = new Array(options.length).fill(0);
-    }
-
-    const audienceTotal = selectedYearFilter === 'All Years'
-      ? stats.connectedCount
-      : (stats.yearGroupCounts && stats.yearGroupCounts[selectedYearFilter] || 0);
-
-    const participationPct = audienceTotal > 0
-      ? Math.round((totalFilterVotes / audienceTotal) * 100)
-      : 0;
-
-    chartVoteSummary.textContent = `${totalFilterVotes} Votes Cast (${participationPct}% participation · ${audienceTotal} in ${selectedYearFilter})`;
-
-    // Empty state when question is not launched yet and no votes
-    if (totalFilterVotes === 0 && questionStatus === 'idle') {
-      chartBarsList.innerHTML = `
-        <div class="empty-chart-state">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <div style="font-weight:800; font-size:1.1rem; color:var(--text-main);">Question Ready to Launch</div>
-          <div style="font-size:0.9rem;">Click "Launch Poll to Parents" above to broadcast live to phones.</div>
-        </div>
-      `;
-      return;
-    }
-
-    // Check if bars need structure rebuild
-    const existingBars = chartBarsList.querySelectorAll('.bar-row');
-    if (existingBars.length !== options.length) {
-      chartBarsList.innerHTML = '';
-      options.forEach((optText, i) => {
-        const optTa = optionsTa[i] || '';
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.dataset.index = i;
-
-        row.innerHTML = `
-          <div class="bar-label-line">
-            <div class="bar-option-info">
-              <span class="option-badge opt-color-${i}">${optionLetters[i] || (i + 1)}</span>
-              <div class="bar-option-titles-stacked">
-                <span class="bar-option-title-en">${escapeHtml(optText)}</span>
-                ${optTa ? `<span class="bar-option-title-ta">${escapeHtml(optTa)}</span>` : ''}
-              </div>
-            </div>
-            <div class="bar-metrics">
-              <span class="bar-count">0 votes</span>
-              <span class="bar-percent">(0%)</span>
-            </div>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill bar-fill-${i}" style="width: 0%"></div>
-          </div>
-        `;
-        chartBarsList.appendChild(row);
-      });
-    }
-
-    // Smoothly animate existing bars
-    options.forEach((optText, i) => {
-      const row = chartBarsList.querySelector(`.bar-row[data-index="${i}"]`);
-      if (!row) return;
-
-      const titleEnEl = row.querySelector('.bar-option-title-en');
-      const countEl = row.querySelector('.bar-count');
-      const percentEl = row.querySelector('.bar-percent');
-      const fillEl = row.querySelector('.bar-fill');
-
-      if (titleEnEl) titleEnEl.textContent = optText;
-
-      const votes = filterCounts[i] || 0;
-      const pct = totalFilterVotes > 0 ? ((votes / totalFilterVotes) * 100).toFixed(1) : '0.0';
-
-      countEl.textContent = `${votes} ${votes === 1 ? 'vote' : 'votes'}`;
-      percentEl.textContent = `(${pct}%)`;
-
-      const barWidth = totalFilterVotes > 0 ? (votes / totalFilterVotes) * 100 : 0;
-      fillEl.style.width = `${barWidth}%`;
-    });
-  }
-
-  // Question Navigation Actions
-  btnPrevQuestion.addEventListener('click', () => {
-    const idx = questions.findIndex(q => q.id === currentQuestionId);
-    if (idx > 0) switchToQuestion(questions[idx - 1].id);
+  document.getElementById('ctrlBtnViewQr')?.addEventListener('click', () => {
+    window.location.hash = '#qr';
   });
 
-  btnNextQuestion.addEventListener('click', () => {
-    const idx = questions.findIndex(q => q.id === currentQuestionId);
-    if (idx >= 0 && idx < questions.length - 1) switchToQuestion(questions[idx + 1].id);
+  document.getElementById('ctrlBtnAttendance')?.addEventListener('click', () => {
+    window.location.hash = '#attendance';
   });
 
-  btnLaunchPoll.addEventListener('click', () => {
-    if (!currentQuestionId && questions.length > 0) currentQuestionId = questions[0].id;
-    if (currentQuestionId) socket.emit('admin:launch_question', { questionId: currentQuestionId });
+  document.getElementById('ctrlBtnResults')?.addEventListener('click', () => {
+    window.location.hash = '#results';
   });
 
-  btnClosePoll.addEventListener('click', () => {
+  document.getElementById('ctrlBtnEndMeeting')?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to end this meeting? A final report snapshot will be archived.')) {
+      socket.emit('admin:end_meeting');
+    }
+  });
+
+  // Question navigation buttons
+  document.getElementById('ctrlBtnPrevQ')?.addEventListener('click', () => {
+    const curIdx = state.questions.findIndex(q => q.id === state.previewQuestionId);
+    if (curIdx > 0) {
+      window.selectPreviewQuestion(state.questions[curIdx - 1].id);
+    }
+  });
+
+  document.getElementById('ctrlBtnNextQ')?.addEventListener('click', () => {
+    const curIdx = state.questions.findIndex(q => q.id === state.previewQuestionId);
+    if (curIdx < state.questions.length - 1) {
+      window.selectPreviewQuestion(state.questions[curIdx + 1].id);
+    }
+  });
+
+  // Launch Question: Explicitly launches to parents
+  document.getElementById('ctrlBtnLaunchQ')?.addEventListener('click', () => {
+    if (!state.previewQuestionId) return;
+    socket.emit('admin:launch_question', { questionId: state.previewQuestionId });
+  });
+
+  // Close Question
+  document.getElementById('ctrlBtnCloseQ')?.addEventListener('click', () => {
     socket.emit('admin:close_question');
   });
 
-  btnResetPoll.addEventListener('click', () => {
-    if (!currentQuestionId) return;
-    if (confirm('Are you sure you want to reset all responses for this question?')) {
-      socket.emit('admin:reset_question', { questionId: currentQuestionId });
+  // Reset Question
+  document.getElementById('ctrlBtnResetQ')?.addEventListener('click', () => {
+    document.getElementById('resetConfirmModal')?.classList.remove('hidden');
+  });
+
+  document.getElementById('btnCloseResetConfirm')?.addEventListener('click', () => {
+    document.getElementById('resetConfirmModal')?.classList.add('hidden');
+  });
+
+  document.getElementById('btnCancelResetConfirm')?.addEventListener('click', () => {
+    document.getElementById('resetConfirmModal')?.classList.add('hidden');
+  });
+
+  document.getElementById('btnConfirmResetOperation')?.addEventListener('click', () => {
+    if (state.previewQuestionId) {
+      socket.emit('admin:reset_question', { questionId: state.previewQuestionId });
+    }
+    document.getElementById('resetConfirmModal')?.classList.add('hidden');
+  });
+
+  // -------------------------------------------------------------
+  // View 4: Questions Management
+  // -------------------------------------------------------------
+  function renderQuestionsBank() {
+    const list = document.getElementById('questionsBankList');
+    if (!list) return;
+
+    if (!state.questions || state.questions.length === 0) {
+      list.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No questions configured yet. Click "+ Add Question" to create one.</div>`;
+      return;
+    }
+
+    list.innerHTML = state.questions.map((q, idx) => `
+      <div class="question-item-card">
+        <div style="flex: 1;">
+          <div class="q-item-num">Question ${idx + 1}</div>
+          <div class="q-item-text-en">${escapeHtml(q.text)}</div>
+          ${q.textTa ? `<div class="q-item-text-ta">${escapeHtml(q.textTa)}</div>` : ''}
+          <div class="q-item-options-preview">
+            ${(q.options || []).map((opt, i) => `
+              <span class="opt-pill"><strong>${['A', 'B', 'C', 'D'][i]}:</strong> ${escapeHtml(opt)}</span>
+            `).join('')}
+          </div>
+        </div>
+        <div class="q-item-actions">
+          <button class="btn btn-secondary btn-sm" onclick="window.editQuestion('${q.id}')">Edit</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.duplicateQuestion('${q.id}')">Duplicate</button>
+          <button class="btn btn-danger btn-sm" onclick="window.deleteQuestion('${q.id}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Question Modal Handling
+  const qModal = document.getElementById('questionEditorModal');
+
+  document.getElementById('btnOpenAddQuestionModal')?.addEventListener('click', () => {
+    document.getElementById('questionEditorTitle').textContent = 'Add Question';
+    document.getElementById('editQuestionId').value = '';
+    document.getElementById('formQuestionEditor').reset();
+    qModal.classList.remove('hidden');
+  });
+
+  document.getElementById('btnCloseQuestionEditor')?.addEventListener('click', () => {
+    qModal.classList.add('hidden');
+  });
+
+  document.getElementById('btnCancelQuestionEditor')?.addEventListener('click', () => {
+    qModal.classList.add('hidden');
+  });
+
+  window.editQuestion = function(qId) {
+    const q = state.questions.find(item => item.id === qId);
+    if (!q) return;
+
+    document.getElementById('questionEditorTitle').textContent = 'Edit Question';
+    document.getElementById('editQuestionId').value = q.id;
+    document.getElementById('editQuestionEn').value = q.text || '';
+    document.getElementById('editQuestionTa').value = q.textTa || '';
+
+    document.getElementById('editOptAEn').value = q.options[0] || '';
+    document.getElementById('editOptATa').value = q.optionsTa?.[0] || '';
+    document.getElementById('editOptBEn').value = q.options[1] || '';
+    document.getElementById('editOptBTa').value = q.optionsTa?.[1] || '';
+    document.getElementById('editOptCEn').value = q.options[2] || '';
+    document.getElementById('editOptCTa').value = q.optionsTa?.[2] || '';
+    document.getElementById('editOptDEn').value = q.options[3] || '';
+    document.getElementById('editOptDTa').value = q.optionsTa?.[3] || '';
+
+    qModal.classList.remove('hidden');
+  };
+
+  window.duplicateQuestion = async function(qId) {
+    const q = state.questions.find(item => item.id === qId);
+    if (!q) return;
+
+    const payload = {
+      text: q.text + ' (Copy)',
+      textTa: q.textTa ? q.textTa + ' (நகல்)' : '',
+      options: [...q.options],
+      optionsTa: [...(q.optionsTa || [])]
+    };
+
+    try {
+      await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  window.deleteQuestion = async function(qId) {
+    if (!confirm('Are you sure you want to delete this question?')) return;
+    try {
+      await fetch(`/api/questions/${qId}`, { method: 'DELETE' });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  document.getElementById('btnSaveQuestionEditor')?.addEventListener('click', async () => {
+    const qId = document.getElementById('editQuestionId').value;
+    const text = document.getElementById('editQuestionEn').value.trim();
+    const textTa = document.getElementById('editQuestionTa').value.trim();
+
+    const options = [
+      document.getElementById('editOptAEn').value.trim(),
+      document.getElementById('editOptBEn').value.trim(),
+      document.getElementById('editOptCEn').value.trim(),
+      document.getElementById('editOptDEn').value.trim()
+    ].filter(Boolean);
+
+    const optionsTa = [
+      document.getElementById('editOptATa').value.trim(),
+      document.getElementById('editOptBTa').value.trim(),
+      document.getElementById('editOptCTa').value.trim(),
+      document.getElementById('editOptDTa').value.trim()
+    ];
+
+    if (!text || options.length < 2) {
+      alert('Please provide question text and at least 2 options.');
+      return;
+    }
+
+    try {
+      if (qId) {
+        await fetch(`/api/questions/${qId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, textTa, options, optionsTa })
+        });
+      } else {
+        await fetch('/api/questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, textTa, options, optionsTa })
+        });
+      }
+      qModal.classList.add('hidden');
+    } catch (e) {
+      console.error(e);
     }
   });
 
-  // QR Modals
-  function openQrModal() { qrModal.classList.remove('hidden'); }
-  function closeQrModal() { qrModal.classList.add('hidden'); }
-  btnBigQr.addEventListener('click', openQrModal);
-  btnOpenQrModal.addEventListener('click', openQrModal);
-  btnCloseQrModal.addEventListener('click', closeQrModal);
+  // -------------------------------------------------------------
+  // View 5: Results & Analysis (Categorized By Year)
+  // -------------------------------------------------------------
+  function renderResultsPage() {
+    // Overall Stats
+    const totalAudience = state.attendance.total || 0;
+    const totalResponses = state.progress.totalResponses || 0;
+    const totalExpected = totalAudience * (state.questions.length || 1);
+    const overallPct = totalExpected > 0 ? Math.min(100, Math.round((totalResponses / totalExpected) * 100)) : 0;
 
-  // CSV Export
-  btnExportCsv.addEventListener('click', () => { window.location.href = '/api/export/csv'; });
-  btnDownloadCsvFromSummary.addEventListener('click', () => { window.location.href = '/api/export/csv'; });
+    document.getElementById('resultsOverallStat').textContent = `${totalResponses} / ${totalExpected} (${overallPct}%)`;
 
-  // Summary Report Modal
-  btnSummaryReport.addEventListener('click', () => {
-    fetch('/api/session/summary')
-      .then(res => res.json())
-      .then(data => {
-        renderSummaryReport(data);
-        summaryModal.classList.remove('hidden');
-      });
-  });
+    // Render questions list with breakdown for active year filter
+    const container = document.getElementById('resultsQuestionsContainer');
+    if (!container) return;
 
-  btnCloseSummary.addEventListener('click', () => summaryModal.classList.add('hidden'));
-  btnPrintReport.addEventListener('click', () => window.print());
+    container.innerHTML = state.questions.map((q, qIndex) => {
+      return renderSingleQuestionResultCard(q, qIndex, state.activeYearFilter);
+    }).join('');
 
-  function renderSummaryReport(data) {
-    let html = `
-      <div style="border-bottom: 2px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;">
-        <h2 style="font-size: 1.5rem; color: var(--text-main); font-weight: 800;">${escapeHtml(data.meetingTitle)}</h2>
-        <p style="color: var(--primary-dark); font-weight: 700; font-size: 1.05rem;">${escapeHtml(data.departmentName)}</p>
-        <span style="font-size: 0.82rem; color: var(--text-dim);">Report Generated on ${new Date(data.generatedAt).toLocaleString()}</span>
+    // Setup Year Filter buttons
+    document.querySelectorAll('.year-filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-year') === state.activeYearFilter);
+      btn.onclick = () => {
+        state.activeYearFilter = btn.getAttribute('data-year');
+        renderResultsPage();
+      };
+    });
+  }
+
+  function renderSingleQuestionResultCard(q, qIndex, selectedYear) {
+    const isFiltered = selectedYear !== 'All Years';
+    const yearGroups = ['1st Year', '2nd Year', '3rd Year', 'Final Year'];
+
+    return `
+      <div class="result-question-card">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">
+          Question ${qIndex + 1}
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 4px 0 8px 0;">
+          ${escapeHtml(q.text)}
+        </h3>
+        ${q.textTa ? `<div style="color: var(--text-muted); font-family: 'Noto Sans Tamil'; font-size: 0.95rem; margin-bottom: 16px;">${escapeHtml(q.textTa)}</div>` : ''}
+
+        <!-- Primary Filtered View or All Years Grid -->
+        ${!isFiltered ? `
+          <div class="year-breakdown-grid">
+            ${yearGroups.map(yg => `
+              <div class="year-col-card">
+                <div class="year-col-title">${yg}</div>
+                ${renderYearDistributionLines(q, yg)}
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div style="background: var(--bg-page); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px;">
+            <div style="font-weight: 700; margin-bottom: 12px; color: var(--primary);">${selectedYear} Distribution</div>
+            ${renderYearDistributionLines(q, selectedYear)}
+          </div>
+        `}
       </div>
     `;
+  }
 
-    data.results.forEach((res, qIdx) => {
-      if (!res) return;
-      html += `
-        <div style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
-          <h4 style="font-size: 1.12rem; font-weight: 800; margin-bottom: 4px; color: var(--text-main);">
-            Q${qIdx + 1}: ${escapeHtml(res.questionText)}
-          </h4>
-          ${res.questionTextTa ? `<div style="font-family: var(--font-tamil); color: #7b1fa2; font-weight: 600; font-size: 0.95rem; margin-bottom: 14px;">${escapeHtml(res.questionTextTa)}</div>` : '<div style="margin-bottom: 12px;"></div>'}
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-            <thead>
-              <tr style="border-bottom: 2px solid var(--border); text-align: left; color: var(--text-muted);">
-                <th style="padding: 10px 8px;">Option (English & தமிழ்)</th>
-                ${data.yearGroups.map(yg => `<th style="padding: 10px 8px; text-align: right;">${escapeHtml(yg)}</th>`).join('')}
-                <th style="padding: 10px 8px; text-align: right;">Total</th>
-                <th style="padding: 10px 8px; text-align: right;">%</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
+  function renderYearDistributionLines(question, yearGroup) {
+    // Check if we have tallies for this question
+    const tallies = (state.tallies && state.tallies.questionId === question.id) ? state.tallies : null;
+    const yearTotal = tallies?.yearTotals?.[yearGroup] || 0;
+    const counts = tallies?.breakdown?.[yearGroup] || [];
 
-      res.options.forEach((opt, optIdx) => {
-        const optTa = (res.optionsTa && res.optionsTa[optIdx]) || '';
-        const total = res.breakdown['All Years'][optIdx];
-        const pct = res.totalVotes > 0 ? ((total / res.totalVotes) * 100).toFixed(1) : '0.0';
+    return question.options.map((opt, i) => {
+      const count = counts[i] || 0;
+      const pct = yearTotal > 0 ? ((count / yearTotal) * 100).toFixed(0) : '0';
+      const letter = ['A', 'B', 'C', 'D'][i] || (i + 1);
 
-        html += `
-          <tr style="border-bottom: 1px solid var(--border-light);">
-            <td style="padding: 10px 8px; font-weight: 600;">
-              <span style="color: var(--primary); font-weight: 800; margin-right: 6px;">${optionLetters[optIdx]}.</span> 
-              <span>${escapeHtml(opt)}</span>
-              ${optTa ? `<div style="font-family: var(--font-tamil); font-size: 0.82rem; color: #7b1fa2; margin-left: 20px;">${escapeHtml(optTa)}</div>` : ''}
-            </td>
-            ${data.yearGroups.map(yg => {
-              const val = res.breakdown[yg] ? res.breakdown[yg][optIdx] : 0;
-              return `<td style="padding: 10px 8px; text-align: right; color: var(--text-muted);">${val}</td>`;
-            }).join('')}
-            <td style="padding: 10px 8px; text-align: right; font-weight: 800; color: var(--text-main);">${total}</td>
-            <td style="padding: 10px 8px; text-align: right; font-weight: 800; color: #059669;">${pct}%</td>
-          </tr>
-        `;
-      });
-
-      html += `
-            </tbody>
-          </table>
-          <div style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted); text-align: right;">
-            Total recorded votes: <strong style="color: var(--text-main);">${res.totalVotes}</strong>
+      return `
+        <div style="margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 2px;">
+            <span><strong>${letter}.</strong> ${escapeHtml(opt.slice(0, 24))}</span>
+            <span style="font-weight: 700;">${pct}% (${count})</span>
+          </div>
+          <div class="bar-track" style="height: 6px;">
+            <div class="bar-fill" style="width: ${pct}%;"></div>
           </div>
         </div>
       `;
-    });
-
-    summaryReportContent.innerHTML = html;
+    }).join('');
   }
 
-  // =========================================================================
-  // MEETING ARCHIVES & HISTORY SYSTEM
-  // =========================================================================
-  btnMeetingArchivesNav.addEventListener('click', () => {
-    historyModal.classList.remove('hidden');
-    loadHistoryMeetings();
-  });
+  // -------------------------------------------------------------
+  // View 6: Attendance Screen
+  // -------------------------------------------------------------
+  function renderAttendancePage() {
+    const total = state.attendance.total || 0;
+    const yearCounts = state.attendance.yearBreakdown || {};
 
-  btnCloseHistory.addEventListener('click', () => historyModal.classList.add('hidden'));
-  btnCloseHistoryFooter.addEventListener('click', () => historyModal.classList.add('hidden'));
-
-  btnManualArchiveCurrent.addEventListener('click', () => {
-    socket.emit('admin:archive_current_meeting');
-  });
-
-  function loadHistoryMeetings() {
-    historyLoadingState.style.display = 'block';
-    historyMeetingsList.innerHTML = '';
-
-    fetch('/api/meetings/history')
-      .then(res => res.json())
-      .then(meetings => {
-        historyLoadingState.style.display = 'none';
-        if (!Array.isArray(meetings) || meetings.length === 0) {
-          historyMeetingsList.innerHTML = `
-            <div style="text-align:center; padding:32px; color:var(--text-muted);">
-              No past meeting archives found yet. Past meetings will appear here automatically.
-            </div>
-          `;
-          return;
-        }
-
-        meetings.forEach(m => {
-          const card = document.createElement('div');
-          card.className = 'history-card';
-          card.innerHTML = `
-            <div class="history-header-line">
-              <span class="history-title">${escapeHtml(m.meetingTitle)}</span>
-              <span class="history-date">${new Date(m.archivedAt).toLocaleDateString()} ${new Date(m.archivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-            <div class="history-stats-row">
-              <span class="history-stat-badge">📋 ${m.questionsCount} Questions</span>
-              <span class="history-stat-badge">🗳️ ${m.totalVotes} Votes Cast</span>
-              <span style="font-size:0.8rem; color:var(--text-dim);">${escapeHtml(m.departmentName)}</span>
-            </div>
-            <div class="history-actions-row">
-              <button class="btn btn-secondary btn-sm" data-action="view" data-id="${m.id}">
-                <span>View Summary</span>
-              </button>
-              <button class="btn btn-secondary btn-sm" data-action="csv" data-id="${m.id}">
-                <span>Download CSV</span>
-              </button>
-              <button class="btn btn-accent btn-sm" data-action="alter" data-id="${m.id}" title="Copy questions into builder so you can alter them for a new meeting">
-                <span>Alter Questions for New Meeting →</span>
-              </button>
-            </div>
-          `;
-
-          // Event handlers for action buttons
-          card.querySelector('[data-action="view"]')?.addEventListener('click', () => {
-            fetch(`/api/meetings/history/${m.id}`)
-              .then(res => res.json())
-              .then(data => {
-                renderSummaryReport(data);
-                historyModal.classList.add('hidden');
-                summaryModal.classList.remove('hidden');
-              });
-          });
-
-          card.querySelector('[data-action="csv"]')?.addEventListener('click', () => {
-            window.location.href = `/api/meetings/history/${m.id}/csv`;
-          });
-
-          card.querySelector('[data-action="alter"]')?.addEventListener('click', () => {
-            if (confirm(`Load questions from "${m.meetingTitle}" into the Question Builder so you can alter them for your next meeting?`)) {
-              socket.emit('admin:restore_meeting_questions', { meetingId: m.id });
-              historyModal.classList.add('hidden');
-              switchView('setup');
-            }
-          });
-
-          historyMeetingsList.appendChild(card);
-        });
-      })
-      .catch(err => {
-        historyLoadingState.textContent = 'Error loading meeting archives: ' + err.message;
-      });
+    document.getElementById('attTotalPill').textContent = `${total} Total`;
+    document.getElementById('attYear1').textContent = yearCounts['1st Year'] || 0;
+    document.getElementById('attYear2').textContent = yearCounts['2nd Year'] || 0;
+    document.getElementById('attYear3').textContent = yearCounts['3rd Year'] || 0;
+    document.getElementById('attYear4').textContent = yearCounts['Final Year'] || 0;
   }
 
-  // =========================================================================
-  // START A NEW MEETING SYSTEM
-  // =========================================================================
-  btnNewMeetingNav.addEventListener('click', () => {
-    newMeetingTitleInput.value = `CSBS Parent-Teacher Meeting ${new Date().getFullYear()}`;
-    newMeetingModal.classList.remove('hidden');
+  // -------------------------------------------------------------
+  // View 7: Dedicated QR Page
+  // -------------------------------------------------------------
+  function renderQrPage() {
+    document.getElementById('qrPageMeetingTitle').textContent = state.currentMeeting?.title || 'Parent–Teacher Meeting';
+    const qrImg = document.getElementById('qrCodeImage');
+    if (qrImg && state.qrDataUrl) qrImg.src = state.qrDataUrl;
+    const urlText = document.getElementById('qrJoinUrlText');
+    if (urlText) urlText.textContent = state.joinUrl;
+  }
+
+  document.getElementById('btnCopyJoinLink')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(state.joinUrl).then(() => alert('Join URL copied to clipboard!'));
   });
 
-  btnCloseNewMeeting.addEventListener('click', () => newMeetingModal.classList.add('hidden'));
-  btnCancelNewMeeting.addEventListener('click', () => newMeetingModal.classList.add('hidden'));
-
-  btnConfirmNewMeeting.addEventListener('click', () => {
-    const title = newMeetingTitleInput.value.trim() || 'New CSBS Meeting';
-    const choiceEl = document.querySelector('input[name="newMeetingQChoice"]:checked');
-    const choice = choiceEl ? choiceEl.value : 'clone';
-
-    let cloneQuestions = false;
-    let newQuestions = null;
-
-    if (choice === 'clone') {
-      cloneQuestions = true;
-    } else if (choice === 'blank') {
-      newQuestions = [{
-        id: 'q_' + Date.now(),
-        text: '',
-        textTa: '',
-        options: ['', ''],
-        optionsTa: ['', '']
-      }];
-    }
-
-    socket.emit('admin:create_new_meeting', {
-      meetingTitle: title,
-      departmentName,
-      cloneQuestions,
-      newQuestions
-    });
-
-    newMeetingModal.classList.add('hidden');
-    switchView('setup');
-    alert(`New meeting "${title}" initialized. You can now alter and customize the questions!`);
+  document.getElementById('btnDownloadQr')?.addEventListener('click', () => {
+    if (!state.qrDataUrl) return;
+    const a = document.createElement('a');
+    a.href = state.qrDataUrl;
+    a.download = `CSBS_PTM_QR_${Date.now()}.png`;
+    a.click();
   });
 
-  // Settings Modal Handlers
-  btnSettings.addEventListener('click', () => {
-    settingDeptName.value = departmentName;
-    settingMeetingTitle.value = meetingTitle;
-    settingJoinUrl.value = joinUrl.includes(window.location.host) ? '' : joinUrl;
-    settingYearGroups.value = yearGroups.join(', ');
-    settingsModal.classList.remove('hidden');
+  document.getElementById('btnFullscreenQr')?.addEventListener('click', () => {
+    const elem = document.getElementById('viewQr');
+    if (elem.requestFullscreen) elem.requestFullscreen();
   });
 
-  btnCloseSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
-  btnCancelSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
+  // -------------------------------------------------------------
+  // View 8: Meeting Archives
+  // -------------------------------------------------------------
+  async function renderArchivesPage() {
+    const tbody = document.getElementById('archivesTableBody');
+    if (!tbody) return;
 
-  btnSaveSettings.addEventListener('click', () => {
-    const newDept = settingDeptName.value.trim();
-    const newTitle = settingMeetingTitle.value.trim();
-    const newJoinUrl = settingJoinUrl.value.trim();
-    const newYears = settingYearGroups.value.split(',').map(s => s.trim()).filter(Boolean);
+    try {
+      const res = await fetch('/api/meetings/history');
+      const archives = await res.json();
+      state.history = archives;
 
-    socket.emit('admin:update_settings', {
-      departmentName: newDept,
-      meetingTitle: newTitle,
-      customJoinUrl: newJoinUrl,
-      yearGroups: newYears.length > 0 ? newYears : undefined
-    });
-
-    settingsModal.classList.add('hidden');
-  });
-
-  btnSwitchToSetupFromSettings.addEventListener('click', () => {
-    settingsModal.classList.add('hidden');
-    switchView('setup');
-    renderBuilderQuestions();
-    renderMobilePreview();
-  });
-
-  // Smooth number interpolation helper
-  function animateNumber(element, targetNumber) {
-    const currentNumber = parseInt(element.textContent || '0', 10) || 0;
-    if (currentNumber === targetNumber) return;
-
-    const startTime = performance.now();
-    const duration = 400; // ms
-
-    function update(time) {
-      const elapsed = time - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const val = Math.round(currentNumber + (targetNumber - currentNumber) * progress);
-      element.textContent = val;
-      if (progress < 1) {
-        requestAnimationFrame(update);
-      } else {
-        element.textContent = targetNumber;
+      if (archives.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No historical meetings found.</td></tr>`;
+        return;
       }
+
+      tbody.innerHTML = archives.map(m => `
+        <tr>
+          <td class="cell-main">${escapeHtml(m.title)}</td>
+          <td>${escapeHtml(m.date || m.archivedAt?.slice(0, 10) || '-')}</td>
+          <td>${m.questionsCount || 0}</td>
+          <td>${m.totalParents || 0}</td>
+          <td>${m.participationRate || 0}%</td>
+          <td><span class="status-badge completed">${m.status || 'COMPLETED'}</span></td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <a href="#results" class="btn btn-secondary btn-sm" onclick="window.loadHistoricalResults('${m.id}')">Results</a>
+              <a href="/api/export/csv" class="btn btn-secondary btn-sm">Export</a>
+              <button class="btn btn-danger btn-sm" onclick="window.deleteHistoricalMeeting('${m.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      console.error(e);
     }
-    requestAnimationFrame(update);
+  }
+
+  window.deleteHistoricalMeeting = async function(id) {
+    if (!confirm('Are you sure you want to permanently delete this archived meeting record?')) return;
+    try {
+      await fetch(`/api/meetings/history/${id}`, { method: 'DELETE' });
+      renderArchivesPage();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // -------------------------------------------------------------
+  // View 9: Reports & Summary View
+  // -------------------------------------------------------------
+  async function renderReportsSummary() {
+    const container = document.getElementById('summaryReportView');
+    if (!container) return;
+
+    try {
+      const res = await fetch('/api/session/summary');
+      const data = await res.json();
+
+      document.getElementById('summaryHeaderTitle').textContent = `${data.meetingTitle} Summary Report`;
+
+      container.innerHTML = `
+        <div class="metrics-row" style="margin-bottom: 24px;">
+          <div class="metric-card">
+            <span class="metric-title">Total Parents</span>
+            <div class="metric-total-pill">${data.totalParents}</div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-title">Total Questions</span>
+            <div class="metric-total-pill">${data.totalQuestions}</div>
+          </div>
+          <div class="metric-card">
+            <span class="metric-title">Participation Rate</span>
+            <div class="metric-total-pill">${data.participationRate}%</div>
+          </div>
+        </div>
+
+        <div class="recent-meetings-card" style="margin-bottom: 24px;">
+          <h3 class="card-heading">Year Distribution</h3>
+          <div class="metrics-row" style="margin-top: 14px;">
+            <div class="stat-item-row"><span class="stat-item-label">1st Year</span><span class="stat-item-val">${data.yearBreakdown['1st Year'] || 0}</span></div>
+            <div class="stat-item-row"><span class="stat-item-label">2nd Year</span><span class="stat-item-val">${data.yearBreakdown['2nd Year'] || 0}</span></div>
+            <div class="stat-item-row"><span class="stat-item-label">3rd Year</span><span class="stat-item-val">${data.yearBreakdown['3rd Year'] || 0}</span></div>
+            <div class="stat-item-row"><span class="stat-item-label">Final Year</span><span class="stat-item-val">${data.yearBreakdown['Final Year'] || 0}</span></div>
+          </div>
+        </div>
+
+        <div class="recent-meetings-card">
+          <h3 class="card-heading" style="margin-bottom: 16px;">Question Summaries</h3>
+          ${(data.results || []).map((r, i) => `
+            <div style="padding: 14px 0; border-bottom: 1px solid var(--border);">
+              <div style="font-weight: 700; color: var(--text-primary);">Q${i + 1}: ${escapeHtml(r.questionText)}</div>
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Total Votes: ${r.totalVotes} (${r.participationRate}% Participation)</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  document.getElementById('btnPrintSummary')?.addEventListener('click', () => {
+    window.print();
+  });
+
+  // -------------------------------------------------------------
+  // View 10: Export View
+  // -------------------------------------------------------------
+  document.getElementById('btnExportResponsesCsv')?.addEventListener('click', () => {
+    window.location.href = '/api/export/csv';
+  });
+
+  document.getElementById('btnExportAttendanceCsv')?.addEventListener('click', () => {
+    window.location.href = '/api/export/attendance/csv';
+  });
+
+  document.getElementById('btnExportResponsesExcel')?.addEventListener('click', () => {
+    window.location.href = '/api/export/csv';
+  });
+
+  document.getElementById('btnExportAttendanceExcel')?.addEventListener('click', () => {
+    window.location.href = '/api/export/attendance/csv';
+  });
+
+  // -------------------------------------------------------------
+  // View 11: Settings Page
+  // -------------------------------------------------------------
+  function populateSettingsForm() {
+    const s = state.settings;
+    if (!s) return;
+
+    setVal('setMeetingTitle', s.defaultMeetingTitle || 'Parent–Teacher Meeting');
+    setVal('setAcademicYear', s.academicYear || '2026');
+    setVal('setDeptName', s.departmentName || 'Department of Computer Science and Business Systems');
+    setVal('setDefaultLanguage', s.defaultLanguage || 'Bilingual');
+    setVal('setDuration', s.meetingDuration || '60');
+
+    setCheck('setAllowAnswerChanges', s.allowAnswerChanges !== false);
+    setCheck('setShowTamilTranslation', s.showTamilTranslation !== false);
+    setCheck('setShowProgressIndicator', s.showProgressIndicator !== false);
+    setCheck('setRequireYearSelection', s.requireYearSelection !== false);
+    setCheck('setShowConfirmation', s.showConfirmation !== false);
+  }
+
+  document.getElementById('formSettings')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      defaultMeetingTitle: getVal('setMeetingTitle'),
+      academicYear: getVal('setAcademicYear'),
+      departmentName: getVal('setDeptName'),
+      defaultLanguage: getVal('setDefaultLanguage'),
+      meetingDuration: getVal('setDuration'),
+      allowAnswerChanges: getCheck('setAllowAnswerChanges'),
+      showTamilTranslation: getCheck('setShowTamilTranslation'),
+      showProgressIndicator: getCheck('setShowProgressIndicator'),
+      requireYearSelection: getCheck('setRequireYearSelection'),
+      showConfirmation: getCheck('setShowConfirmation')
+    };
+
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      state.settings = data.settings;
+      alert('Settings saved successfully!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save settings.');
+    }
+  });
+
+  document.getElementById('btnHeaderSettings')?.addEventListener('click', () => {
+    window.location.hash = '#settings';
+  });
+
+  // Helpers
+  function setVal(id, v) {
+    const el = document.getElementById(id);
+    if (el) el.value = v;
+  }
+  function getVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+  function setCheck(id, v) {
+    const el = document.getElementById(id);
+    if (el) el.checked = Boolean(v);
+  }
+  function getCheck(id) {
+    const el = document.getElementById(id);
+    return el ? el.checked : false;
+  }
+
+  function formatStatusLabel(status) {
+    switch (status) {
+      case 'DRAFT': return 'Draft';
+      case 'WAITING_FOR_PARENTS': return 'Waiting for Parents';
+      case 'READY': return 'Ready';
+      case 'QUESTION_LIVE': return 'Live';
+      case 'QUESTION_CLOSED': return 'Question Closed';
+      case 'COMPLETED': return 'Completed';
+      default: return status || 'Setup';
+    }
+  }
+
+  function getStatusBadgeClass(status) {
+    switch (status) {
+      case 'DRAFT': return 'draft';
+      case 'WAITING_FOR_PARENTS': return 'waiting';
+      case 'READY': return 'draft';
+      case 'QUESTION_LIVE': return 'live';
+      case 'QUESTION_CLOSED': return 'closed';
+      case 'COMPLETED': return 'completed';
+      default: return 'draft';
+    }
   }
 
   function escapeHtml(str) {
@@ -1267,4 +1055,7 @@
     div.textContent = str;
     return div.innerHTML;
   }
+
+  // Initial Route setup
+  handleRoute();
 })();

@@ -1,0 +1,26 @@
+{
+  "departmentName": "Department of Computer Science and Business Systems",
+  "defaultMeetingTitle": "CSBS Annual Academic PTM",
+  "academicYear": "2026",
+  "defaultLanguage": "",
+  "meetingDuration": "60",
+  "questionsPerMeeting": "5",
+  "allowAnswerChanges": true,
+  "showTamilTranslation": false,
+  "showProgressIndicator": true,
+  "allowParentReentry": true,
+  "requireYearSelection": true,
+  "showConfirmation": true,
+  "accentColor": "#4338ca",
+  "displayLanguage": "en-ta",
+  "defaultExportFormat": "csv",
+  "includeTamilResponses": true,
+  "includeYearCategory": true,
+  "includeTimestamps": true,
+  "yearGroups": [
+    "1st Year",
+    "2nd Year",
+    "3rd Year",
+    "Final Year"
+  ]
+}
