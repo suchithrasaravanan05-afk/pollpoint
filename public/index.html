@@ -6,7 +6,7 @@
   <title>CSBS Parent–Teacher Meeting</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/parent.css">
 </head>
 <body>
@@ -15,6 +15,7 @@
     <!-- Header -->
     <header class="parent-header">
       <div>
+        <div class="app-eyebrow">PollPoint · Live Event</div>
         <h1 class="header-brand-title" id="pHeaderTitle">CSBS Parent–Teacher Meeting</h1>
         <div class="dept-subtitle" id="pHeaderSubtitle">Dept. of Computer Science & Business Systems</div>
       </div>
@@ -27,7 +28,7 @@
     <!-- Student Year Selected Bar (Shown once year selected) -->
     <div class="student-year-bar" id="pStudentYearBar" style="display: none;">
       <div>
-        <span>Student Year:</span>
+        <span>Cohort:</span>
         <span class="student-year-val" id="pStudentYearVal">1st Year</span>
       </div>
       <button class="btn-change-year" id="pBtnChangeYear">Change</button>
@@ -37,10 +38,14 @@
          SCREEN 1: WELCOME / JOIN SCREEN
          =================================================================== -->
     <section class="screen-card active" id="screenWelcome">
-      <h2 class="screen-title">Welcome</h2>
+      <h2 class="screen-title">Welcome to the Meeting</h2>
       <p class="screen-desc">
-        Welcome to the CSBS Parent–Teacher Meeting. Tap below to join the live session.
+        Participate in department discussions and share your perspective anonymously. Tap below to begin.
       </p>
+      <div class="privacy-notice">
+        <span class="privacy-icon">🔒</span>
+        <span><strong>Completely Anonymous:</strong> Your responses are confidential and are not linked to your name or student ID.</span>
+      </div>
       <button class="btn-primary-mobile" id="btnJoinMeeting">Join Meeting →</button>
     </section>
 

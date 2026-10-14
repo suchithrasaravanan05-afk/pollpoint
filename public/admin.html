@@ -6,7 +6,7 @@
   <title>CSBS Parent–Teacher Meeting</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
@@ -355,6 +355,33 @@
           <h2 class="view-title">Meeting Setup & Question Builder</h2>
           <p class="view-subtitle">Organize and refine questions, reorder the polling agenda, and inspect the synchronized live mobile preview.</p>
         </div>
+
+        <!-- Setup Sequence Stepper -->
+        <nav class="setup-stepper" aria-label="Meeting Setup Sequence">
+          <a href="#new-meeting" class="step-badge-item completed">
+            <span class="step-num-icon">✓</span>
+            <div class="step-info">
+              <span class="step-phase">Step 1</span>
+              <span class="step-name">Meeting Details</span>
+            </div>
+          </a>
+          <span class="step-connector"></span>
+          <div class="step-badge-item active" aria-current="step">
+            <span class="step-num-icon">2</span>
+            <div class="step-info">
+              <span class="step-phase">Step 2</span>
+              <span class="step-name">Question Builder</span>
+            </div>
+          </div>
+          <span class="step-connector"></span>
+          <a href="#meeting-control" class="step-badge-item">
+            <span class="step-num-icon">3</span>
+            <div class="step-info">
+              <span class="step-phase">Step 3</span>
+              <span class="step-name">Review & Launch</span>
+            </div>
+          </a>
+        </nav>
 
         <!-- Student Year Visibility & Privacy Helper Card -->
         <div class="privacy-setting-card">
