@@ -7,7 +7,7 @@
     "description": "Automated Test Verification Session",
     "status": "QUESTION_LIVE",
     "currentQuestionIndex": 1,
-    "currentQuestionId": "custom_q1",
+    "currentQuestionId": "q1",
     "questionStatus": "live",
     "selectedQuestionIds": [
       "q1",
@@ -153,6 +153,14 @@
       "joinedAt": 1791988958919,
       "lastSeen": 1791988959318,
       "socketId": "WkY8QPDqxlDlGplgAAAL"
+    },
+    "test_parent_v1": {
+      "participantId": "test_parent_v1",
+      "meetingId": "mtg_1791965373109",
+      "studentYear": "2nd Year",
+      "joinedAt": 1791990132048,
+      "lastSeen": 1791990132056,
+      "socketId": "Ft09YF_Lx29Sp5HsAAAN"
     }
   },
   "responses": {
@@ -245,6 +253,16 @@
       "studentYear": "3rd Year",
       "submittedAt": 1791988959072,
       "updatedAt": 1791988959072
+    },
+    "mtg_1791965373109:q1:test_parent_v1": {
+      "id": "resp_1791990132053_ep91",
+      "meetingId": "mtg_1791965373109",
+      "participantId": "test_parent_v1",
+      "questionId": "q1",
+      "selectedOption": 0,
+      "studentYear": "2nd Year",
+      "submittedAt": 1791990132053,
+      "updatedAt": 1791990132053
     }
   }
 }
