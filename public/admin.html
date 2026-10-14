@@ -637,90 +637,207 @@
           <p class="view-subtitle">Configure department defaults, question behavior, and parent experience.</p>
         </div>
 
-        <div class="form-layout">
-          <form id="formSettings">
-            <!-- 1. Meeting Settings -->
-            <div class="form-section-title">Meeting Settings</div>
-            <div class="form-group">
-              <label class="form-label" for="setMeetingTitle">Default Meeting Title</label>
-              <input type="text" class="form-input" id="setMeetingTitle">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="setAcademicYear">Academic Year</label>
-              <input type="text" class="form-input" id="setAcademicYear">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="setDeptName">Department Name</label>
-              <input type="text" class="form-input" id="setDeptName">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="setDefaultLanguage">Default Language</label>
-              <select class="form-select" id="setDefaultLanguage">
-                <option value="Bilingual">Bilingual (English & Tamil)</option>
-                <option value="English">English Only</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="setDuration">Meeting Duration (Minutes)</label>
-              <input type="number" class="form-input" id="setDuration" value="60">
+        <form id="formSettings">
+          <div class="settings-layout-grid">
+            <!-- Left Column: Primary Settings Cards -->
+            <div class="settings-main-form-column">
+
+              <!-- Card 1: Meeting & Academic Defaults -->
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-icon">🏛️</div>
+                  <div>
+                    <h3 class="settings-card-title">Meeting & Department Configuration</h3>
+                    <p class="settings-card-desc">General defaults applied to new PTM sessions and public headers.</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="setMeetingTitle">Default Meeting Title</label>
+                  <input type="text" class="form-input" id="setMeetingTitle" placeholder="e.g. Annual Parent-Teacher Meeting 2026">
+                </div>
+
+                <div class="form-grid-2col">
+                  <div class="form-group">
+                    <label class="form-label" for="setAcademicYear">Academic Year</label>
+                    <input type="text" class="form-input" id="setAcademicYear" placeholder="e.g. 2026">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="setDuration">Meeting Duration (Minutes)</label>
+                    <input type="number" class="form-input" id="setDuration" value="60">
+                  </div>
+                </div>
+
+                <div class="form-grid-2col">
+                  <div class="form-group">
+                    <label class="form-label" for="setDeptName">Department Name</label>
+                    <input type="text" class="form-input" id="setDeptName" placeholder="e.g. Department of Computer Science and Business Systems">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="setDefaultLanguage">Default Language</label>
+                    <select class="form-select" id="setDefaultLanguage">
+                      <option value="Bilingual">Bilingual (English & Tamil)</option>
+                      <option value="English">English Only</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Question & Polling Behavior -->
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-icon">📊</div>
+                  <div>
+                    <h3 class="settings-card-title">Question & Live Polling Behavior</h3>
+                    <p class="settings-card-desc">Control how questions are presented and answered during live sessions.</p>
+                  </div>
+                </div>
+
+                <label class="settings-toggle-card">
+                  <input type="checkbox" id="setAllowAnswerChanges" checked>
+                  <div class="settings-toggle-text">
+                    <span class="settings-toggle-title">Allow Answer Changes</span>
+                    <span class="settings-toggle-desc">Parents can navigate to previous questions and update their selection in real time without creating duplicates.</span>
+                  </div>
+                </label>
+
+                <label class="settings-toggle-card">
+                  <input type="checkbox" id="setShowTamilTranslation" checked>
+                  <div class="settings-toggle-text">
+                    <span class="settings-toggle-title">Show Tamil Translation (தமிழ்)</span>
+                    <span class="settings-toggle-desc">Display bilingual Tamil text across parent mobile devices, projector displays, and export summaries.</span>
+                  </div>
+                </label>
+
+                <label class="settings-toggle-card">
+                  <input type="checkbox" id="setShowProgressIndicator" checked>
+                  <div class="settings-toggle-text">
+                    <span class="settings-toggle-title">Show Progress Indicator</span>
+                    <span class="settings-toggle-desc">Displays a "Question X of Y" progress indicator on parent mobile screens during voting.</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Card 3: Parent Experience & Anonymity -->
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-icon">👨‍👩‍👧‍👦</div>
+                  <div>
+                    <h3 class="settings-card-title">Parent Experience & Access</h3>
+                    <p class="settings-card-desc">Configure the onboarding flow and post-submission behavior for parents.</p>
+                  </div>
+                </div>
+
+                <label class="settings-toggle-card">
+                  <input type="checkbox" id="setRequireYearSelection" checked>
+                  <div class="settings-toggle-text">
+                    <span class="settings-toggle-title">Require Student Year Selection</span>
+                    <span class="settings-toggle-desc">Mandates selecting 1st, 2nd, 3rd, or Final Year upon joining so responses can be categorized by student cohort.</span>
+                  </div>
+                </label>
+
+                <label class="settings-toggle-card">
+                  <input type="checkbox" id="setShowConfirmation" checked>
+                  <div class="settings-toggle-text">
+                    <span class="settings-toggle-title">Show Confirmation after Submission</span>
+                    <span class="settings-toggle-desc">Displays an animated green checkmark and "Vote recorded" confirmation banner immediately upon voting.</span>
+                  </div>
+                </label>
+
+                <div class="settings-action-bar">
+                  <button type="submit" class="btn btn-primary btn-lg" id="btnSaveSettings">Save Settings</button>
+                  <span class="settings-save-hint">Changes take effect immediately across all active sessions.</span>
+                </div>
+              </div>
+
             </div>
 
-            <!-- 2. Question Settings -->
-            <div class="form-section-title">Question Settings</div>
-            <div class="form-group">
-              <label class="checkbox-item">
-                <input type="checkbox" id="setAllowAnswerChanges" checked>
-                <div>
-                  <span class="checkbox-title">Allow Answer Changes</span>
-                  <div class="checkbox-desc">Parents can navigate to previous questions and update their selection.</div>
-                </div>
-              </label>
-            </div>
-            <div class="form-group">
-              <label class="checkbox-item">
-                <input type="checkbox" id="setShowTamilTranslation" checked>
-                <div>
-                  <span class="checkbox-title">Show Tamil Translation</span>
-                  <div class="checkbox-desc">Display bilingual Tamil text on parent screens and results.</div>
-                </div>
-              </label>
-            </div>
-            <div class="form-group">
-              <label class="checkbox-item">
-                <input type="checkbox" id="setShowProgressIndicator" checked>
-                <div>
-                  <span class="checkbox-title">Show Progress Indicator</span>
-                  <div class="checkbox-desc">Show Question X of Y indicator to parents.</div>
-                </div>
-              </label>
-            </div>
+            <!-- Right Column: System Diagnostics, Guidance & Department Sidebar -->
+            <aside class="settings-side-panel">
 
-            <!-- 3. Parent Experience -->
-            <div class="form-section-title">Parent Experience</div>
-            <div class="form-group">
-              <label class="checkbox-item">
-                <input type="checkbox" id="setRequireYearSelection" checked>
-                <div>
-                  <span class="checkbox-title">Require Student Year Selection</span>
-                  <div class="checkbox-desc">Mandates selecting 1st, 2nd, 3rd, or Final Year before questions are shown.</div>
+              <!-- Sidebar Card 1: Department Scope Profile -->
+              <div class="settings-info-card">
+                <h4 class="settings-info-title">🏢 Department Profile</h4>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                  <div class="brand-icon" style="width: 44px; height: 44px; font-size: 1.1rem;">CS</div>
+                  <div>
+                    <div style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem;">CSBS Department</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Computer Science & Business Systems</div>
+                  </div>
                 </div>
-              </label>
-            </div>
-            <div class="form-group">
-              <label class="checkbox-item">
-                <input type="checkbox" id="setShowConfirmation" checked>
-                <div>
-                  <span class="checkbox-title">Show Confirmation after Submission</span>
-                  <div class="checkbox-desc">Displays a confirmation banner upon recording answers.</div>
-                </div>
-              </label>
-            </div>
 
-            <div style="margin-top: 30px;">
-              <button type="submit" class="btn btn-primary btn-lg" id="btnSaveSettings">Save Settings</button>
-            </div>
-          </form>
-        </div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+                  Active Cohort Groups:
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;">
+                  <span class="builder-count-pill" style="font-size: 0.78rem; padding: 3px 10px;">1st Year</span>
+                  <span class="builder-count-pill" style="font-size: 0.78rem; padding: 3px 10px;">2nd Year</span>
+                  <span class="builder-count-pill" style="font-size: 0.78rem; padding: 3px 10px;">3rd Year</span>
+                  <span class="builder-count-pill" style="font-size: 0.78rem; padding: 3px 10px;">Final Year</span>
+                </div>
+
+                <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">
+                  Bilingual Support: <strong style="color: var(--primary);">English + தமிழ்</strong> with Tamil Noto Sans typography.
+                </div>
+              </div>
+
+              <!-- Sidebar Card 2: PTM Best Practice Guidelines -->
+              <div class="settings-info-card">
+                <h4 class="settings-info-title">💡 PTM Facilitation Guide</h4>
+                <div class="guidelines-item">
+                  <span class="guidelines-icon">⏱️</span>
+                  <div>
+                    <strong>Optimal Duration:</strong>
+                    <span>Keep interactive polling between 45–60 minutes for high audience participation.</span>
+                  </div>
+                </div>
+                <div class="guidelines-item">
+                  <span class="guidelines-icon">🔒</span>
+                  <div>
+                    <strong>Anonymous Tokens:</strong>
+                    <span>Parents are authenticated anonymously with device tokens to guarantee genuine feedback.</span>
+                  </div>
+                </div>
+                <div class="guidelines-item">
+                  <span class="guidelines-icon">📶</span>
+                  <div>
+                    <strong>Local WiFi Ready:</strong>
+                    <span>Parents scan the QR code to vote without creating accounts or downloading apps.</span>
+                  </div>
+                </div>
+                <div class="guidelines-item">
+                  <span class="guidelines-icon">📊</span>
+                  <div>
+                    <strong>Live Cohort Analysis:</strong>
+                    <span>Use the projector filter tabs to inspect sentiment per year group during the meeting.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sidebar Card 3: Platform & Environment Health -->
+              <div class="settings-info-card">
+                <h4 class="settings-info-title">⚡ Environment & Services</h4>
+                <div class="diag-status-row">
+                  <span class="diag-status-label">Socket.IO Engine</span>
+                  <span class="diag-status-badge">Active</span>
+                </div>
+                <div class="diag-status-row">
+                  <span class="diag-status-label">Real-Time Sync</span>
+                  <span class="diag-status-badge">Connected</span>
+                </div>
+                <div class="diag-status-row">
+                  <span class="diag-status-label">CSV & UTF-8 BOM</span>
+                  <span class="diag-status-badge">Enabled</span>
+                </div>
+                <div class="diag-status-row">
+                  <span class="diag-status-label">Local JSON Store</span>
+                  <span class="diag-status-badge">Synchronized</span>
+                </div>
+              </div>
+
+            </aside>
+          </div>
+        </form>
       </section>
 
     </main>

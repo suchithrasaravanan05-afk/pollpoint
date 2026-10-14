@@ -406,8 +406,28 @@ function archiveCurrentMeetingSnapshot() {
   return archiveEntry;
 }
 
-// Express Middlewares
-app.use(express.json());
+// CSV Formula Injection Sanitizer (Mitigates CWE-1236)
+function sanitizeCsvCell(val) {
+  if (val === null || val === undefined) return '';
+  let str = String(val);
+  // Neutralize formula triggers: =, +, -, @, \t, \r
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = "'" + str;
+  }
+  return str.replace(/"/g, '""');
+}
+
+// Express Middlewares & Security Hardening
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // -------------------------------------------------------------
@@ -476,17 +496,25 @@ app.get('/api/meetings/history', (req, res) => {
 
 // Single Historical Meeting Details
 app.get('/api/meetings/history/:id', (req, res) => {
+  const id = req.params.id;
+  if (!id || typeof id !== 'string' || id.length > 100) {
+    return res.status(400).json({ error: 'Invalid meeting identifier' });
+  }
   const history = loadMeetingHistory();
-  const meeting = history.find(m => m.id === req.params.id);
+  const meeting = history.find(m => m.id === id);
   if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
   res.json(meeting);
 });
 
 // Delete Historical Meeting
 app.delete('/api/meetings/history/:id', (req, res) => {
+  const id = req.params.id;
+  if (!id || typeof id !== 'string' || id.length > 100) {
+    return res.status(400).json({ error: 'Invalid meeting identifier' });
+  }
   let history = loadMeetingHistory();
   const beforeCount = history.length;
-  history = history.filter(m => m.id !== req.params.id);
+  history = history.filter(m => m.id !== id);
   if (history.length === beforeCount) {
     return res.status(404).json({ error: 'Meeting not found' });
   }
@@ -501,16 +529,16 @@ app.get('/api/questions', (req, res) => {
 
 app.post('/api/questions', (req, res) => {
   const { text, textTa, options, optionsTa } = req.body || {};
-  if (!text || !options || options.length < 2) {
+  if (!text || typeof text !== 'string' || !options || !Array.isArray(options) || options.length < 2) {
     return res.status(400).json({ error: 'Text and at least 2 options required' });
   }
 
   const newQ = {
     id: 'q_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
     text: text.trim(),
-    textTa: (textTa || '').trim(),
-    options: options.map(o => (o || '').trim()).filter(Boolean),
-    optionsTa: Array.isArray(optionsTa) ? optionsTa.map(o => (o || '').trim()) : []
+    textTa: (typeof textTa === 'string' ? textTa : '').trim(),
+    options: options.map(o => (typeof o === 'string' ? o.trim() : '')).filter(Boolean),
+    optionsTa: Array.isArray(optionsTa) ? optionsTa.map(o => (typeof o === 'string' ? o.trim() : '')) : []
   };
 
   sessionState.questions.push(newQ);
@@ -521,6 +549,9 @@ app.post('/api/questions', (req, res) => {
 
 app.put('/api/questions/:id', (req, res) => {
   const { id } = req.params;
+  if (!id || typeof id !== 'string' || id.length > 100) {
+    return res.status(400).json({ error: 'Invalid question identifier' });
+  }
   const { text, textTa, options, optionsTa } = req.body || {};
   const q = sessionState.questions.find(item => item.id === id);
   if (!q) return res.status(404).json({ error: 'Question not found' });
@@ -613,11 +644,11 @@ app.get('/api/export/csv', (req, res) => {
       const optCount = tallies?.breakdown?.['All Years']?.[optIndex] || 0;
       csv.push([
         `"Q${qIndex + 1}"`,
-        `"${(q.text || '').replace(/"/g, '""')}"`,
-        `"${(q.textTa || '').replace(/"/g, '""')}"`,
+        `"${sanitizeCsvCell(q.text)}"`,
+        `"${sanitizeCsvCell(q.textTa)}"`,
         `"${optIndex + 1}"`,
-        `"${opt.replace(/"/g, '""')}"`,
-        `"${optTa.replace(/"/g, '""')}"`,
+        `"${sanitizeCsvCell(opt)}"`,
+        `"${sanitizeCsvCell(optTa)}"`,
         optCount
       ].join(','));
     });
@@ -663,15 +694,15 @@ app.get('/api/export/csv', (req, res) => {
     const optTextTa = q ? (q.optionsTa?.[resp.selectedOption] || '') : '';
 
     const row = [
-      `"${resp.participantId}"`,
-      `"${resp.studentYear || 'Not Specified'}"`,
+      `"${sanitizeCsvCell(resp.participantId)}"`,
+      `"${sanitizeCsvCell(resp.studentYear || 'Not Specified')}"`,
       `"Q${qIndex >= 0 ? qIndex + 1 : '-'}"`,
-      `"${(q?.text || '').replace(/"/g, '""')}"`,
-      `"${(q?.textTa || '').replace(/"/g, '""')}"`,
-      `"${optLetter}"`,
-      `"${optTextEn.replace(/"/g, '""')}"`,
-      `"${optTextTa.replace(/"/g, '""')}"`,
-      `"${new Date(resp.updatedAt || resp.submittedAt).toLocaleString()}"`
+      `"${sanitizeCsvCell(q?.text || '')}"`,
+      `"${sanitizeCsvCell(q?.textTa || '')}"`,
+      `"${sanitizeCsvCell(optLetter)}"`,
+      `"${sanitizeCsvCell(optTextEn)}"`,
+      `"${sanitizeCsvCell(optTextTa)}"`,
+      `"${sanitizeCsvCell(new Date(resp.updatedAt || resp.submittedAt).toLocaleString())}"`
     ];
     csv.push(row.join(','));
   });
@@ -689,9 +720,9 @@ app.get('/api/export/attendance/csv', (req, res) => {
 
   const csv = [];
   csv.push(`\uFEFF"CSBS Parent-Teacher Meeting Attendance Log"`);
-  csv.push(`"Department:","${(settings.departmentName || '').replace(/"/g, '""')}"`);
-  csv.push(`"Meeting:","${(meeting.title || '').replace(/"/g, '""')}"`);
-  csv.push(`"Date:","${meeting.date || ''}"`);
+  csv.push(`"Department:","${sanitizeCsvCell(settings.departmentName || '')}"`);
+  csv.push(`"Meeting:","${sanitizeCsvCell(meeting.title || '')}"`);
+  csv.push(`"Date:","${sanitizeCsvCell(meeting.date || '')}"`);
   csv.push('');
 
   const headers = ['Participant ID', 'Student Year', 'Joined At', 'Total Questions Answered'];
@@ -708,9 +739,9 @@ app.get('/api/export/attendance/csv', (req, res) => {
       }
 
       const row = [
-        `"${p.participantId}"`,
-        `"${p.studentYear || 'Not Specified'}"`,
-        `"${new Date(p.joinedAt).toLocaleString()}"`,
+        `"${sanitizeCsvCell(p.participantId)}"`,
+        `"${sanitizeCsvCell(p.studentYear || 'Not Specified')}"`,
+        `"${sanitizeCsvCell(new Date(p.joinedAt).toLocaleString())}"`,
         answeredCount
       ];
       csv.push(row.join(','));
@@ -1031,7 +1062,7 @@ io.on('connection', (socket) => {
   // Parent joins
   socket.on('parent:join', (data) => {
     const { voterToken, yearGroup } = data || {};
-    if (!voterToken) return;
+    if (!voterToken || typeof voterToken !== 'string' || voterToken.length > 100) return;
 
     role = 'parent';
     clientVoterToken = voterToken;
@@ -1044,7 +1075,7 @@ io.on('connection', (socket) => {
       p = {
         participantId: voterToken,
         meetingId,
-        studentYear: yearGroup || null,
+        studentYear: (typeof yearGroup === 'string' && yearGroup.length <= 50) ? yearGroup : null,
         joinedAt: Date.now(),
         lastSeen: Date.now(),
         socketId: socket.id
@@ -1053,7 +1084,7 @@ io.on('connection', (socket) => {
     } else {
       p.lastSeen = Date.now();
       p.socketId = socket.id;
-      if (yearGroup) p.studentYear = yearGroup;
+      if (typeof yearGroup === 'string' && yearGroup.length <= 50) p.studentYear = yearGroup;
       if (p.meetingId !== meetingId) p.meetingId = meetingId;
     }
 
@@ -1101,7 +1132,8 @@ io.on('connection', (socket) => {
   // Parent selects/changes student year
   socket.on('parent:select_year', (data) => {
     const { voterToken, yearGroup } = data || {};
-    if (!voterToken || !yearGroup) return;
+    if (!voterToken || typeof voterToken !== 'string' || voterToken.length > 100 ||
+        !yearGroup || typeof yearGroup !== 'string' || yearGroup.length > 50) return;
 
     const meetingId = sessionState.currentMeeting.id;
     if (!sessionState.participants[voterToken]) {
@@ -1147,7 +1179,9 @@ io.on('connection', (socket) => {
   socket.on('parent:vote', (data) => {
     const { voterToken, questionId, optionIndex } = data || {};
 
-    if (!voterToken || !questionId || optionIndex === undefined) {
+    if (!voterToken || typeof voterToken !== 'string' || voterToken.length > 100 ||
+        !questionId || typeof questionId !== 'string' || questionId.length > 100 ||
+        optionIndex === undefined || typeof optionIndex !== 'number' || !Number.isInteger(optionIndex)) {
       return socket.emit('parent:vote_error', { message: 'Invalid vote submission' });
     }
 
@@ -1163,9 +1197,19 @@ io.on('connection', (socket) => {
       return socket.emit('parent:vote_error', { message: 'Invalid option selected' });
     }
 
+    // Polling status enforcement
+    if (sessionState.currentMeeting.questionStatus === 'closed') {
+      return socket.emit('parent:vote_error', { message: 'Polling is closed for this question' });
+    }
+
     // Uniqueness key: `${meetingId}:${questionId}:${voterToken}`
     const respKey = `${meetingId}:${questionId}:${voterToken}`;
     const isUpdate = Boolean(sessionState.responses[respKey]);
+
+    // Answer change policy enforcement
+    if (!settings.allowAnswerChanges && isUpdate) {
+      return socket.emit('parent:vote_error', { message: 'Answer changes are disabled for this meeting' });
+    }
 
     sessionState.responses[respKey] = {
       id: 'resp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),

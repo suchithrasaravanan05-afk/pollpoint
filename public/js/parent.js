@@ -354,6 +354,18 @@
     renderOptionButtons();
   });
 
+  socket.on('parent:vote_error', (data) => {
+    if (btnSubmitVote) {
+      btnSubmitVote.disabled = false;
+      btnSubmitVote.innerHTML = '<span>Submit Vote</span>';
+    }
+    if (pVoteStatusBanner) {
+      pVoteStatusBanner.style.display = 'block';
+      pVoteStatusBanner.className = 'feedback-banner warning';
+      pVoteStatusBanner.innerHTML = `<span>⚠️ ${escapeHtml(data.message || 'Unable to record vote')}</span>`;
+    }
+  });
+
   socket.on('parent:answers_list', (answersMap) => {
     myAnswers = { ...myAnswers, ...(answersMap || {}) };
     if (currentQuestion && myAnswers[currentQuestion.id] !== undefined) {
