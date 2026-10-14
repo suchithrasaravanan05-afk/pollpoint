@@ -602,7 +602,28 @@ app.get('/api/export/csv', (req, res) => {
   csv.push(`"Academic Year:","${(meeting.academicYear || '').replace(/"/g, '""')}"`);
   csv.push(`"Meeting Date:","${meeting.date || ''}"`);
   csv.push(`"Exported At:","${new Date().toLocaleString()}"`);
+  csv.push('"--- MEETING QUESTIONS & OPTIONS BREAKDOWN ---"');
+  const summaryHeaders = ['Question #', 'Question (English)', 'Question (Tamil)', 'Option #', 'Option (English)', 'Option (Tamil)', 'Total Votes'];
+  csv.push(summaryHeaders.map(h => `"${h}"`).join(','));
+
+  sessionState.questions.forEach((q, qIndex) => {
+    const tallies = computeQuestionTallies(q.id, meeting.id);
+    (q.options || []).forEach((opt, optIndex) => {
+      const optTa = (q.optionsTa && q.optionsTa[optIndex]) || '';
+      const optCount = tallies?.breakdown?.['All Years']?.[optIndex] || 0;
+      csv.push([
+        `"Q${qIndex + 1}"`,
+        `"${(q.text || '').replace(/"/g, '""')}"`,
+        `"${(q.textTa || '').replace(/"/g, '""')}"`,
+        `"${optIndex + 1}"`,
+        `"${opt.replace(/"/g, '""')}"`,
+        `"${optTa.replace(/"/g, '""')}"`,
+        optCount
+      ].join(','));
+    });
+  });
   csv.push('');
+  csv.push('"--- INDIVIDUAL PARTICIPANT RESPONSES LOG ---"');
 
   // Headers
   const headers = [
