@@ -1,5 +1,671 @@
 [
   {
+    "id": "mtg_1791965373109",
+    "title": "Annual Parent-Teacher Meeting 2026",
+    "academicYear": "2026",
+    "date": "2026-09-23",
+    "description": "Automated Test Verification Session",
+    "departmentName": "Department of Computer Science and Business Systems",
+    "archivedAt": "2026-10-14T15:13:25.751Z",
+    "status": "COMPLETED",
+    "totalParents": 7,
+    "yearBreakdown": {
+      "1st Year": 2,
+      "2nd Year": 2,
+      "3rd Year": 2,
+      "Final Year": 1
+    },
+    "totalVotes": 10,
+    "questionsCount": 5,
+    "participationRate": 29,
+    "questions": [
+      {
+        "id": "q1",
+        "text": "How satisfied are you with the academic progress and curriculum delivery in CSBS so far?",
+        "textTa": "இதுவரை CSBS பாடத்திட்டம் மற்றும் கல்வி முன்னேற்றத்தில் நீங்கள் எவ்வளவு திருப்தி அடைகிறீர்கள்?",
+        "options": [
+          "Highly Satisfied",
+          "Satisfied",
+          "Needs Improvement",
+          "Dissatisfied"
+        ],
+        "optionsTa": [
+          "மிகவும் திருப்தி",
+          "திருப்தி",
+          "முன்னேற்றம் தேவை",
+          "திருப்தியற்றது"
+        ]
+      },
+      {
+        "id": "q2",
+        "text": "Which industry readiness initiative should the CSBS department prioritize this semester?",
+        "textTa": "இந்த செமஸ்டரில் CSBS துறை எந்த தொழில்முனைவு மற்றும் வேலைவாய்ப்பு பயிற்சிக்கு முன்னுரிமை அளிக்க வேண்டும்?",
+        "options": [
+          "Business Analytics & AI Workshops",
+          "Corporate Internships & Live Projects",
+          "Full-Stack & Cloud Certifications",
+          "Soft Skills & Management Consulting Prep"
+        ],
+        "optionsTa": [
+          "பிசினஸ் அனலிட்டிக்ஸ் & AI பட்டறைகள்",
+          "நிறுவன இன்டர்ன்ஷிப் & நேரடி திட்டங்கள்",
+          "ஃபுல்-ஸ்டாக் & கிளவுட் சான்றிதழ்கள்",
+          "திறன் மேம்பாடு & நேர்காணல் பயிற்சி"
+        ]
+      },
+      {
+        "id": "q3",
+        "text": "What is your preferred channel for receiving department notifications and student attendance alerts?",
+        "textTa": "துறை அறிவிப்புகள் மற்றும் மாணவர் வருகைப் பதிவை அறிய உங்கள் விருப்பமான வழி எது?",
+        "options": [
+          "WhatsApp / SMS Alerts",
+          "College Mobile App / Portal",
+          "Official Email Updates",
+          "Direct Phone Call from Mentor"
+        ],
+        "optionsTa": [
+          "வாட்ஸ்அப் / SMS தகவல்கள்",
+          "கல்லூரி மொபைல் ஆப் / போர்ட்டல்",
+          "அதிகாரப்பூர்வ மின்னஞ்சல்",
+          "ஆசிரியரின் நேரடி தொலைபேசி அழைப்பு"
+        ]
+      },
+      {
+        "id": "q4",
+        "text": "Would you support weekend expert bootcamps and business hackathons for hands-on experience?",
+        "textTa": "நடைமுறை பயிற்சிக்காக வார இறுதி சிறப்பு வகுப்புகள் மற்றும் வணிக ஹேக்கத்தான்களை ஆதரிக்கிறீர்களா?",
+        "options": [
+          "Strongly Support",
+          "Support (if hybrid / online)",
+          "Prefer Weekday Sessions Only",
+          "Not In Favor"
+        ],
+        "optionsTa": [
+          "முழு ஆதரவு அளிக்கிறேன்",
+          "ஆதரிக்கிறேன் (ஆன்லைன் என்றால்)",
+          "வார நாட்களில் மட்டும் விரும்புகிறேன்",
+          "ஆதரவு இல்லை"
+        ]
+      },
+      {
+        "id": "q5",
+        "text": "Overall, how effective is the faculty mentorship and student career guidance system in CSBS?",
+        "textTa": "ஒட்டுமொத்தமாக, CSBS துறையின் ஆசிரியர் வழிகாட்டுதல் மற்றும் தொழில் வழிகாட்டல் முறை எவ்வாறு உள்ளது?",
+        "options": [
+          "Excellent Guidance",
+          "Good Support",
+          "Average",
+          "Needs Major Enhancement"
+        ],
+        "optionsTa": [
+          "சிறந்த வழிகாட்டுதல்",
+          "நல்ல ஆதரவு",
+          "சுமாராக உள்ளது",
+          "அதிக முன்னேற்றம் தேவை"
+        ]
+      }
+    ],
+    "results": [
+      {
+        "questionId": "q1",
+        "questionText": "How satisfied are you with the academic progress and curriculum delivery in CSBS so far?",
+        "questionTextTa": "இதுவரை CSBS பாடத்திட்டம் மற்றும் கல்வி முன்னேற்றத்தில் நீங்கள் எவ்வளவு திருப்தி அடைகிறீர்கள்?",
+        "options": [
+          "Highly Satisfied",
+          "Satisfied",
+          "Needs Improvement",
+          "Dissatisfied"
+        ],
+        "optionsTa": [
+          "மிகவும் திருப்தி",
+          "திருப்தி",
+          "முன்னேற்றம் தேவை",
+          "திருப்தியற்றது"
+        ],
+        "status": "live",
+        "totalVotes": 4,
+        "breakdown": {
+          "All Years": [
+            3,
+            0,
+            1,
+            0
+          ],
+          "1st Year": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "2nd Year": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "3rd Year": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "Final Year": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        "yearTotals": {
+          "All Years": 4,
+          "1st Year": 1,
+          "2nd Year": 1,
+          "3rd Year": 1,
+          "Final Year": 1
+        },
+        "percentages": {
+          "All Years": [
+            "75.0",
+            "0.0",
+            "25.0",
+            "0.0"
+          ],
+          "1st Year": [
+            "100.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "100.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "0.0",
+            "0.0",
+            "100.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "100.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ]
+        },
+        "participationRate": 57
+      },
+      {
+        "questionId": "q2",
+        "questionText": "Which industry readiness initiative should the CSBS department prioritize this semester?",
+        "questionTextTa": "இந்த செமஸ்டரில் CSBS துறை எந்த தொழில்முனைவு மற்றும் வேலைவாய்ப்பு பயிற்சிக்கு முன்னுரிமை அளிக்க வேண்டும்?",
+        "options": [
+          "Business Analytics & AI Workshops",
+          "Corporate Internships & Live Projects",
+          "Full-Stack & Cloud Certifications",
+          "Soft Skills & Management Consulting Prep"
+        ],
+        "optionsTa": [
+          "பிசினஸ் அனலிட்டிக்ஸ் & AI பட்டறைகள்",
+          "நிறுவன இன்டர்ன்ஷிப் & நேரடி திட்டங்கள்",
+          "ஃபுல்-ஸ்டாக் & கிளவுட் சான்றிதழ்கள்",
+          "திறன் மேம்பாடு & நேர்காணல் பயிற்சி"
+        ],
+        "status": "closed",
+        "totalVotes": 4,
+        "breakdown": {
+          "All Years": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "1st Year": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "2nd Year": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "3rd Year": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "Final Year": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "yearTotals": {
+          "All Years": 4,
+          "1st Year": 1,
+          "2nd Year": 1,
+          "3rd Year": 1,
+          "Final Year": 1
+        },
+        "percentages": {
+          "All Years": [
+            "25.0",
+            "25.0",
+            "25.0",
+            "25.0"
+          ],
+          "1st Year": [
+            "0.0",
+            "0.0",
+            "100.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "0.0",
+            "100.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "100.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "100.0"
+          ]
+        },
+        "participationRate": 57
+      },
+      {
+        "questionId": "q3",
+        "questionText": "What is your preferred channel for receiving department notifications and student attendance alerts?",
+        "questionTextTa": "துறை அறிவிப்புகள் மற்றும் மாணவர் வருகைப் பதிவை அறிய உங்கள் விருப்பமான வழி எது?",
+        "options": [
+          "WhatsApp / SMS Alerts",
+          "College Mobile App / Portal",
+          "Official Email Updates",
+          "Direct Phone Call from Mentor"
+        ],
+        "optionsTa": [
+          "வாட்ஸ்அப் / SMS தகவல்கள்",
+          "கல்லூரி மொபைல் ஆப் / போர்ட்டல்",
+          "அதிகாரப்பூர்வ மின்னஞ்சல்",
+          "ஆசிரியரின் நேரடி தொலைபேசி அழைப்பு"
+        ],
+        "status": "closed",
+        "totalVotes": 0,
+        "breakdown": {
+          "All Years": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "1st Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "2nd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "3rd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "Final Year": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "yearTotals": {
+          "All Years": 0,
+          "1st Year": 0,
+          "2nd Year": 0,
+          "3rd Year": 0,
+          "Final Year": 0
+        },
+        "percentages": {
+          "All Years": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "1st Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ]
+        },
+        "participationRate": 0
+      },
+      {
+        "questionId": "q4",
+        "questionText": "Would you support weekend expert bootcamps and business hackathons for hands-on experience?",
+        "questionTextTa": "நடைமுறை பயிற்சிக்காக வார இறுதி சிறப்பு வகுப்புகள் மற்றும் வணிக ஹேக்கத்தான்களை ஆதரிக்கிறீர்களா?",
+        "options": [
+          "Strongly Support",
+          "Support (if hybrid / online)",
+          "Prefer Weekday Sessions Only",
+          "Not In Favor"
+        ],
+        "optionsTa": [
+          "முழு ஆதரவு அளிக்கிறேன்",
+          "ஆதரிக்கிறேன் (ஆன்லைன் என்றால்)",
+          "வார நாட்களில் மட்டும் விரும்புகிறேன்",
+          "ஆதரவு இல்லை"
+        ],
+        "status": "closed",
+        "totalVotes": 0,
+        "breakdown": {
+          "All Years": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "1st Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "2nd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "3rd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "Final Year": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "yearTotals": {
+          "All Years": 0,
+          "1st Year": 0,
+          "2nd Year": 0,
+          "3rd Year": 0,
+          "Final Year": 0
+        },
+        "percentages": {
+          "All Years": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "1st Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ]
+        },
+        "participationRate": 0
+      },
+      {
+        "questionId": "q5",
+        "questionText": "Overall, how effective is the faculty mentorship and student career guidance system in CSBS?",
+        "questionTextTa": "ஒட்டுமொத்தமாக, CSBS துறையின் ஆசிரியர் வழிகாட்டுதல் மற்றும் தொழில் வழிகாட்டல் முறை எவ்வாறு உள்ளது?",
+        "options": [
+          "Excellent Guidance",
+          "Good Support",
+          "Average",
+          "Needs Major Enhancement"
+        ],
+        "optionsTa": [
+          "சிறந்த வழிகாட்டுதல்",
+          "நல்ல ஆதரவு",
+          "சுமாராக உள்ளது",
+          "அதிக முன்னேற்றம் தேவை"
+        ],
+        "status": "closed",
+        "totalVotes": 0,
+        "breakdown": {
+          "All Years": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "1st Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "2nd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "3rd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "Final Year": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "yearTotals": {
+          "All Years": 0,
+          "1st Year": 0,
+          "2nd Year": 0,
+          "3rd Year": 0,
+          "Final Year": 0
+        },
+        "percentages": {
+          "All Years": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "1st Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ]
+        },
+        "participationRate": 0
+      }
+    ],
+    "responses": {
+      "mtg_1791965373109:q1:token_parent_A_1791965373149": {
+        "id": "resp_1791965374629_62gl",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "token_parent_A_1791965373149",
+        "questionId": "q1",
+        "selectedOption": 0,
+        "studentYear": "1st Year",
+        "submittedAt": 1791965374629,
+        "updatedAt": 1791965374630
+      },
+      "mtg_1791965373109:q1:token_parent_B_1791965373149": {
+        "id": "resp_1791965375882_9e31",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "token_parent_B_1791965373149",
+        "questionId": "q1",
+        "selectedOption": 2,
+        "studentYear": "3rd Year",
+        "submittedAt": 1791965374631,
+        "updatedAt": 1791965375882
+      },
+      "mtg_1791965373109:q1:token_parent_C_1791965373149": {
+        "id": "resp_1791965374633_0cb6",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "token_parent_C_1791965373149",
+        "questionId": "q1",
+        "selectedOption": 0,
+        "studentYear": "Final Year",
+        "submittedAt": 1791965374633,
+        "updatedAt": 1791965374633
+      },
+      "mtg_1791965373109:q2:token_parent_A_1791965373149": {
+        "id": "resp_1791965375461_hyvh",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "token_parent_A_1791965373149",
+        "questionId": "q2",
+        "selectedOption": 2,
+        "studentYear": "1st Year",
+        "submittedAt": 1791965375461,
+        "updatedAt": 1791965375461
+      },
+      "mtg_1791965373109:q2:token_parent_B_1791965373149": {
+        "id": "resp_1791965375463_quxf",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "token_parent_B_1791965373149",
+        "questionId": "q2",
+        "selectedOption": 0,
+        "studentYear": "3rd Year",
+        "submittedAt": 1791965375463,
+        "updatedAt": 1791965375463
+      },
+      "mtg_1791965373109:q2:token_parent_C_1791965373149": {
+        "id": "resp_1791965375466_s9ef",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "token_parent_C_1791965373149",
+        "questionId": "q2",
+        "selectedOption": 3,
+        "studentYear": "Final Year",
+        "submittedAt": 1791965375466,
+        "updatedAt": 1791965375466
+      },
+      "mtg_1791965373109:q2:e2e_parent_token_001": {
+        "id": "resp_1791965389765_og5d",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "e2e_parent_token_001",
+        "questionId": "q2",
+        "selectedOption": 1,
+        "studentYear": "2nd Year",
+        "submittedAt": 1791965389765,
+        "updatedAt": 1791965389765
+      },
+      "mtg_1791965373109:custom_q1:parent_flow_1": {
+        "id": "resp_1791988959071_euzj",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "parent_flow_1",
+        "questionId": "custom_q1",
+        "selectedOption": 0,
+        "studentYear": "1st Year",
+        "submittedAt": 1791988959071,
+        "updatedAt": 1791988959071
+      },
+      "mtg_1791965373109:custom_q1:parent_flow_2": {
+        "id": "resp_1791988959072_mic5",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "parent_flow_2",
+        "questionId": "custom_q1",
+        "selectedOption": 1,
+        "studentYear": "3rd Year",
+        "submittedAt": 1791988959072,
+        "updatedAt": 1791988959072
+      },
+      "mtg_1791965373109:q1:test_parent_v1": {
+        "id": "resp_1791990798474_24u7",
+        "meetingId": "mtg_1791965373109",
+        "participantId": "test_parent_v1",
+        "questionId": "q1",
+        "selectedOption": 0,
+        "studentYear": "2nd Year",
+        "submittedAt": 1791990132053,
+        "updatedAt": 1791990798475
+      }
+    }
+  },
+  {
     "id": "mtg_1791964223492",
     "title": "Annual Parent-Teacher Meeting 2026",
     "academicYear": "2026",
