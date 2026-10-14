@@ -141,6 +141,14 @@
       "joinedAt": 1791958840247,
       "lastSeen": 1791958840615,
       "socketId": "50qj4FDbKnzTljkUAAAE"
+    },
+    "test_parent_v1": {
+      "participantId": "test_parent_v1",
+      "meetingId": "mtg_1791958840067",
+      "studentYear": "2nd Year",
+      "joinedAt": 1791959749799,
+      "lastSeen": 1791959749826,
+      "socketId": "4pPS4KhSpLDVU3cqAAAB"
     }
   },
   "responses": {
