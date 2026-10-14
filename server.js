@@ -612,8 +612,8 @@ app.get('/api/export/csv', (req, res) => {
     'Question (English)',
     'Question (Tamil)',
     'Selected Option',
-    'Answer Text (English)',
-    'Answer Text (Tamil)',
+    'Option (English)',
+    'Option (Tamil)',
     'Timestamp'
   ];
   csv.push(headers.map(h => `"${h}"`).join(','));
