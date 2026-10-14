@@ -1,7 +1,7 @@
 const http = require('http');
 const { io } = require('socket.io-client');
 
-const PORT = 3001;
+const PORT = parseInt(process.env.PORT || 3000, 10);
 const BASE_URL = `http://localhost:${PORT}`;
 
 function fetchHttp(urlPath) {
