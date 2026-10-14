@@ -204,6 +204,19 @@
     const isClosed = currentQuestionStatus === 'closed';
     const letters = ['A', 'B', 'C', 'D'];
 
+    // Update poll status indicator
+    const pollStatusTag = document.getElementById('pPollStatusTag');
+    const pollStatusTagText = document.getElementById('pPollStatusTagText');
+    if (pollStatusTag && pollStatusTagText) {
+      if (isClosed) {
+        pollStatusTag.className = 'poll-status-indicator closed';
+        pollStatusTagText.textContent = 'Polling Closed';
+      } else {
+        pollStatusTag.className = 'poll-status-indicator open';
+        pollStatusTagText.textContent = 'Polling Active';
+      }
+    }
+
     pOptionsList.innerHTML = currentQuestion.options.map((optText, index) => {
       const optTa = currentQuestion.optionsTa?.[index] || '';
       const isSelected = pendingOptionSelection === index;
@@ -246,6 +259,10 @@
   btnSubmitVote?.addEventListener('click', () => {
     if (pendingOptionSelection === null || !currentQuestion) return;
 
+    // Submitting feedback state
+    btnSubmitVote.disabled = true;
+    btnSubmitVote.textContent = 'Submitting response...';
+
     // Send vote to server
     socket.emit('parent:vote', {
       voterToken,
@@ -254,7 +271,10 @@
     });
 
     myAnswers[currentQuestion.id] = pendingOptionSelection;
-    showVoteFeedback(false);
+    setTimeout(() => {
+      showVoteFeedback(false);
+      renderOptionButtons();
+    }, 150);
   });
 
   function showVoteFeedback(isExisting) {
@@ -264,7 +284,7 @@
       pVoteStatusBanner.innerHTML = '<span>Poll closed. Your response was recorded.</span>';
     } else {
       pVoteStatusBanner.className = 'feedback-banner success';
-      pVoteStatusBanner.innerHTML = '<span>✓ Response recorded! You can tap another option to change.</span>';
+      pVoteStatusBanner.innerHTML = '<span>✓ Response recorded! You can tap another option to update your choice.</span>';
     }
   }
 

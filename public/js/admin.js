@@ -18,7 +18,10 @@
     joinUrl: '',
     qrDataUrl: '',
     previewQuestionId: null,
-    activeYearFilter: 'All Years'
+    activeYearFilter: 'All Years',
+    ctrlCohortFilter: 'All Years',
+    builderPreviewIndex: 0,
+    mobilePreviewSelectedOption: null
   };
 
   // Socket Connection
@@ -221,6 +224,10 @@
       if (qrImg) qrImg.src = data.qrDataUrl;
       const urlText = document.getElementById('qrJoinUrlText');
       if (urlText) urlText.textContent = data.joinUrl;
+      const ctrlThumb = document.getElementById('ctrlQrThumbnail');
+      if (ctrlThumb) ctrlThumb.src = data.qrDataUrl;
+      const ctrlUrl = document.getElementById('ctrlQrJoinUrl');
+      if (ctrlUrl) ctrlUrl.textContent = data.joinUrl;
     } catch (e) {
       console.error('Failed to load QR info:', e);
     }
@@ -426,6 +433,18 @@
         taEl.style.display = 'none';
       }
 
+      // Cohort filter pills
+      const filterBtns = document.querySelectorAll('#ctrlCohortFilterPills .ctrl-filter-btn');
+      filterBtns.forEach(btn => {
+        const yr = btn.getAttribute('data-year');
+        btn.classList.toggle('active', yr === (state.ctrlCohortFilter || 'All Years'));
+        btn.onclick = () => {
+          state.ctrlCohortFilter = yr;
+          filterBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-year') === yr));
+          renderBreakdownBars(previewQ);
+        };
+      });
+
       // Breakdown bars
       renderBreakdownBars(previewQ);
     }
@@ -439,20 +458,32 @@
     const list = document.getElementById('ctrlBreakdownList');
     if (!list) return;
 
-    // Use current tallies if matching
+    const filterYear = state.ctrlCohortFilter || 'All Years';
     const tallies = (state.tallies && state.tallies.questionId === question.id) ? state.tallies : null;
-    const totalVotes = tallies ? tallies.totalVotes : 0;
-    const totalAudience = state.attendance.total || 0;
+    const isAll = filterYear === 'All Years';
+
+    const totalVotes = isAll
+      ? (tallies ? tallies.totalVotes : 0)
+      : (tallies?.yearTotals?.[filterYear] || 0);
+
+    const totalAudience = isAll
+      ? (state.attendance.total || 0)
+      : (state.attendance.yearBreakdown?.[filterYear] || 0);
+
     const pct = totalAudience > 0 ? Math.round((totalVotes / totalAudience) * 100) : 0;
 
-    document.getElementById('ctrlLiveResponsesStat').textContent = `${totalVotes} Votes Cast (${pct}% participation)`;
+    const statLabel = isAll
+      ? `${totalVotes} Votes Cast (${pct}% participation)`
+      : `${filterYear}: ${totalVotes} Votes (${pct}% participation)`;
+
+    document.getElementById('ctrlLiveResponsesStat').textContent = statLabel;
 
     const options = question.options || [];
     const optionsTa = question.optionsTa || [];
 
     list.innerHTML = options.map((opt, idx) => {
       const optTa = (state.settings.showTamilTranslation !== false && optionsTa[idx]) ? optionsTa[idx] : '';
-      const votesCount = tallies?.breakdown?.['All Years']?.[idx] || 0;
+      const votesCount = tallies?.breakdown?.[filterYear]?.[idx] || 0;
       const optPct = totalVotes > 0 ? ((votesCount / totalVotes) * 100).toFixed(1) : '0.0';
       const letter = ['A', 'B', 'C', 'D'][idx] || (idx + 1);
 
@@ -460,10 +491,13 @@
         <div class="breakdown-bar-item">
           <div class="bar-label-row">
             <span class="bar-opt-text">
-              <strong>${letter}.</strong> ${escapeHtml(opt)}
-              ${optTa ? `<span style="font-family: 'Noto Sans Tamil'; color: var(--text-muted); font-size: 0.84rem; margin-left: 6px;">(${escapeHtml(optTa)})</span>` : ''}
+              <strong style="color: var(--primary); font-size: 1rem;">${letter}.</strong>
+              <span style="font-weight: 700; color: var(--text-primary); margin-left: 4px;">${escapeHtml(opt)}</span>
+              ${optTa ? `<span style="font-family: 'Noto Sans Tamil'; color: var(--text-muted); font-size: 0.88rem; margin-left: 8px;">(${escapeHtml(optTa)})</span>` : ''}
             </span>
-            <span class="bar-opt-stat">${votesCount} votes (${optPct}%)</span>
+            <span class="bar-opt-stat" style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem;">
+              ${votesCount} votes <span style="color: var(--primary);">(${optPct}%)</span>
+            </span>
           </div>
           <div class="bar-track">
             <div class="bar-fill" style="width: ${optPct}%;"></div>
@@ -482,6 +516,10 @@
   // Meeting Control Actions
   document.getElementById('ctrlBtnStartMeeting')?.addEventListener('click', () => {
     socket.emit('admin:start_meeting');
+  });
+
+  document.getElementById('ctrlBtnEditQuestions')?.addEventListener('click', () => {
+    window.location.hash = '#questions';
   });
 
   document.getElementById('ctrlBtnViewQr')?.addEventListener('click', () => {
@@ -549,45 +587,350 @@
   });
 
   // -------------------------------------------------------------
-  // View 4: Questions Management
+  // View 4: Questions Management & Setup Builder
   // -------------------------------------------------------------
   function renderQuestionsBank() {
     const list = document.getElementById('questionsBankList');
     if (!list) return;
 
+    // Update count pill
+    const countPill = document.getElementById('builderQuestionsCount');
+    if (countPill) {
+      countPill.textContent = `${state.questions.length} Questions Configured`;
+    }
+
+    // Student year visibility & privacy toggle
+    const toggleYear = document.getElementById('toggleShowYearToParents');
+    const labelStatus = document.getElementById('labelShowYearStatus');
+    if (toggleYear && labelStatus) {
+      const isVisible = state.settings.requireYearSelection !== false;
+      toggleYear.checked = isVisible;
+      labelStatus.textContent = isVisible ? 'Cohort Visible to Parents' : 'Fully Anonymized Mode';
+
+      toggleYear.onchange = async () => {
+        const val = toggleYear.checked;
+        state.settings.requireYearSelection = val;
+        labelStatus.textContent = val ? 'Cohort Visible to Parents' : 'Fully Anonymized Mode';
+        renderLiveMobilePreview();
+        try {
+          await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requireYearSelection: val })
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      };
+    }
+
     if (!state.questions || state.questions.length === 0) {
-      list.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No questions configured yet. Click "+ Add Question" to create one.</div>`;
+      list.innerHTML = `
+        <div class="empty-state-card" style="text-align: center; padding: 48px 24px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg);">
+          <div style="font-size: 2.2rem; margin-bottom: 10px;">📋</div>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">No Questions Configured</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px;">Create questions for parents before starting the meeting.</p>
+          <button class="btn btn-primary" onclick="document.getElementById('btnOpenAddQuestionModal').click()">+ Add First Question</button>
+        </div>
+      `;
+      renderLiveMobilePreview();
       return;
     }
 
-    list.innerHTML = state.questions.map((q, idx) => `
-      <div class="question-item-card">
-        <div style="flex: 1;">
-          <div class="q-item-num">Question ${idx + 1}</div>
-          <div class="q-item-text-en">${escapeHtml(q.text)}</div>
-          ${q.textTa ? `<div class="q-item-text-ta">${escapeHtml(q.textTa)}</div>` : ''}
-          <div class="q-item-options-preview">
-            ${(q.options || []).map((opt, i) => `
-              <span class="opt-pill"><strong>${['A', 'B', 'C', 'D'][i]}:</strong> ${escapeHtml(opt)}</span>
-            `).join('')}
+    // Clamp preview index
+    if (state.builderPreviewIndex >= state.questions.length) {
+      state.builderPreviewIndex = state.questions.length - 1;
+    }
+    if (state.builderPreviewIndex < 0) {
+      state.builderPreviewIndex = 0;
+    }
+
+    list.innerHTML = state.questions.map((q, idx) => {
+      const isSelected = idx === state.builderPreviewIndex;
+      const isFirst = idx === 0;
+      const isLast = idx === state.questions.length - 1;
+
+      return `
+        <div class="builder-q-card ${isSelected ? 'selected-for-preview' : ''}" data-index="${idx}" onclick="window.setBuilderPreview(${idx})">
+          <div class="builder-q-top">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="builder-q-num">Q${idx + 1}</span>
+              ${isSelected ? '<span class="status-badge live" style="font-size: 0.72rem; padding: 2px 8px;">PREVIEWING</span>' : '<span class="status-badge draft" style="font-size: 0.72rem; padding: 2px 8px;">READY</span>'}
+            </div>
+            <div class="builder-reorder-group" onclick="event.stopPropagation()">
+              <button type="button" class="btn-reorder" title="Move Up" ${isFirst ? 'disabled' : ''} onclick="window.moveQuestionUp(${idx})">↑</button>
+              <button type="button" class="btn-reorder" title="Move Down" ${isLast ? 'disabled' : ''} onclick="window.moveQuestionDown(${idx})">↓</button>
+            </div>
+          </div>
+
+          <div class="builder-q-en">${escapeHtml(q.text)}</div>
+          ${q.textTa ? `<div class="builder-q-ta">${escapeHtml(q.textTa)}</div>` : ''}
+
+          <div class="builder-options-grid">
+            ${(q.options || []).map((opt, i) => {
+              const optTa = q.optionsTa?.[i] || '';
+              return `
+                <div class="builder-opt-pill">
+                  <span class="builder-opt-letter">${['A', 'B', 'C', 'D'][i] || (i + 1)}</span>
+                  <div class="builder-opt-texts">
+                    <span class="builder-opt-en">${escapeHtml(opt)}</span>
+                    ${optTa ? `<span class="builder-opt-ta">${escapeHtml(optTa)}</span>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="builder-q-actions" onclick="event.stopPropagation()">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.editQuestion('${q.id}')">✏️ Edit</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.duplicateQuestion('${q.id}')">📋 Duplicate</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="window.deleteQuestion('${q.id}')">🗑️ Delete</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.setBuilderPreview(${idx})">👁️ Preview</button>
           </div>
         </div>
-        <div class="q-item-actions">
-          <button class="btn btn-secondary btn-sm" onclick="window.editQuestion('${q.id}')">Edit</button>
-          <button class="btn btn-secondary btn-sm" onclick="window.duplicateQuestion('${q.id}')">Duplicate</button>
-          <button class="btn btn-danger btn-sm" onclick="window.deleteQuestion('${q.id}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    renderLiveMobilePreview();
   }
 
-  // Question Modal Handling
+  // Render Synchronized Live Parent Mobile Preview
+  function renderLiveMobilePreview() {
+    const viewport = document.getElementById('previewPhoneViewport');
+    if (!viewport) return;
+
+    const q = state.questions[state.builderPreviewIndex] || state.questions[0];
+    if (!q) {
+      viewport.innerHTML = `
+        <div style="padding: 40px 20px; text-align: center; color: var(--text-muted);">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">📱</div>
+          <div style="font-weight: 700; color: var(--text-primary);">No Question Selected</div>
+          <div style="font-size: 0.85rem; margin-top: 4px;">Add or select a question to see live mobile preview</div>
+        </div>
+      `;
+      return;
+    }
+
+    const showYear = state.settings.requireYearSelection !== false;
+    const currentIdx = state.builderPreviewIndex;
+    const totalCount = state.questions.length;
+    const selectedOpt = state.mobilePreviewSelectedOption;
+
+    viewport.innerHTML = `
+      <div class="preview-phone-header">
+        <div>
+          <div class="preview-brand-title">CSBS Parent–Teacher Meeting</div>
+          <div class="preview-dept-sub">Dept. of Computer Science & Business Systems</div>
+        </div>
+        <div class="preview-live-indicator">
+          <span class="preview-dot"></span> Live
+        </div>
+      </div>
+
+      ${showYear ? `
+        <div class="preview-year-banner">
+          <span>Student Year:</span>
+          <span class="preview-year-tag">1st Year</span>
+        </div>
+      ` : ''}
+
+      <div class="preview-poll-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div class="preview-progress-label">Question ${currentIdx + 1} of ${totalCount}</div>
+          <div class="preview-status-pill">● Polling Active</div>
+        </div>
+
+        <div class="preview-question-en">${escapeHtml(q.text)}</div>
+        ${q.textTa ? `<div class="preview-question-ta">${escapeHtml(q.textTa)}</div>` : ''}
+
+        ${selectedOpt !== null ? `
+          <div class="preview-vote-banner">
+            <span>✓ Response recorded! Tap another option to update.</span>
+          </div>
+        ` : ''}
+
+        <div class="preview-options-container">
+          ${(q.options || []).map((opt, i) => {
+            const optTa = q.optionsTa?.[i] || '';
+            const isOptSelected = selectedOpt === i;
+            const letter = ['A', 'B', 'C', 'D'][i] || (i + 1);
+
+            return `
+              <div class="preview-mock-opt ${isOptSelected ? 'selected' : ''}" onclick="window.selectMobilePreviewOption(${i})">
+                <div class="preview-mock-letter">${letter}</div>
+                <div class="preview-mock-labels">
+                  <div class="preview-mock-en">${escapeHtml(opt)}</div>
+                  ${optTa ? `<div class="preview-mock-ta">${escapeHtml(optTa)}</div>` : ''}
+                </div>
+                ${isOptSelected ? '<span class="preview-mock-check">✓</span>' : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <button type="button" class="preview-mock-submit" ${selectedOpt === null ? 'disabled' : ''}>
+          ${selectedOpt !== null ? 'Update Answer' : 'Submit & Continue'}
+        </button>
+      </div>
+    `;
+  }
+
+  window.setBuilderPreview = function(idx) {
+    state.builderPreviewIndex = idx;
+    state.mobilePreviewSelectedOption = null;
+    const cards = document.querySelectorAll('.builder-q-card');
+    cards.forEach((c, i) => c.classList.toggle('selected-for-preview', i === idx));
+    renderLiveMobilePreview();
+  };
+
+  window.selectMobilePreviewOption = function(optIndex) {
+    state.mobilePreviewSelectedOption = optIndex;
+    renderLiveMobilePreview();
+  };
+
+  window.moveQuestionUp = async function(idx) {
+    if (idx <= 0 || idx >= state.questions.length) return;
+    const item = state.questions[idx];
+    state.questions.splice(idx, 1);
+    state.questions.splice(idx - 1, 0, item);
+    state.builderPreviewIndex = idx - 1;
+
+    renderQuestionsBank();
+    await saveQuestionOrder();
+  };
+
+  window.moveQuestionDown = async function(idx) {
+    if (idx < 0 || idx >= state.questions.length - 1) return;
+    const item = state.questions[idx];
+    state.questions.splice(idx, 1);
+    state.questions.splice(idx + 1, 0, item);
+    state.builderPreviewIndex = idx + 1;
+
+    renderQuestionsBank();
+    await saveQuestionOrder();
+  };
+
+  async function saveQuestionOrder() {
+    const questionIds = state.questions.map(q => q.id);
+    try {
+      await fetch('/api/questions/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionIds })
+      });
+      socket.emit('admin:reorder_questions', { questionIds });
+    } catch (e) {
+      console.error('Failed to save question reorder:', e);
+    }
+  }
+
+  // "Finish & Start Meeting" action
+  document.getElementById('btnFinishAndStartMeeting')?.addEventListener('click', () => {
+    if (!state.questions || state.questions.length === 0) {
+      alert('Please add at least 1 question with at least 2 options before starting the meeting.');
+      return;
+    }
+    const invalidQ = state.questions.find(q => !q.text || !q.options || q.options.filter(Boolean).length < 2);
+    if (invalidQ) {
+      alert('Every question must have question text and at least 2 answer options.');
+      return;
+    }
+
+    socket.emit('admin:start_meeting');
+    window.location.hash = '#meeting-control';
+  });
+
+  // Mobile preview toggle for small screens
+  document.getElementById('btnToggleMobilePreviewPane')?.addEventListener('click', () => {
+    const pane = document.getElementById('builderPreviewColumn');
+    if (!pane) return;
+    const isHidden = window.getComputedStyle(pane).display === 'none';
+    pane.style.display = isHidden ? 'block' : 'none';
+  });
+
+  // Question Modal Handling & Autosave
   const qModal = document.getElementById('questionEditorModal');
+
+  // Live Sync & Autosave draft setup
+  function setupQuestionEditorLiveSync() {
+    const enInput = document.getElementById('editQuestionEn');
+    const taInput = document.getElementById('editQuestionTa');
+    const optA = document.getElementById('editOptAEn');
+    const optATa = document.getElementById('editOptATa');
+    const optB = document.getElementById('editOptBEn');
+    const optBTa = document.getElementById('editOptBTa');
+    const optC = document.getElementById('editOptCEn');
+    const optCTa = document.getElementById('editOptCTa');
+    const optD = document.getElementById('editOptDEn');
+    const optDTa = document.getElementById('editOptDTa');
+
+    const inputs = [enInput, taInput, optA, optATa, optB, optBTa, optC, optCTa, optD, optDTa];
+
+    inputs.forEach(inp => {
+      inp?.addEventListener('input', () => {
+        // Live preview sync
+        const currentQ = state.questions[state.builderPreviewIndex];
+        if (currentQ) {
+          if (enInput.value) currentQ.text = enInput.value;
+          currentQ.textTa = taInput.value;
+          if (optA.value) currentQ.options[0] = optA.value;
+          if (optB.value) currentQ.options[1] = optB.value;
+          if (optC.value) currentQ.options[2] = optC.value;
+          if (optD.value) currentQ.options[3] = optD.value;
+          if (!currentQ.optionsTa) currentQ.optionsTa = [];
+          currentQ.optionsTa[0] = optATa.value;
+          currentQ.optionsTa[1] = optBTa.value;
+          currentQ.optionsTa[2] = optCTa.value;
+          currentQ.optionsTa[3] = optDTa.value;
+          renderLiveMobilePreview();
+        }
+
+        // Save draft to localStorage
+        const draft = {
+          qId: document.getElementById('editQuestionId').value,
+          text: enInput.value,
+          textTa: taInput.value,
+          optA: optA.value,
+          optATa: optATa.value,
+          optB: optB.value,
+          optBTa: optBTa.value,
+          optC: optC.value,
+          optCTa: optCTa.value,
+          optD: optD.value,
+          optDTa: optDTa.value
+        };
+        localStorage.setItem('pollpoint_draft_question', JSON.stringify(draft));
+      });
+    });
+  }
+
+  setupQuestionEditorLiveSync();
 
   document.getElementById('btnOpenAddQuestionModal')?.addEventListener('click', () => {
     document.getElementById('questionEditorTitle').textContent = 'Add Question';
     document.getElementById('editQuestionId').value = '';
     document.getElementById('formQuestionEditor').reset();
+
+    // Check for draft autosave
+    const savedDraft = localStorage.getItem('pollpoint_draft_question');
+    if (savedDraft) {
+      try {
+        const d = JSON.parse(savedDraft);
+        if (d && !d.qId) {
+          document.getElementById('editQuestionEn').value = d.text || '';
+          document.getElementById('editQuestionTa').value = d.textTa || '';
+          document.getElementById('editOptAEn').value = d.optA || '';
+          document.getElementById('editOptATa').value = d.optATa || '';
+          document.getElementById('editOptBEn').value = d.optB || '';
+          document.getElementById('editOptBTa').value = d.optBTa || '';
+          document.getElementById('editOptCEn').value = d.optC || '';
+          document.getElementById('editOptCTa').value = d.optCTa || '';
+          document.getElementById('editOptDEn').value = d.optD || '';
+          document.getElementById('editOptDTa').value = d.optDTa || '';
+        }
+      } catch (e) {}
+    }
+
     qModal.classList.remove('hidden');
   });
 
@@ -602,6 +945,9 @@
   window.editQuestion = function(qId) {
     const q = state.questions.find(item => item.id === qId);
     if (!q) return;
+
+    const qIdx = state.questions.findIndex(item => item.id === qId);
+    if (qIdx >= 0) window.setBuilderPreview(qIdx);
 
     document.getElementById('questionEditorTitle').textContent = 'Edit Question';
     document.getElementById('editQuestionId').value = q.id;
@@ -670,8 +1016,12 @@
       document.getElementById('editOptDTa').value.trim()
     ];
 
-    if (!text || options.length < 2) {
-      alert('Please provide question text and at least 2 options.');
+    if (!text) {
+      alert('Please provide the question text.');
+      return;
+    }
+    if (options.length < 2) {
+      alert('Please provide at least 2 answer options (e.g. Option A and Option B).');
       return;
     }
 
@@ -689,9 +1039,13 @@
           body: JSON.stringify({ text, textTa, options, optionsTa })
         });
       }
+
+      // Clear draft on successful save
+      localStorage.removeItem('pollpoint_draft_question');
       qModal.classList.add('hidden');
     } catch (e) {
       console.error(e);
+      alert('Failed to save question. Please try again.');
     }
   });
 

@@ -79,10 +79,14 @@
          =================================================================== -->
     <section class="screen-card" id="screenWaiting">
       <div class="waiting-box">
-        <div class="waiting-spinner"></div>
+        <div class="radar-pulse-container">
+          <div class="radar-circle circle-1"></div>
+          <div class="radar-circle circle-2"></div>
+          <div class="radar-center-dot"></div>
+        </div>
         <h2 class="screen-title" id="pWaitingTitle">Welcome Parents!</h2>
         <p class="screen-desc" id="pWaitingSubtitle" style="margin-bottom: 0;">
-          You are connected to the live meeting session. Please wait for faculty to launch the question on the screen.
+          You are securely connected to the meeting session. Please wait for faculty to launch the first question on the screen.
         </p>
       </div>
     </section>
@@ -91,7 +95,13 @@
          SCREEN 4: QUESTION & POLLING SCREEN
          =================================================================== -->
     <section class="screen-card" id="screenQuestion">
-      <div class="question-progress-label" id="pQuestionProgressLabel">Question 1 of 5</div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+        <div class="question-progress-label" id="pQuestionProgressLabel">Question 1 of 5</div>
+        <div class="poll-status-indicator open" id="pPollStatusTag">
+          <span class="status-indicator-dot"></span>
+          <span id="pPollStatusTagText">Polling Active</span>
+        </div>
+      </div>
 
       <!-- Question Text -->
       <h2 class="question-text-en" id="pQuestionTextEn">Loading question...</h2>
@@ -99,7 +109,7 @@
 
       <!-- Feedback Banner -->
       <div class="feedback-banner success" id="pVoteStatusBanner" style="display: none;">
-        <span>✓ Response recorded! You can select another option to change.</span>
+        <span>✓ Response recorded! You can tap another option to update your choice.</span>
       </div>
 
       <!-- Options -->

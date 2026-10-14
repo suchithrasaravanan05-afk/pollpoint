@@ -561,6 +561,32 @@ app.delete('/api/questions/:id', (req, res) => {
   res.json({ success: true });
 });
 
+app.post('/api/questions/reorder', (req, res) => {
+  const { questionIds } = req.body || {};
+  if (!Array.isArray(questionIds)) {
+    return res.status(400).json({ error: 'questionIds array required' });
+  }
+
+  const newQuestions = [];
+  questionIds.forEach(qId => {
+    const found = sessionState.questions.find(q => q.id === qId);
+    if (found) newQuestions.push(found);
+  });
+
+  // Append any missing questions to prevent data loss
+  sessionState.questions.forEach(q => {
+    if (!newQuestions.some(nq => nq.id === q.id)) {
+      newQuestions.push(q);
+    }
+  });
+
+  sessionState.questions = newQuestions;
+  sessionState.currentMeeting.selectedQuestionIds = newQuestions.map(q => q.id);
+  persistState();
+  io.emit('questions:updated', sessionState.questions);
+  res.json({ success: true, questions: sessionState.questions });
+});
+
 // Export CSV API - Responses
 app.get('/api/export/csv', (req, res) => {
   const meeting = sessionState.currentMeeting;
@@ -752,6 +778,7 @@ io.on('connection', (socket) => {
     persistState();
 
     io.to('admin-room').emit('meeting:state_changed', getAdminStats());
+    io.to('admin-room').emit('admin:meeting_started', { meetingStatus: 'READY' });
     io.emit('session:meeting_state', {
       status: sessionState.currentMeeting.status,
       title: sessionState.currentMeeting.title,
@@ -924,6 +951,50 @@ io.on('connection', (socket) => {
     persistState();
     io.emit('questions:updated', sessionState.questions);
     io.to('admin-room').emit('admin:questions_updated', { questions: sessionState.questions });
+  });
+
+  // Admin saves question builder set
+  socket.on('admin:save_questions', (data) => {
+    const { questions, showYearToParents, departmentName, meetingTitle } = data || {};
+    if (Array.isArray(questions)) {
+      sessionState.questions = questions;
+      sessionState.currentMeeting.selectedQuestionIds = questions.map(q => q.id);
+    }
+    if (showYearToParents !== undefined) {
+      settings.requireYearSelection = Boolean(showYearToParents);
+      persistSettings();
+    }
+    if (departmentName) settings.departmentName = departmentName;
+    if (meetingTitle) sessionState.currentMeeting.title = meetingTitle;
+    persistState();
+
+    const tallies = sessionState.currentMeeting.currentQuestionId
+      ? computeQuestionTallies(sessionState.currentMeeting.currentQuestionId)
+      : null;
+
+    io.emit('questions:updated', sessionState.questions);
+    io.to('admin-room').emit('admin:questions_saved', {
+      questions: sessionState.questions,
+      showYearToParents: settings.requireYearSelection,
+      tallies
+    });
+  });
+
+  // Admin reorders questions
+  socket.on('admin:reorder_questions', ({ questionIds }) => {
+    if (!Array.isArray(questionIds)) return;
+    const reordered = [];
+    questionIds.forEach(id => {
+      const q = sessionState.questions.find(item => item.id === id);
+      if (q) reordered.push(q);
+    });
+    sessionState.questions.forEach(q => {
+      if (!reordered.some(item => item.id === q.id)) reordered.push(q);
+    });
+    sessionState.questions = reordered;
+    sessionState.currentMeeting.selectedQuestionIds = reordered.map(q => q.id);
+    persistState();
+    io.emit('questions:updated', sessionState.questions);
   });
 
   // ---------------- PARENT SOCKET EVENTS ----------------

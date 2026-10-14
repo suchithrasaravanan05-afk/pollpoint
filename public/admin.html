@@ -234,6 +234,7 @@
         <!-- Top Action Buttons -->
         <div class="control-bar-actions" style="margin-bottom: 20px;">
           <button class="btn btn-primary" id="ctrlBtnStartMeeting">Start Meeting</button>
+          <button class="btn btn-secondary" id="ctrlBtnEditQuestions">Edit Questions</button>
           <button class="btn btn-secondary" id="ctrlBtnViewQr">View QR</button>
           <button class="btn btn-secondary" id="ctrlBtnAttendance">Attendance</button>
           <button class="btn btn-secondary" id="ctrlBtnResults">Results</button>
@@ -269,10 +270,20 @@
 
             <!-- Live Response Breakdown -->
             <div>
-              <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
-                <h4 style="font-size: 1rem; font-weight: 700;">Live Response Breakdown</h4>
-                <span style="font-size: 0.85rem; color: var(--text-muted);" id="ctrlLiveResponsesStat">0 Votes Cast (0% participation)</span>
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">Live Response Breakdown</h4>
+                <span style="font-size: 0.88rem; font-weight: 600; color: var(--primary);" id="ctrlLiveResponsesStat">0 Votes Cast (0% participation)</span>
               </div>
+
+              <!-- Live Cohort Filter Pills -->
+              <div class="live-cohort-filter-pills" id="ctrlCohortFilterPills" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+                <button type="button" class="btn btn-sm btn-secondary ctrl-filter-btn active" data-year="All Years">All Years</button>
+                <button type="button" class="btn btn-sm btn-secondary ctrl-filter-btn" data-year="1st Year">1st Year</button>
+                <button type="button" class="btn btn-sm btn-secondary ctrl-filter-btn" data-year="2nd Year">2nd Year</button>
+                <button type="button" class="btn btn-sm btn-secondary ctrl-filter-btn" data-year="3rd Year">3rd Year</button>
+                <button type="button" class="btn btn-sm btn-secondary ctrl-filter-btn" data-year="Final Year">Final Year</button>
+              </div>
+
               <div class="live-breakdown-list" id="ctrlBreakdownList">
                 <!-- Dynamically populated bars -->
               </div>
@@ -281,6 +292,18 @@
 
           <!-- Right Sidebar: Attendance & Progress -->
           <div class="control-side-panel">
+            <!-- Compact QR Preview Widget for Auditorium Facilitators -->
+            <div class="side-panel-card qr-side-widget">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">Projector QR Code</span>
+                <a href="#qr" class="btn btn-secondary btn-sm" id="ctrlBtnExpandQr">Full Screen ↗</a>
+              </div>
+              <div class="qr-thumbnail-frame" style="text-align: center; background: #ffffff; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                <img id="ctrlQrThumbnail" src="" alt="Parent QR Code" style="max-width: 140px; height: auto; border-radius: 4px; display: inline-block;">
+                <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-top: 6px;" id="ctrlQrJoinUrl">Scan on venue Wi-Fi</div>
+              </div>
+            </div>
+
             <!-- Attendance By Year -->
             <div class="side-panel-card">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
@@ -318,19 +341,75 @@
         </div>
       </section>
 
-      <!-- VIEW 4: QUESTIONS MANAGEMENT -->
+      <!-- VIEW 4: QUESTIONS MANAGEMENT & SETUP BUILDER -->
       <section class="route-view" id="viewQuestions">
         <div class="view-back-bar">
           <a href="#dashboard" class="btn-back">← Back to Dashboard</a>
-          <button class="btn btn-primary" id="btnOpenAddQuestionModal">+ Add Question</button>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-secondary" id="btnToggleMobilePreviewPane">📱 Toggle Preview</button>
+            <button class="btn btn-secondary" id="btnOpenAddQuestionModal">+ Add Question</button>
+            <button class="btn btn-primary" id="btnFinishAndStartMeeting">Finish & Start Meeting →</button>
+          </div>
         </div>
         <div class="view-header">
-          <h2 class="view-title">Question Management</h2>
-          <p class="view-subtitle">Manage bilingual questions for CSBS Parent-Teacher Meetings.</p>
+          <h2 class="view-title">Meeting Setup & Question Builder</h2>
+          <p class="view-subtitle">Organize and refine questions, reorder the polling agenda, and inspect the synchronized live mobile preview.</p>
         </div>
 
-        <div id="questionsBankList">
-          <!-- Dynamically populated question cards -->
+        <!-- Student Year Visibility & Privacy Helper Card -->
+        <div class="privacy-setting-card">
+          <div class="privacy-setting-info">
+            <div class="privacy-setting-title">
+              <span class="privacy-icon">🛡️</span> Student Year Visibility & Privacy
+            </div>
+            <p class="privacy-setting-desc">
+              When enabled, parents see their student's cohort on their mobile screen. When disabled, the parent portal operates in fully anonymous mode without displaying cohort tags.
+            </p>
+          </div>
+          <div class="privacy-toggle-wrap">
+            <label class="switch-toggle" for="toggleShowYearToParents">
+              <input type="checkbox" id="toggleShowYearToParents" checked>
+              <span class="slider-round"></span>
+            </label>
+            <span class="privacy-toggle-label" id="labelShowYearStatus">Cohort Visible</span>
+          </div>
+        </div>
+
+        <!-- Two-Column Question Builder & Live Mobile Preview Grid -->
+        <div class="builder-layout-container">
+          <!-- Left Column: Questions List -->
+          <div class="builder-questions-column">
+            <div class="builder-col-header">
+              <span class="builder-count-pill" id="builderQuestionsCount">5 Questions Configured</span>
+              <span class="builder-hint">Select any question card to inspect on mobile preview</span>
+            </div>
+            <div id="questionsBankList">
+              <!-- Dynamically populated question cards -->
+            </div>
+          </div>
+
+          <!-- Right Column: Synchronized Live Mobile Preview Pane -->
+          <div class="builder-preview-column" id="builderPreviewColumn">
+            <div class="preview-column-sticky">
+              <div class="preview-column-title">
+                <span>Live Parent Mobile Preview</span>
+                <span class="preview-live-dot">● Synced</span>
+              </div>
+              <div class="mobile-device-mockup">
+                <div class="device-notch">
+                  <span class="notch-speaker"></span>
+                  <span class="notch-camera"></span>
+                </div>
+                <div class="device-status-bar">
+                  <span>9:41</span>
+                  <span>5G 100%</span>
+                </div>
+                <div class="phone-screen-viewport" id="previewPhoneViewport">
+                  <!-- Live bilingual mobile parent mockup -->
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
