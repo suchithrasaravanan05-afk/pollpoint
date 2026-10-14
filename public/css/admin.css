@@ -1,65 +1,66 @@
 /* ==========================================================================
    PollPoint - HOD Administration & Auditorium Projector Stylesheet
-   Theme: Warm Editorial Event Identity
-   Palette: Warm Parchment, Deep Ink / Charcoal, Terracotta / Vermilion Accent
-   Welcoming to parents, professional and authoritative for college meetings.
+   Theme: Luminous Royal Purple & Soft Lavender Editorial
+   Palette: Soft Lavender, Crisp Lilac-Tinted White, Deep Plum Charcoal Ink,
+            Royal Purple & Violet Accent (#7c3aed, #6d28d9)
+   Authoritative, welcoming, high-contrast, and college-ready.
    ========================================================================== */
 
 :root {
-  /* Warm Parchment & Editorial Paper Palette */
-  --bg-page: #fbf9f4;
-  --bg-subtle: #f4efe6;
+  /* Soft Lavender & Luminous Paper Palette */
+  --bg-page: #f7f2fc;
+  --bg-subtle: #ede3f8;
   --bg-card: #ffffff;
   --surface: #ffffff;
-  --surface-warm: #faf7f2;
-  --surface-hover: #f3ede2;
-  --surface-active: #eae2d3;
+  --surface-warm: #faf6fe;
+  --surface-hover: #f3e9fc;
+  --surface-active: #ebdcf9;
 
-  /* Subtle, Tailored Book-Cloth Borders & Dividers */
-  --border: #e7dfd5;
-  --border-subtle: #efe9df;
-  --border-strong: #d4cbbe;
-  --border-focus: #d94a2b;
-  --border-glow: rgba(217, 74, 43, 0.22);
+  /* Delicate Lavender-Slate Borders & Dividers */
+  --border: #e2d3f5;
+  --border-subtle: #ede4fa;
+  --border-strong: #cbb4ec;
+  --border-focus: #7c3aed;
+  --border-glow: rgba(124, 58, 237, 0.22);
 
-  /* Deep Charcoal / Ink Typography (WCAG AAA Contrast > 14:1) */
-  --text-primary: #1c1917;       /* Deepest ink charcoal */
-  --text-secondary: #44403c;     /* Warm dark charcoal */
-  --text-muted: #78716c;         /* Warm stone muted */
-  --text-dim: #a8a29e;           /* Subtle paper gray */
+  /* Deep Plum Charcoal / Ink Typography (WCAG AAA Contrast > 14:1) */
+  --text-primary: #190f2e;       /* Deepest rich plum charcoal */
+  --text-secondary: #3b2859;     /* Deep violet charcoal */
+  --text-muted: #6f598f;         /* Muted lilac-slate */
+  --text-dim: #9e8cb8;           /* Subtle lavender gray */
   --text-inverse: #ffffff;
 
-  /* Distinctive Warm Accent (Terracotta / Vermilion / Coral) */
-  --primary: #d94a2b;            /* Warm vermilion / terracotta */
-  --primary-hover: #c23c1f;
-  --primary-active: #a53218;
-  --primary-subtle: #fbeee9;
-  --primary-border: #f3cbbf;
-  --primary-glow: rgba(217, 74, 43, 0.22);
+  /* Royal Purple & Violet Accent */
+  --primary: #7c3aed;            /* Vibrant royal purple */
+  --primary-hover: #6d28d9;      /* Deep violet */
+  --primary-active: #5b21b6;
+  --primary-subtle: #f4edfd;      /* Soft lavender wash */
+  --primary-border: #dcc8f8;
+  --primary-glow: rgba(124, 58, 237, 0.24);
 
   /* Semantic Feedback */
-  --success: #2b7a4b;
-  --success-bg: #f0f7f3;
-  --success-border: #b8dfc7;
-  --success-text: #1d5433;
+  --success: #059669;
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
+  --success-text: #065f46;
 
   --warning: #b45309;
-  --warning-bg: #fef8ee;
-  --warning-border: #fbd38d;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
   --warning-text: #92400e;
 
-  --danger: #c53030;
-  --danger-bg: #fdf2f2;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
   --danger-border: #fecaca;
-  --danger-hover: #9b2c2c;
+  --danger-hover: #b91c1c;
 
-  /* Restrained, Tactile Paper Shadows */
-  --shadow-xs: 0 1px 2px rgba(28, 25, 23, 0.04);
-  --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.06), 0 1px 2px rgba(28, 25, 23, 0.04);
-  --shadow-md: 0 4px 14px -2px rgba(28, 25, 23, 0.08), 0 2px 4px -1px rgba(28, 25, 23, 0.04);
-  --shadow-lg: 0 12px 28px -4px rgba(28, 25, 23, 0.10), 0 4px 10px -2px rgba(28, 25, 23, 0.04);
+  /* Subtle Ambient Paper Shadows with Soft Violet Tint */
+  --shadow-xs: 0 1px 2px rgba(45, 18, 80, 0.04);
+  --shadow-sm: 0 1px 3px rgba(45, 18, 80, 0.06), 0 1px 2px rgba(45, 18, 80, 0.04);
+  --shadow-md: 0 4px 14px -2px rgba(45, 18, 80, 0.08), 0 2px 4px -1px rgba(45, 18, 80, 0.04);
+  --shadow-lg: 0 12px 28px -4px rgba(45, 18, 80, 0.11), 0 4px 10px -2px rgba(45, 18, 80, 0.04);
 
-  /* Tailored Geometry (No excessive rounding) */
+  /* Tailored Geometry */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -91,13 +92,13 @@ html, body {
   line-height: 1.55;
   color: var(--text-primary);
   background-color: var(--bg-page);
-  /* Subtle Warm Linen Texture Gradient */
+  /* Luminous Lavender Multi-Orb Ambient Background */
   background-image: 
-    radial-gradient(circle at 8% 8%, #f7f1e5 0%, transparent 45%),
-    radial-gradient(circle at 92% 12%, #f5ece0 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, #fcfbf8 0%, transparent 60%),
-    radial-gradient(circle at 88% 90%, #f6eee2 0%, transparent 45%),
-    radial-gradient(circle at 12% 92%, #f5ecdf 0%, transparent 45%);
+    radial-gradient(circle at 6% 8%, #ede1fa 0%, transparent 45%),
+    radial-gradient(circle at 94% 10%, #e6d3f9 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #faf6fe 0%, transparent 60%),
+    radial-gradient(circle at 88% 90%, #ebdcf8 0%, transparent 45%),
+    radial-gradient(circle at 10% 92%, #e5d1f8 0%, transparent 45%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -120,19 +121,20 @@ html, body {
 
 /* ==========================================================================
    1. GLOBAL HEADER
-   Warm editorial banner with college identity and clean navigation.
+   Clean, luminous lavender navigation bar.
    ========================================================================== */
 .global-header {
   height: var(--header-height);
-  background: rgba(251, 249, 244, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
   display: flex;
   align-items: center;
+  box-shadow: 0 1px 3px rgba(45, 18, 80, 0.04);
 }
 
 .header-container {
@@ -162,7 +164,7 @@ html, body {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-sm);
-  background: var(--text-primary);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -170,8 +172,8 @@ html, body {
   font-weight: 800;
   font-size: 0.88rem;
   letter-spacing: 0.02em;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: var(--shadow-xs);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
 }
 
 .header-brand-title {
@@ -208,7 +210,7 @@ html, body {
 }
 
 .nav-link:hover {
-  color: var(--text-primary);
+  color: var(--primary);
   background: rgba(255, 255, 255, 0.7);
 }
 
@@ -272,7 +274,7 @@ html, body {
 }
 
 .btn-back:hover {
-  color: var(--text-primary);
+  color: var(--primary);
   border-color: var(--border-strong);
   background: var(--surface-warm);
   transform: translateX(-2px);
@@ -301,7 +303,7 @@ html, body {
 
 /* ==========================================================================
    3. BUTTONS & UI CONTROLS
-   Restrained, tactile, warm buttons with crisp contrast.
+   Royal purple buttons with crisp tactile feedback.
    ========================================================================== */
 .btn {
   display: inline-flex;
@@ -325,16 +327,17 @@ html, body {
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   color: #ffffff;
-  border-color: var(--primary-hover);
-  box-shadow: 0 1px 3px rgba(217, 74, 43, 0.25);
+  border-color: #6d28d9;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.28);
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-active);
-  box-shadow: 0 3px 8px rgba(217, 74, 43, 0.3);
+  background: linear-gradient(135deg, #8b5cf6 0%, #5b21b6 100%);
+  border-color: #5b21b6;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -347,19 +350,20 @@ html, body {
 .btn-secondary:hover {
   background: var(--surface-warm);
   border-color: var(--border-strong);
-  color: var(--text-primary);
+  color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .btn-success {
   background: var(--success);
   color: #ffffff;
   border-color: var(--success);
-  box-shadow: 0 1px 3px rgba(43, 122, 75, 0.2);
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
 }
 
 .btn-success:hover {
-  background: #23653d;
-  box-shadow: 0 3px 8px rgba(43, 122, 75, 0.25);
+  background: #047857;
+  box-shadow: 0 3px 8px rgba(5, 150, 105, 0.25);
 }
 
 .btn-warning {
@@ -369,7 +373,7 @@ html, body {
 }
 
 .btn-warning:hover {
-  background: #fdf1dc;
+  background: #fef3c7;
   color: #78350f;
 }
 
@@ -492,7 +496,7 @@ html, body {
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--primary);
+  background: linear-gradient(90deg, #7c3aed 0%, #9333ea 50%, #c084fc 100%);
 }
 
 .current-meeting-card:hover {
@@ -622,10 +626,10 @@ html, body {
   gap: 8px;
 }
 
-.stat-item-row:nth-child(1) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #d94a2b; }
-.stat-item-row:nth-child(2) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #b45309; }
-.stat-item-row:nth-child(3) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #2b7a4b; }
-.stat-item-row:nth-child(4) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #44403c; }
+.stat-item-row:nth-child(1) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #7c3aed; }
+.stat-item-row:nth-child(2) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #9333ea; }
+.stat-item-row:nth-child(3) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #a855f7; }
+.stat-item-row:nth-child(4) .stat-item-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #6b21a8; }
 
 .stat-item-val {
   font-weight: 700;
@@ -835,7 +839,7 @@ html, body {
 
 .live-cohort-filter-pills .ctrl-filter-btn:hover {
   background: var(--surface-warm);
-  color: var(--text-primary);
+  color: var(--primary);
   border-color: var(--border-strong);
 }
 
@@ -895,7 +899,7 @@ html, body {
 
 .bar-fill {
   height: 100%;
-  background: var(--primary);
+  background: linear-gradient(90deg, #8b5cf6 0%, #6d28d9 100%);
   border-radius: var(--radius-xs);
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   min-width: 0;
@@ -958,7 +962,7 @@ html, body {
 }
 
 .step-badge-item:hover {
-  color: var(--text-primary);
+  color: var(--primary);
 }
 
 .step-badge-item.active {
@@ -1175,7 +1179,7 @@ input:checked + .slider-round:before {
 .builder-q-card.selected-for-preview {
   border-color: var(--primary);
   background: var(--surface-warm);
-  box-shadow: 0 2px 10px rgba(217, 74, 43, 0.12);
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.12);
 }
 
 .builder-q-top {
@@ -1270,7 +1274,7 @@ input:checked + .slider-round:before {
   height: 20px;
   border-radius: 4px;
   background: var(--bg-subtle);
-  color: var(--text-secondary);
+  color: var(--primary);
   font-weight: 700;
   font-size: 0.78rem;
   display: flex;
@@ -1306,7 +1310,7 @@ input:checked + .slider-round:before {
 
 /* ==========================================================================
    7. LIVE MOBILE PREVIEW MOCKUP
-   Tailored to reflect the warm parchment parent portal.
+   Tailored to reflect the purple parent portal.
    ========================================================================== */
 .preview-column-sticky {
   position: sticky;
@@ -1334,9 +1338,9 @@ input:checked + .slider-round:before {
   max-width: 330px;
   margin: 0 auto;
   background: #ffffff;
-  border: 10px solid #292524;
+  border: 10px solid #23163a;
   border-radius: 36px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 16px 36px rgba(45, 18, 80, 0.16);
   overflow: hidden;
   position: relative;
   display: flex;
@@ -1345,7 +1349,7 @@ input:checked + .slider-round:before {
 
 .device-notch {
   height: 20px;
-  background: #292524;
+  background: #23163a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1355,14 +1359,14 @@ input:checked + .slider-round:before {
 .notch-speaker {
   width: 44px;
   height: 4px;
-  background: #44403c;
+  background: #463266;
   border-radius: 2px;
 }
 
 .notch-camera {
   width: 6px;
   height: 6px;
-  background: #44403c;
+  background: #463266;
   border-radius: 50%;
 }
 
@@ -1374,12 +1378,12 @@ input:checked + .slider-round:before {
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--text-muted);
-  background: #fbf9f4;
+  background: #f7f2fc;
 }
 
 .phone-screen-viewport {
   padding: 12px;
-  background: #fbf9f4;
+  background: #f7f2fc;
   min-height: 460px;
   display: flex;
   flex-direction: column;
@@ -1523,7 +1527,7 @@ input:checked + .slider-round:before {
   border-radius: 4px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  color: var(--text-secondary);
+  color: var(--primary);
   font-weight: 700;
   font-size: 0.76rem;
   display: flex;
@@ -1563,7 +1567,7 @@ input:checked + .slider-round:before {
 .preview-mock-submit {
   width: 100%;
   padding: 9px 12px;
-  background: var(--primary);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   color: #ffffff;
   border: none;
   border-radius: var(--radius-xs);
@@ -1606,7 +1610,7 @@ input:checked + .slider-round:before {
 .year-filter-btn:hover {
   background: var(--surface-warm);
   border-color: var(--border-strong);
-  color: var(--text-primary);
+  color: var(--primary);
 }
 
 .year-filter-btn.active {
@@ -1871,7 +1875,7 @@ input:checked + .slider-round:before {
 }
 
 .settings-toggle-card:hover {
-  background: #f7efe4;
+  background: var(--bg-subtle);
   border-color: var(--border-strong);
 }
 
@@ -2008,7 +2012,7 @@ input:checked + .slider-round:before {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(28, 25, 23, 0.45);
+  background: rgba(25, 15, 46, 0.45);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 1000;

@@ -1,51 +1,51 @@
 /* ==========================================================================
    PollPoint - Parent Mobile Client Stylesheet
-   Design Direction: Warm Editorial Event Identity
-   Palette: Warm Parchment, Deep Ink, Terracotta / Vermilion Accent
+   Theme: Luminous Royal Purple & Soft Lavender
+   Palette: Soft Lavender, Crisp White, Deep Plum Charcoal, Royal Purple Accent (#7c3aed)
    Welcoming to parents, collegiate, legible, and uncluttered
    ========================================================================== */
 
 :root {
-  /* Warm Parchment & Crisp Paper Palette */
-  --bg-page: #fbf9f4;
+  /* Soft Lavender & Crisp White Palette */
+  --bg-page: #f7f2fc;
   --bg-surface: #ffffff;
-  --bg-subtle: #f4efe6;
+  --bg-subtle: #ede3f8;
   --bg-card: #ffffff;
-  --bg-warm-tint: #f8f4ec;
+  --bg-warm-tint: #faf6fe;
 
-  /* Deep Ink & Charcoal Typography */
-  --text-primary: #1c1917;       /* Deep ink charcoal - WCAG AAA */
-  --text-secondary: #44403c;     /* Stone charcoal */
-  --text-muted: #78716c;         /* Warm editorial gray */
-  --text-dim: #a8a29e;           /* Muted hairline text */
+  /* Deep Plum Charcoal & Slate Typography (WCAG AAA Contrast > 14:1) */
+  --text-primary: #190f2e;       /* Deepest rich plum charcoal */
+  --text-secondary: #3b2859;     /* Deep violet charcoal */
+  --text-muted: #6f598f;         /* Muted lilac-slate */
+  --text-dim: #9e8cb8;           /* Subtle lavender gray */
 
-  /* Distinctive Terracotta / Vermilion Accent */
-  --accent: #d94a2b;            /* Warm vermilion / terracotta */
-  --accent-hover: #c23c1f;
-  --accent-active: #a93218;
-  --accent-subtle: #fbf0ec;      /* Soft warm coral wash */
-  --accent-border: #f3c8bc;
+  /* Royal Purple Accent */
+  --accent: #7c3aed;            /* Vibrant royal purple */
+  --accent-hover: #6d28d9;      /* Deep violet */
+  --accent-active: #5b21b6;
+  --accent-subtle: #f4edfd;      /* Soft lavender wash */
+  --accent-border: #dcc8f8;
   --accent-ink: #ffffff;
 
-  /* Clean Tailored Borders */
-  --border: #e7dfd5;
-  --border-subtle: #efeae2;
-  --border-strong: #cbbfae;
-  --border-focus: #d94a2b;
+  /* Delicate Lavender-Slate Borders */
+  --border: #e2d3f5;
+  --border-subtle: #ede4fa;
+  --border-strong: #cbb4ec;
+  --border-focus: #7c3aed;
 
   /* Semantic Feedback */
-  --success: #166534;
-  --success-bg: #f0fdf4;
-  --success-border: #bbf7d0;
+  --success: #059669;
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
 
-  --warning: #9a3412;
-  --warning-bg: #fff7ed;
-  --warning-border: #fed7aa;
+  --warning: #b45309;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
 
-  /* Restrained Paper Shadows */
-  --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.05);
-  --shadow-card: 0 2px 8px rgba(28, 25, 23, 0.06), 0 0 0 1px rgba(231, 223, 213, 0.7);
-  --shadow-hover: 0 4px 14px rgba(28, 25, 23, 0.09);
+  /* Restrained Paper Shadows with Soft Violet Tint */
+  --shadow-sm: 0 1px 3px rgba(45, 18, 80, 0.05);
+  --shadow-card: 0 2px 8px rgba(45, 18, 80, 0.06), 0 0 0 1px rgba(226, 211, 245, 0.7);
+  --shadow-hover: 0 4px 14px rgba(45, 18, 80, 0.1);
 
   /* Geometry - Refined Book / Editorial Tailoring */
   --radius-xs: 4px;
@@ -73,6 +73,12 @@ body {
   line-height: 1.5;
   color: var(--text-primary);
   background-color: var(--bg-page);
+  /* Ambient Lavender Mesh */
+  background-image: 
+    radial-gradient(circle at 10% 8%, #ede1fa 0%, transparent 45%),
+    radial-gradient(circle at 90% 12%, #e6d3f9 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #faf6fe 0%, transparent 60%);
+  background-attachment: fixed;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -145,7 +151,7 @@ body {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #15803d;
+  background: #059669;
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
@@ -261,34 +267,34 @@ body {
   font-size: 0.98rem;
   font-weight: 700;
   color: var(--accent-ink);
-  background: var(--accent);
-  border: 1px solid var(--accent);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border: 1px solid #6d28d9;
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 2px 6px rgba(217, 74, 43, 0.2);
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
   transition: all 0.15s ease;
 }
 
 .btn-primary-mobile:hover:not(:disabled) {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+  background: linear-gradient(135deg, #8b5cf6 0%, #5b21b6 100%);
+  border-color: #5b21b6;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(217, 74, 43, 0.28);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.32);
 }
 
 .btn-primary-mobile:active:not(:disabled) {
-  background: var(--accent-active);
+  background: #5b21b6;
   transform: translateY(0);
 }
 
 .btn-primary-mobile:disabled {
-  background: #e2dbd1;
-  border-color: #e2dbd1;
-  color: #8c8275;
+  background: #dcd0f0;
+  border-color: #dcd0f0;
+  color: #8c7ba8;
   box-shadow: none;
   cursor: not-allowed;
   opacity: 0.85;
@@ -371,6 +377,7 @@ body {
   background: var(--accent);
   position: relative;
   z-index: 2;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
 }
 
 .radar-circle {
@@ -502,7 +509,7 @@ body {
   border-radius: var(--radius-xs);
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  color: var(--text-secondary);
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
