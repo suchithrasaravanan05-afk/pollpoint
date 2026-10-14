@@ -58,7 +58,7 @@ async function runStageFlowTests() {
     adminSocket.emit('admin:save_questions', {
       questions: sampleQuestions,
       showYearToParents: true,
-      departmentName: 'Department of Computer Science & Engineering',
+      departmentName: 'Department of Computer Science and Business Systems',
       meetingTitle: 'Annual Parent-Teacher Meeting 2026'
     });
   });
