@@ -1,191 +1,268 @@
 {
   "currentMeeting": {
-    "id": "mtg_1791960786587",
+    "id": "mtg_1791961021717",
     "title": "Annual Parent-Teacher Meeting 2026",
     "academicYear": "2026",
     "date": "2026-09-23",
     "description": "Automated Test Verification Session",
     "status": "QUESTION_LIVE",
     "currentQuestionIndex": 1,
-    "currentQuestionId": "custom_q1",
+    "currentQuestionId": "q1",
     "questionStatus": "live",
     "selectedQuestionIds": [
-      "custom_q1",
-      "custom_q2",
-      "custom_q3"
+      "q1",
+      "q2",
+      "q3",
+      "q4",
+      "q5"
     ],
-    "createdAt": "2026-10-14T06:53:06.587Z"
+    "createdAt": "2026-10-14T06:57:01.717Z"
   },
   "questions": [
     {
-      "id": "custom_q1",
-      "text": "How would you rate the frequency of parent-teacher communications?",
+      "id": "q1",
+      "text": "How satisfied are you with the academic progress and curriculum delivery in CSBS so far?",
+      "textTa": "இதுவரை CSBS பாடத்திட்டம் மற்றும் கல்வி முன்னேற்றத்தில் நீங்கள் எவ்வளவு திருப்தி அடைகிறீர்கள்?",
       "options": [
-        "Very Timely",
-        "Adequate",
-        "Too Infrequent"
+        "Highly Satisfied",
+        "Satisfied",
+        "Needs Improvement",
+        "Dissatisfied"
+      ],
+      "optionsTa": [
+        "மிகவும் திருப்தி",
+        "திருப்தி",
+        "முன்னேற்றம் தேவை",
+        "திருப்தியற்றது"
       ]
     },
     {
-      "id": "custom_q2",
-      "text": "Which student development initiative would you most like to support?",
+      "id": "q2",
+      "text": "Which industry readiness initiative should the CSBS department prioritize this semester?",
+      "textTa": "இந்த செமஸ்டரில் CSBS துறை எந்த தொழில்முனைவு மற்றும் வேலைவாய்ப்பு பயிற்சிக்கு முன்னுரிமை அளிக்க வேண்டும்?",
       "options": [
-        "Industry Guest Lectures",
-        "Competitive Programming & Hackathons",
-        "Soft Skills & Interview Prep",
-        "Research Grants"
+        "Business Analytics & AI Workshops",
+        "Corporate Internships & Live Projects",
+        "Full-Stack & Cloud Certifications",
+        "Soft Skills & Management Consulting Prep"
+      ],
+      "optionsTa": [
+        "பிசினஸ் அனலிட்டிக்ஸ் & AI பட்டறைகள்",
+        "நிறுவன இன்டர்ன்ஷிப் & நேரடி திட்டங்கள்",
+        "ஃபுல்-ஸ்டாக் & கிளவுட் சான்றிதழ்கள்",
+        "திறன் மேம்பாடு & நேர்காணல் பயிற்சி"
       ]
     },
     {
-      "id": "custom_q3",
-      "text": "MODIFIED Q3: Should the department organize Saturday industry bootcamps?",
+      "id": "q3",
+      "text": "What is your preferred channel for receiving department notifications and student attendance alerts?",
+      "textTa": "துறை அறிவிப்புகள் மற்றும் மாணவர் வருகைப் பதிவை அறிய உங்கள் விருப்பமான வழி எது?",
+      "options": [
+        "WhatsApp / SMS Alerts",
+        "College Mobile App / Portal",
+        "Official Email Updates",
+        "Direct Phone Call from Mentor"
+      ],
+      "optionsTa": [
+        "வாட்ஸ்அப் / SMS தகவல்கள்",
+        "கல்லூரி மொபைல் ஆப் / போர்ட்டல்",
+        "அதிகாரப்பூர்வ மின்னஞ்சல்",
+        "ஆசிரியரின் நேரடி தொலைபேசி அழைப்பு"
+      ]
+    },
+    {
+      "id": "q4",
+      "text": "Would you support weekend expert bootcamps and business hackathons for hands-on experience?",
+      "textTa": "நடைமுறை பயிற்சிக்காக வார இறுதி சிறப்பு வகுப்புகள் மற்றும் வணிக ஹேக்கத்தான்களை ஆதரிக்கிறீர்களா?",
       "options": [
         "Strongly Support",
-        "Support if Virtual",
-        "Do Not Support"
+        "Support (if hybrid / online)",
+        "Prefer Weekday Sessions Only",
+        "Not In Favor"
+      ],
+      "optionsTa": [
+        "முழு ஆதரவு அளிக்கிறேன்",
+        "ஆதரிக்கிறேன் (ஆன்லைன் என்றால்)",
+        "வார நாட்களில் மட்டும் விரும்புகிறேன்",
+        "ஆதரவு இல்லை"
+      ]
+    },
+    {
+      "id": "q5",
+      "text": "Overall, how effective is the faculty mentorship and student career guidance system in CSBS?",
+      "textTa": "ஒட்டுமொத்தமாக, CSBS துறையின் ஆசிரியர் வழிகாட்டுதல் மற்றும் தொழில் வழிகாட்டல் முறை எவ்வாறு உள்ளது?",
+      "options": [
+        "Excellent Guidance",
+        "Good Support",
+        "Average",
+        "Needs Major Enhancement"
+      ],
+      "optionsTa": [
+        "சிறந்த வழிகாட்டுதல்",
+        "நல்ல ஆதரவு",
+        "சுமாராக உள்ளது",
+        "அதிக முன்னேற்றம் தேவை"
       ]
     }
   ],
   "participants": {
-    "token_parent_A_1791960786618": {
-      "participantId": "token_parent_A_1791960786618",
-      "meetingId": "mtg_1791960786587",
+    "token_parent_A_1791961021741": {
+      "participantId": "token_parent_A_1791961021741",
+      "meetingId": "mtg_1791961021717",
       "studentYear": "1st Year",
-      "joinedAt": 1791960786810,
-      "lastSeen": 1791960790121,
-      "socketId": "Dsdbdfy-XBnWesz0AAAD"
+      "joinedAt": 1791961021839,
+      "lastSeen": 1791961025108,
+      "socketId": "V4hOx8HppUjiiAqKAAAc"
     },
-    "token_parent_C_1791960786618": {
-      "participantId": "token_parent_C_1791960786618",
-      "meetingId": "mtg_1791960786587",
-      "studentYear": "Final Year",
-      "joinedAt": 1791960786817,
-      "lastSeen": 1791960786818,
-      "socketId": "bAV-_HTi-7oCWg-OAAAF"
-    },
-    "token_parent_B_1791960786618": {
-      "participantId": "token_parent_B_1791960786618",
-      "meetingId": "mtg_1791960786587",
+    "token_parent_B_1791961021741": {
+      "participantId": "token_parent_B_1791961021741",
+      "meetingId": "mtg_1791961021717",
       "studentYear": "3rd Year",
-      "joinedAt": 1791960786820,
-      "lastSeen": 1791960790122,
-      "socketId": "Zb8Yq3Ys4FLZ6DcjAAAG"
+      "joinedAt": 1791961021942,
+      "lastSeen": 1791961025109,
+      "socketId": "11tA9MNPeBRo0J5TAAAf"
+    },
+    "token_parent_C_1791961021741": {
+      "participantId": "token_parent_C_1791961021741",
+      "meetingId": "mtg_1791961021717",
+      "studentYear": "Final Year",
+      "joinedAt": 1791961021944,
+      "lastSeen": 1791961021944,
+      "socketId": "ALijnbPKjvOEujoyAAAe"
     },
     "e2e_parent_token_001": {
       "participantId": "e2e_parent_token_001",
-      "meetingId": "mtg_1791960786587",
+      "meetingId": "mtg_1791961021717",
       "studentYear": "2nd Year",
-      "joinedAt": 1791960796043,
-      "lastSeen": 1791960796072,
-      "socketId": "ziHC5kY7JAJOnel9AAAI"
+      "joinedAt": 1791961035726,
+      "lastSeen": 1791961035749,
+      "socketId": "PM1nrRy1sL08azIaAAAh"
     },
     "parent_flow_1": {
       "participantId": "parent_flow_1",
-      "meetingId": "mtg_1791960786587",
+      "meetingId": "mtg_1791961021717",
       "studentYear": "1st Year",
-      "joinedAt": 1791960802019,
-      "lastSeen": 1791960858835,
-      "socketId": "auiBAR4fK_nRCkK_AAAN"
+      "joinedAt": 1791961042317,
+      "lastSeen": 1791961042357,
+      "socketId": "pq-_qaMK_ZZ29xHcAAAj"
     },
     "parent_flow_2": {
       "participantId": "parent_flow_2",
-      "meetingId": "mtg_1791960786587",
+      "meetingId": "mtg_1791961021717",
       "studentYear": "3rd Year",
-      "joinedAt": 1791960802025,
-      "lastSeen": 1791960858835,
-      "socketId": "6RrTWDYxO7U9rsT3AAAO"
+      "joinedAt": 1791961042320,
+      "lastSeen": 1791961042357,
+      "socketId": "2Y_-MhOa6gljv6AjAAAk"
+    },
+    "test_parent_v1": {
+      "participantId": "test_parent_v1",
+      "meetingId": "mtg_1791961021717",
+      "studentYear": "2nd Year",
+      "joinedAt": 1791961050678,
+      "lastSeen": 1791961050697,
+      "socketId": "VrsyemH28i1U6ubTAAAm"
     }
   },
   "responses": {
-    "mtg_1791960786587:q1:token_parent_A_1791960786618": {
-      "id": "resp_1791960788093_ul4o",
-      "meetingId": "mtg_1791960786587",
-      "participantId": "token_parent_A_1791960786618",
+    "mtg_1791961021717:q1:token_parent_A_1791961021741": {
+      "id": "resp_1791961023116_7ci3",
+      "meetingId": "mtg_1791961021717",
+      "participantId": "token_parent_A_1791961021741",
       "questionId": "q1",
       "selectedOption": 0,
       "studentYear": "1st Year",
-      "submittedAt": 1791960788093,
-      "updatedAt": 1791960788093
+      "submittedAt": 1791961023116,
+      "updatedAt": 1791961023116
     },
-    "mtg_1791960786587:q1:token_parent_B_1791960786618": {
-      "id": "resp_1791960789319_ewop",
-      "meetingId": "mtg_1791960786587",
-      "participantId": "token_parent_B_1791960786618",
+    "mtg_1791961021717:q1:token_parent_B_1791961021741": {
+      "id": "resp_1791961024352_n25f",
+      "meetingId": "mtg_1791961021717",
+      "participantId": "token_parent_B_1791961021741",
       "questionId": "q1",
       "selectedOption": 2,
       "studentYear": "3rd Year",
-      "submittedAt": 1791960788095,
-      "updatedAt": 1791960789319
+      "submittedAt": 1791961023118,
+      "updatedAt": 1791961024352
     },
-    "mtg_1791960786587:q1:token_parent_C_1791960786618": {
-      "id": "resp_1791960788096_5gv8",
-      "meetingId": "mtg_1791960786587",
-      "participantId": "token_parent_C_1791960786618",
+    "mtg_1791961021717:q1:token_parent_C_1791961021741": {
+      "id": "resp_1791961023119_xo0h",
+      "meetingId": "mtg_1791961021717",
+      "participantId": "token_parent_C_1791961021741",
       "questionId": "q1",
       "selectedOption": 0,
       "studentYear": "Final Year",
-      "submittedAt": 1791960788096,
-      "updatedAt": 1791960788096
+      "submittedAt": 1791961023119,
+      "updatedAt": 1791961023119
     },
-    "mtg_1791960786587:q2:token_parent_A_1791960786618": {
-      "id": "resp_1791960788911_44f5",
-      "meetingId": "mtg_1791960786587",
-      "participantId": "token_parent_A_1791960786618",
+    "mtg_1791961021717:q2:token_parent_A_1791961021741": {
+      "id": "resp_1791961023941_3fn3",
+      "meetingId": "mtg_1791961021717",
+      "participantId": "token_parent_A_1791961021741",
       "questionId": "q2",
       "selectedOption": 2,
       "studentYear": "1st Year",
-      "submittedAt": 1791960788911,
-      "updatedAt": 1791960788911
+      "submittedAt": 1791961023941,
+      "updatedAt": 1791961023941
     },
-    "mtg_1791960786587:q2:token_parent_B_1791960786618": {
-      "id": "resp_1791960788913_78h3",
-      "meetingId": "mtg_1791960786587",
-      "participantId": "token_parent_B_1791960786618",
+    "mtg_1791961021717:q2:token_parent_B_1791961021741": {
+      "id": "resp_1791961023943_wonm",
+      "meetingId": "mtg_1791961021717",
+      "participantId": "token_parent_B_1791961021741",
       "questionId": "q2",
       "selectedOption": 0,
       "studentYear": "3rd Year",
-      "submittedAt": 1791960788913,
-      "updatedAt": 1791960788913
+      "submittedAt": 1791961023943,
+      "updatedAt": 1791961023943
     },
-    "mtg_1791960786587:q2:token_parent_C_1791960786618": {
-      "id": "resp_1791960788914_by6l",
-      "meetingId": "mtg_1791960786587",
-      "participantId": "token_parent_C_1791960786618",
+    "mtg_1791961021717:q2:token_parent_C_1791961021741": {
+      "id": "resp_1791961023944_io9b",
+      "meetingId": "mtg_1791961021717",
+      "participantId": "token_parent_C_1791961021741",
       "questionId": "q2",
       "selectedOption": 3,
       "studentYear": "Final Year",
-      "submittedAt": 1791960788914,
-      "updatedAt": 1791960788914
+      "submittedAt": 1791961023944,
+      "updatedAt": 1791961023944
     },
-    "mtg_1791960786587:q2:e2e_parent_token_001": {
-      "id": "resp_1791960796047_uwoz",
-      "meetingId": "mtg_1791960786587",
+    "mtg_1791961021717:q2:e2e_parent_token_001": {
+      "id": "resp_1791961035733_62nn",
+      "meetingId": "mtg_1791961021717",
       "participantId": "e2e_parent_token_001",
       "questionId": "q2",
       "selectedOption": 1,
       "studentYear": "2nd Year",
-      "submittedAt": 1791960796047,
-      "updatedAt": 1791960796047
+      "submittedAt": 1791961035733,
+      "updatedAt": 1791961035733
     },
-    "mtg_1791960786587:custom_q1:parent_flow_1": {
-      "id": "resp_1791960858812_uqfh",
-      "meetingId": "mtg_1791960786587",
+    "mtg_1791961021717:custom_q1:parent_flow_1": {
+      "id": "resp_1791961042328_wc8i",
+      "meetingId": "mtg_1791961021717",
       "participantId": "parent_flow_1",
       "questionId": "custom_q1",
       "selectedOption": 0,
       "studentYear": "1st Year",
-      "submittedAt": 1791960802039,
-      "updatedAt": 1791960858812
+      "submittedAt": 1791961042328,
+      "updatedAt": 1791961042328
     },
-    "mtg_1791960786587:custom_q1:parent_flow_2": {
-      "id": "resp_1791960858813_ujjb",
-      "meetingId": "mtg_1791960786587",
+    "mtg_1791961021717:custom_q1:parent_flow_2": {
+      "id": "resp_1791961042329_lb4o",
+      "meetingId": "mtg_1791961021717",
       "participantId": "parent_flow_2",
       "questionId": "custom_q1",
       "selectedOption": 1,
       "studentYear": "3rd Year",
-      "submittedAt": 1791960802041,
-      "updatedAt": 1791960858813
+      "submittedAt": 1791961042329,
+      "updatedAt": 1791961042329
+    },
+    "mtg_1791961021717:q1:test_parent_v1": {
+      "id": "resp_1791961050692_ei9b",
+      "meetingId": "mtg_1791961021717",
+      "participantId": "test_parent_v1",
+      "questionId": "q1",
+      "selectedOption": 0,
+      "studentYear": "2nd Year",
+      "submittedAt": 1791961050692,
+      "updatedAt": 1791961050692
     }
   }
 }

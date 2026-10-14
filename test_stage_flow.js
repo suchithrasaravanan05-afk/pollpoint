@@ -1,4 +1,6 @@
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { io } = require('socket.io-client');
 
 const PORT = parseInt(process.env.PORT || 3000, 10);
@@ -35,24 +37,30 @@ async function runStageFlowTests() {
     {
       id: 'custom_q1',
       text: 'How would you rate the frequency of parent-teacher communications?',
-      options: ['Very Timely', 'Adequate', 'Too Infrequent']
+      textTa: 'பெற்றோர்-ஆசிரியர் தகவல் தொடர்புகளின் அதிர்வெண்ணை எவ்வாறு மதிப்பிடுவீர்கள்?',
+      options: ['Very Timely', 'Adequate', 'Too Infrequent'],
+      optionsTa: ['மிகவும் சரியான நேரத்தில்', 'போதுமானது', 'மிகவும் அரிதாக']
     },
     {
       id: 'custom_q2',
       text: 'Which student development initiative would you most like to support?',
-      options: ['Industry Guest Lectures', 'Competitive Programming & Hackathons', 'Soft Skills & Interview Prep', 'Research Grants']
+      textTa: 'எந்த மாணவர் மேம்பாட்டு முன்முயற்சியை நீங்கள் ஆதரிக்க விரும்புகிறீர்கள்?',
+      options: ['Industry Guest Lectures', 'Competitive Programming & Hackathons', 'Soft Skills & Interview Prep', 'Research Grants'],
+      optionsTa: ['தொழில்துறை சிறப்பு விரிவுரைகள்', 'போட்டி நிரலாக்கம் மற்றும் ஹேக்கத்தான்கள்', 'மென் திறன் மற்றும் நேர்காணல் தயாரிப்பு', 'ஆராய்ச்சி மானியங்கள்']
     },
     {
       id: 'custom_q3',
       text: 'Should the department offer optional weekend certification programs?',
-      options: ['Yes, fully support', 'No, keep weekends free']
+      textTa: 'துறை விருப்பத்தேர்வு வார இறுதி சான்றிதழ் திட்டங்களை வழங்க வேண்டுமா?',
+      options: ['Yes, fully support', 'No, keep weekends free'],
+      optionsTa: ['ஆம், முழுமையாக ஆதரிக்கிறேன்', 'இல்லை, வார இறுதி நாட்களை இலவசமாக விடுங்கள்']
     }
   ];
 
   await new Promise((resolve) => {
-    adminSocket.on('admin:questions_saved', (data) => {
+    adminSocket.once('admin:questions_saved', (data) => {
       console.log(`[2] Admin saved questions successfully. Total = ${data.questions.length}, showYearToParents = ${data.showYearToParents}`);
-      if (data.questions.length === 3) resolve();
+      resolve();
     });
 
     adminSocket.emit('admin:save_questions', {
@@ -166,7 +174,7 @@ async function runStageFlowTests() {
   ];
 
   await new Promise((resolve) => {
-    adminSocket.on('admin:questions_saved', (data) => {
+    adminSocket.once('admin:questions_saved', (data) => {
       const q3 = data.questions.find(q => q.id === 'custom_q3');
       console.log(`    Updated Q3 text: "${q3.text}" (${q3.options.length} options)`);
 
@@ -197,6 +205,18 @@ async function runStageFlowTests() {
   const summaryRes = await fetchHttp('/api/session/summary');
   const summaryData = JSON.parse(summaryRes.body);
   console.log(`[9] Summary Report: ${summaryData.results.length} questions in report. Generated: ${summaryData.generatedAt}`);
+
+  // Restore default questions for clean state across test suites
+  const defaultQuestionsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'default_questions.json'), 'utf8'));
+  await new Promise((resolve) => {
+    adminSocket.once('admin:questions_saved', resolve);
+    adminSocket.emit('admin:save_questions', {
+      questions: defaultQuestionsData.questions,
+      showYearToParents: true,
+      departmentName: 'Department of Computer Science and Business Systems',
+      meetingTitle: 'Annual Parent-Teacher Meeting 2026'
+    });
+  });
 
   // Disconnect
   adminSocket.disconnect();
