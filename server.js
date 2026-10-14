@@ -905,6 +905,14 @@ io.on('connection', (socket) => {
     }
 
     const meetingId = 'mtg_' + Date.now();
+    if (!Array.isArray(questionIds) || questionIds.length === 0) {
+      if (!sessionState.questions.some(q => q.id === 'q1')) {
+        const defs = loadDefaultQuestions();
+        if (defs.length > 0) {
+          sessionState.questions = defs;
+        }
+      }
+    }
     const validQIds = Array.isArray(questionIds) && questionIds.length > 0
       ? questionIds
       : sessionState.questions.slice(0, 5).map(q => q.id);

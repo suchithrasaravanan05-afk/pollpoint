@@ -1,5 +1,294 @@
 [
   {
+    "id": "mtg_1791960580304",
+    "title": "CSBS Test Parent–Teacher Meeting 2026",
+    "academicYear": "2026",
+    "date": "2026-09-23",
+    "description": "Automated Test Verification Session",
+    "departmentName": "Department of Computer Science & Engineering",
+    "archivedAt": "2026-10-14T06:51:29.870Z",
+    "status": "COMPLETED",
+    "totalParents": 3,
+    "yearBreakdown": {
+      "1st Year": 1,
+      "2nd Year": 0,
+      "3rd Year": 1,
+      "Final Year": 1
+    },
+    "totalVotes": 0,
+    "questionsCount": 3,
+    "participationRate": 0,
+    "questions": [
+      {
+        "id": "custom_q1",
+        "text": "How would you rate the frequency of parent-teacher communications?",
+        "options": [
+          "Very Timely",
+          "Adequate",
+          "Too Infrequent"
+        ]
+      },
+      {
+        "id": "custom_q2",
+        "text": "Which student development initiative would you most like to support?",
+        "options": [
+          "Industry Guest Lectures",
+          "Competitive Programming & Hackathons",
+          "Soft Skills & Interview Prep",
+          "Research Grants"
+        ]
+      },
+      {
+        "id": "custom_q3",
+        "text": "MODIFIED Q3: Should the department organize Saturday industry bootcamps?",
+        "options": [
+          "Strongly Support",
+          "Support if Virtual",
+          "Do Not Support"
+        ]
+      }
+    ],
+    "results": [
+      {
+        "questionId": "custom_q1",
+        "questionText": "How would you rate the frequency of parent-teacher communications?",
+        "questionTextTa": "",
+        "options": [
+          "Very Timely",
+          "Adequate",
+          "Too Infrequent"
+        ],
+        "optionsTa": [],
+        "status": "idle",
+        "totalVotes": 0,
+        "breakdown": {
+          "All Years": [
+            0,
+            0,
+            0
+          ],
+          "1st Year": [
+            0,
+            0,
+            0
+          ],
+          "2nd Year": [
+            0,
+            0,
+            0
+          ],
+          "3rd Year": [
+            0,
+            0,
+            0
+          ],
+          "Final Year": [
+            0,
+            0,
+            0
+          ]
+        },
+        "yearTotals": {
+          "All Years": 0,
+          "1st Year": 0,
+          "2nd Year": 0,
+          "3rd Year": 0,
+          "Final Year": 0
+        },
+        "percentages": {
+          "All Years": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "1st Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ]
+        },
+        "participationRate": 0
+      },
+      {
+        "questionId": "custom_q2",
+        "questionText": "Which student development initiative would you most like to support?",
+        "questionTextTa": "",
+        "options": [
+          "Industry Guest Lectures",
+          "Competitive Programming & Hackathons",
+          "Soft Skills & Interview Prep",
+          "Research Grants"
+        ],
+        "optionsTa": [],
+        "status": "closed",
+        "totalVotes": 0,
+        "breakdown": {
+          "All Years": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "1st Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "2nd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "3rd Year": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "Final Year": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "yearTotals": {
+          "All Years": 0,
+          "1st Year": 0,
+          "2nd Year": 0,
+          "3rd Year": 0,
+          "Final Year": 0
+        },
+        "percentages": {
+          "All Years": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "1st Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0"
+          ]
+        },
+        "participationRate": 0
+      },
+      {
+        "questionId": "custom_q3",
+        "questionText": "MODIFIED Q3: Should the department organize Saturday industry bootcamps?",
+        "questionTextTa": "",
+        "options": [
+          "Strongly Support",
+          "Support if Virtual",
+          "Do Not Support"
+        ],
+        "optionsTa": [],
+        "status": "closed",
+        "totalVotes": 0,
+        "breakdown": {
+          "All Years": [
+            0,
+            0,
+            0
+          ],
+          "1st Year": [
+            0,
+            0,
+            0
+          ],
+          "2nd Year": [
+            0,
+            0,
+            0
+          ],
+          "3rd Year": [
+            0,
+            0,
+            0
+          ],
+          "Final Year": [
+            0,
+            0,
+            0
+          ]
+        },
+        "yearTotals": {
+          "All Years": 0,
+          "1st Year": 0,
+          "2nd Year": 0,
+          "3rd Year": 0,
+          "Final Year": 0
+        },
+        "percentages": {
+          "All Years": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "1st Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "2nd Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "3rd Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ],
+          "Final Year": [
+            "0.0",
+            "0.0",
+            "0.0"
+          ]
+        },
+        "participationRate": 0
+      }
+    ],
+    "responses": {}
+  },
+  {
     "id": "mtg_1791960229298",
     "title": "Annual Parent-Teacher Meeting 2026",
     "academicYear": "2026",
