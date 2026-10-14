@@ -6,7 +6,7 @@
   "meetingDuration": "60",
   "questionsPerMeeting": "5",
   "allowAnswerChanges": true,
-  "showTamilTranslation": false,
+  "showTamilTranslation": true,
   "showProgressIndicator": true,
   "allowParentReentry": true,
   "requireYearSelection": true,

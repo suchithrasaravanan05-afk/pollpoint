@@ -308,6 +308,20 @@ async function runVerification() {
   }
   console.log('✓ Settings persisted and updated successfully.\n');
 
+  // Restore bilingual Tamil setting for subsequent test suites
+  await new Promise((resolve) => {
+    const postData = JSON.stringify({ showTamilTranslation: true });
+    const req = http.request(`${BASE_URL}/api/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
+    }, (res) => {
+      res.on('data', () => {});
+      res.on('end', resolve);
+    });
+    req.write(postData);
+    req.end();
+  });
+
   // Cleanup connections
   adminSocket.disconnect();
   parentASocket.disconnect();
